@@ -1,0 +1,29 @@
+# Python
+__pycache__/
+*.py[cod]
+*.so
+
+# Virtual environments
+venv/
+ENV/
+env/
+
+# macOS
+.DS_Store
+
+# SQLite database
+*.db
+
+# VSCode
+.vscode/
+
+# Logs
+*.log
+
+# Flask instance folder
+instance/
+
+# Other
+*.sqlite3
+*.pyo
+.idea/

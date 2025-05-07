@@ -1,0 +1,297 @@
+body {
+    font-family: 'Segoe UI', Arial, sans-serif;
+    background: #f7f8fa;
+    margin: 0;
+    color: #1c2957;
+}
+header {
+    background: #fff;
+    color: #425d77;
+    padding: 1.5em 0.5em 1em 0.5em;
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    border-bottom: 3px solid #74662e;
+    box-shadow: 0 2px 8px rgba(66,93,119,0.07);
+}
+header h1, header .site-title {
+    color: #425d77;
+}
+nav a {
+    color: #74662e;
+}
+nav a:hover {
+    color: #425d77;
+}
+.logo {
+    width: 70px;
+    margin-bottom: 0.5em;
+}
+header h1 {
+    margin: 0.2em 0 0.4em 0;
+    font-size: 1.6em;
+    font-weight: 600;
+    letter-spacing: 1px;
+}
+nav {
+    margin-top: 0.5em;
+}
+nav a {
+    color: #74662e;
+    text-decoration: none;
+    margin: 0 1em;
+    font-weight: 500;
+}
+nav a:hover {
+    color: #425d77;
+    text-decoration: underline;
+}
+main {
+    max-width: 600px;
+    margin: 2em auto;
+    background: #fff;
+    padding: 2em;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(33,58,109,0.07);
+}
+.modern-card {
+    background: #fff;
+    border-radius: 18px;
+    max-width: 430px;
+    margin: 3em auto 0 auto;
+    padding: 2.5em 2em 2em 2em;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+.car-search-form {
+    width: 100%;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.3em 1.2em;
+    margin-top: 1.2em;
+}
+.form-row {
+    display: contents; /* grid handles layout */
+}
+.form-group {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    width: 100%;
+}
+.form-group label {
+    font-weight: 700;
+    margin-bottom: 0.45em;
+    color: #425d77;
+    font-size: 1.08em;
+    letter-spacing: 0.02em;
+}
+.form-group input[type="date"],
+.form-group input[type="text"],
+.form-group select {
+    height: 48px;
+    padding: 0 1em;
+    border: 2px solid #425d77;
+    border-radius: 8px;
+    font-size: 1.08em;
+    width: 100%;
+    box-sizing: border-box;
+    background: #fff;
+    color: #425d77;
+    margin-bottom: 0.1em;
+    transition: border 0.2s;
+    min-width: 0;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    line-height: 1.25em;
+    cursor: pointer;
+}
+.form-group select {
+    padding: 0 1em;
+}
+.form-heading {
+    font-size: 1.35em;
+    font-weight: 800;
+    color: #425d77;
+    text-align: center;
+    margin-bottom: 1.5em;
+    margin-top: 0.2em;
+}
+.form-group input[type="date"]:focus,
+.form-group select:focus {
+    border: 2px solid #425d77;
+    outline: none;
+}
+.btn-large {
+    grid-column: span 2;
+    font-size: 1.17em;
+    padding: 0.9em 2em;
+    margin-top: 1.2em;
+    background: #425d77;
+    color: #fff;
+    border: 2px solid #425d77;
+    border-radius: 8px;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    transition: background 0.2s, color 0.2s, border 0.2s;
+}
+.btn-large:hover {
+    background: #74662e;
+    border: 2px solid #74662e;
+    color: #fff;
+}
+@media (max-width: 600px) {
+    .modern-card {
+        max-width: 98vw;
+        padding: 1.2em 0.5em;
+    }
+    .car-search-form {
+        grid-template-columns: 1fr;
+        gap: 1em;
+    }
+    .btn-large {
+        grid-column: span 1;
+    }
+}
+.btn {
+    background: #425d77;
+    color: #fff;
+    padding: 0.7em 1.5em;
+    border: 2px solid #425d77;
+    border-radius: 8px;
+    font-size: 1em;
+    margin: 0 0.5em;
+    cursor: pointer;
+    text-decoration: none;
+    transition: background 0.2s, border 0.2s, color 0.2s;
+}
+.btn:hover {
+    background: #74662e;
+    border: 2px solid #74662e;
+    color: #fff;
+}
+.flashes {
+    list-style: none;
+    padding: 0;
+    margin: 1em 0;
+    color: #c0392b;
+    font-weight: 500;
+}
+.calendar-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1.5em;
+}
+.calendar-table th, .calendar-table td {
+    border: 1px solid #ddd;
+    padding: 0.6em;
+    text-align: center;
+}
+.calendar-table th {
+    background: #213a6d;
+    color: #fff;
+    font-weight: 600;
+}
+footer {
+    text-align: center;
+    color: #213a6d;
+    font-size: 0.9em;
+    margin: 3em 0 1em 0;
+}
+
+/*********************
+  CHECKOUT PAGE STYLES
+*********************/
+.checkout-form {
+    max-width: 430px;
+    margin: 3em auto 0 auto;
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 2px 16px rgba(66,93,119,0.13);
+    padding: 2.5em 2em 2em 2em;
+    display: flex;
+    flex-direction: column;
+    gap: 1.7em;
+}
+.checkout-summary {
+    background: #f7f8fa;
+    border-radius: 10px;
+    padding: 1.2em 1em 1em 1em;
+    margin-bottom: 1em;
+    border-left: 4px solid #425d77;
+}
+.checkout-summary h3 {
+    margin-top: 0;
+    color: #425d77;
+    font-size: 1.18em;
+}
+.checkout-summary .total-price {
+    color: #74662e;
+    font-size: 1.08em;
+    font-weight: bold;
+}
+.checkout-summary .admin-warning {
+    color: #b15c00;
+    background: #fffbe6;
+    padding: 0.5em 0.9em;
+    border-radius: 6px;
+    font-size: 0.98em;
+    margin-top: 1em;
+}
+.user-info {
+    margin-bottom: 1em;
+}
+.user-info label {
+    color: #425d77;
+    font-weight: 600;
+    margin-bottom: 0.18em;
+    margin-top: 0.6em;
+}
+.user-info input {
+    background: #f7f8fa;
+    border: 1.5px solid #d3d8e0;
+    border-radius: 7px;
+    padding: 0.7em 1em;
+    margin-bottom: 0.2em;
+    width: 100%;
+    font-size: 1em;
+    color: #425d77;
+}
+.rishus-section label {
+    font-weight: 600;
+    color: #425d77;
+}
+.rishus-section div {
+    margin: 0.7em 0 0.5em 0;
+    display: flex;
+    gap: 1.8em;
+}
+.rishus-section input[type="radio"] {
+    accent-color: #425d77;
+    margin-right: 0.3em;
+    width: 1.1em;
+    height: 1.1em;
+}
+.checkout-actions {
+    display: flex;
+    gap: 1.1em;
+    margin-top: 1.2em;
+    justify-content: flex-end;
+}
+.checkout-actions .btn {
+    min-width: 180px;
+    font-size: 1.04em;
+}
+@media (max-width: 600px) {
+    .checkout-form {
+        padding: 1.2em 0.5em 0.7em 0.5em;
+        max-width: 98vw;
+    }
+    .checkout-actions .btn {
+        min-width: 0;
+        width: 100%;
+    }
+}
+

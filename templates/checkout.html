@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>Reservation Checkout</h2>
+<form method="POST" action="/checkout" class="checkout-form">
+    <div class="checkout-summary">
+        <h3>Car: {{ car.name }}</h3>
+        <p><b>Rental Period:</b> {{ start_time_friendly }} to {{ end_time_friendly }}</p>
+        <p><b>Total Duration:</b> {{ duration_hours }} hour{{ 's' if duration_hours != 1 else '' }}</p>
+        <p><b>Total Price:</b> <span class="total-price">${{ total_price }}</span></p>
+        <p class="admin-warning"><b>Note:</b> All reservations are subject to admin approval.</p>
+    </div>
+    <div class="user-info">
+        <h4>Your Information</h4>
+        <label>Name:</label>
+        <input type="text" value="{{ user.name }}" readonly>
+        <label>Email:</label>
+        <input type="email" value="{{ user.email }}" readonly>
+        <label>Phone:</label>
+        <input type="text" value="{{ user.phone }}" readonly>
+    </div>
+    <div class="rishus-section">
+        <label>Do you have <b>Rishus</b> (permission) to rent the car?</label>
+        <div>
+            <input type="radio" id="rishus_yes" name="rishus" value="yes" required>
+            <label for="rishus_yes">Yes</label>
+            <input type="radio" id="rishus_no" name="rishus" value="no" required>
+            <label for="rishus_no">No</label>
+        </div>
+    </div>
+    <div class="checkout-actions">
+        <button type="submit" class="btn btn-large">Submit Reservation Request</button>
+        <a href="/search" class="btn btn-secondary">Cancel</a>
+    </div>
+</form>
+{% endblock %}

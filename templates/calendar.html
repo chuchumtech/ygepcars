@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>Car Booking Calendar</h2>
+<p>Welcome, {{ username }}! Reserve a car below.</p>
+
+<form method="POST" action="/book" class="form">
+    <label for="car_id">Select Car:</label>
+    <select name="car_id" required>
+        <option value="1">Car 1</option>
+        <option value="2">Car 2</option>
+    </select>
+    <label for="start_time">Start Time:</label>
+    <input type="datetime-local" name="start_time" required>
+    <label for="end_time">End Time:</label>
+    <input type="datetime-local" name="end_time" required>
+    <button type="submit" class="btn">Book</button>
+</form>
+
+<h3>Current Bookings</h3>
+<table class="calendar-table">
+    <tr>
+        <th>Car</th>
+        <th>User</th>
+        <th>Start</th>
+        <th>End</th>
+    </tr>
+    {% for b in bookings %}
+    <tr>
+        <td>{{ b[2] }}</td>
+        <td>{{ b[1] }}</td>
+        <td>{{ b[3]_friendly }}</td>
+        <td>{{ b[4]_friendly }}</td>
+    </tr>
+    {% endfor %}
+</table>
+{% endblock %}

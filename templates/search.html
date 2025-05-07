@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>Available Cars</h2>
+<p>For: <b>{{ start_time_friendly }}</b> to <b>{{ end_time_friendly }}</b></p>
+<div class="car-list">
+    {% set available_cars = cars|selectattr('available')|list %}
+    {% if available_cars|length == 0 %}
+        <div class="no-cars-message">No cars are available for the selected time period.</div>
+    {% else %}
+        {% for car in available_cars %}
+        <div class="car-card">
+            <img src="{{ url_for('static', filename=car.image) }}" alt="{{ car.name }}" class="car-img">
+            <h3>{{ car.name }}</h3>
+            <p>{{ car.year }} &mdash; {{ car.color }}</p>
+            <form method="POST" action="/reserve">
+                <input type="hidden" name="car_id" value="{{ car.id }}">
+                <input type="hidden" name="start_time" value="{{ start_time }}">
+                <input type="hidden" name="end_time" value="{{ end_time }}">
+                <button type="submit" class="btn">Request Reservation</button>
+            </form>
+        </div>
+        {% endfor %}
+    {% endif %}
+</div>
+{% endblock %}

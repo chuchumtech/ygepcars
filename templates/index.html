@@ -1,0 +1,65 @@
+{% extends 'base.html' %}
+{% block content %}
+<section class="modern-card">
+    <h2 class="form-heading">Welcome to the YGEP Car Rental Program</h2>
+    <form method="GET" action="/search" class="car-search-form" id="car-search-form">
+    <div class="form-row">
+        <div class="form-group" style="grid-column: span 2; width: 100%;">
+            <label for="date_range">Pick-up & Return Dates</label>
+            <input type="text" id="date_range" name="date_range" placeholder="Select date range" required readonly style="background:#fff;cursor:pointer;">
+            <input type="hidden" name="pickup_date" id="pickup_date">
+            <input type="hidden" name="return_date" id="return_date">
+        </div>
+    </div>
+    <div class="form-row">
+        <div class="form-group">
+            <label for="pickup_time">Pick-up Time</label>
+            <select name="pickup_time" id="pickup_time" required>
+                {% for t in times %}
+                    <option value="{{ t.value }}">{{ t.display }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="return_time">Return Time</label>
+            <select name="return_time" id="return_time" required>
+                {% for t in times %}
+                    <option value="{{ t.value }}">{{ t.display }}</option>
+                {% endfor %}
+            </select>
+        </div>
+    </div>
+    <button type="submit" class="btn btn-large">Check Availability</button>
+</form>
+
+<!-- Flatpickr CSS/JS CDN -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script>
+// Date range picker logic
+flatpickr("#date_range", {
+    mode: "range",
+    dateFormat: "Y-m-d",
+    minDate: "today",
+    onChange: function(selectedDates, dateStr, instance) {
+        if (selectedDates.length === 2) {
+            document.getElementById('pickup_date').value = instance.formatDate(selectedDates[0], "Y-m-d");
+            document.getElementById('return_date').value = instance.formatDate(selectedDates[1], "Y-m-d");
+        } else {
+            document.getElementById('pickup_date').value = '';
+            document.getElementById('return_date').value = '';
+        }
+    }
+});
+// Ensure hidden fields are filled before submit
+const form = document.getElementById('car-search-form');
+form.addEventListener('submit', function(e) {
+    if (!document.getElementById('pickup_date').value || !document.getElementById('return_date').value) {
+        e.preventDefault();
+        alert('Please select both a pick-up and return date.');
+    }
+});
+</script>
+</section>
+
+{% endblock %}
