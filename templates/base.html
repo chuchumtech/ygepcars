@@ -8,20 +8,123 @@
     <link rel="icon" href="{{ url_for('static', filename='logo.png') }}">
 </head>
 <body>
-    <header>
-        <img src="{{ url_for('static', filename='logo.png') }}" alt="YGEP Logo" class="logo">
-        <h1>Yeshiva Gedolah of Elkins Park Car Rental</h1>
-        <nav>
-            <a href="/">Home</a>
+    <header class="header-flex">
+        <a href="/" class="logo-title-link">
+            <img src="{{ url_for('static', filename='logo.png') }}" alt="YGEP Logo" class="logo">
+            <h1>Yeshiva Gedolah of Elkins Park Car Rental</h1>
+        </a>
+        <div class="account-menu-fixed">
             {% if session.get('user_id') %}
-                <a href="/calendar">Calendar</a>
-                <a href="/logout">Logout ({{ session.get('username') }})</a>
+                <div class="account-dropdown" id="accountDropdown">
+                    <button class="account-btn" id="accountBtn">Account &#x25BC;</button>
+                    <div class="account-dropdown-content" id="accountDropdownContent">
+                        <a href="/calendar">My Rentals</a>
+                        <a href="#">Profile</a>
+                        <a href="/logout">Logout ({{ session.get('username') }})</a>
+                    </div>
+                </div>
             {% else %}
-                <a href="/login">Login</a>
-                <a href="/register">Register</a>
+                <a href="/login" class="account-btn">Login</a>
+                <a href="/register" class="account-btn">Register</a>
             {% endif %}
-        </nav>
+        </div>
     </header>
+    <style>
+    .header-flex {
+        display: flex;
+        align-items: center;
+        justify-content: flex-start;
+        padding: 10px 40px 10px 40px;
+        position: relative;
+    }
+    .logo-title-link {
+        display: flex;
+        align-items: center;
+        text-decoration: none;
+        color: inherit;
+    }
+    .logo {
+        height: 50px;
+        margin-right: 16px;
+        cursor: pointer;
+    }
+    .account-menu-fixed {
+        position: absolute;
+        top: 10px;
+        right: 40px;
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        z-index: 10;
+    }
+    .account-btn {
+        background: #2a3e59;
+        color: #fff;
+        border: none;
+        padding: 8px 16px;
+        border-radius: 4px;
+        cursor: pointer;
+        font-weight: 600;
+        margin-left: 8px;
+        transition: background 0.2s;
+    }
+    .account-btn:hover {
+        background: #1d2b3a;
+    }
+    .account-dropdown {
+        position: relative;
+        display: inline-block;
+    }
+    .account-dropdown-content {
+        display: none;
+        position: absolute;
+        right: 0;
+        background: #fff;
+        min-width: 160px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        z-index: 100;
+        border-radius: 4px;
+        margin-top: 8px;
+        overflow: hidden;
+    }
+    .account-dropdown-content a {
+        color: #2a3e59;
+        padding: 12px 16px;
+        text-decoration: none;
+        display: block;
+        transition: background 0.2s;
+    }
+    .account-dropdown-content a:hover {
+        background: #f0f0f0;
+    }
+    .account-dropdown.open .account-dropdown-content {
+        display: block;
+    }
+    </style>
+    <script>
+    // Dropdown toggle and click-away close
+    document.addEventListener('DOMContentLoaded', function() {
+        var btn = document.getElementById('accountBtn');
+        var dropdown = document.getElementById('accountDropdown');
+        var content = document.getElementById('accountDropdownContent');
+        if (btn && dropdown && content) {
+            btn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                dropdown.classList.toggle('open');
+            });
+            document.addEventListener('click', function(e) {
+                if (!dropdown.contains(e.target)) {
+                    dropdown.classList.remove('open');
+                }
+            });
+            // Prevent dropdown from closing when clicking inside
+            content.addEventListener('click', function(e) {
+                e.stopPropagation();
+            });
+        }
+    });
+    </script>
+
     <main>
         {% with messages = get_flashed_messages() %}
           {% if messages %}

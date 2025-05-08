@@ -208,37 +208,444 @@ footer {
     max-width: 430px;
     margin: 3em auto 0 auto;
     background: #fff;
-    border-radius: 16px;
-    box-shadow: 0 2px 16px rgba(66,93,119,0.13);
-    padding: 2.5em 2em 2em 2em;
+    padding: 2.5em 2.7em 2em 2.7em;
+    border-radius: 15px;
+    box-shadow: 0 4px 24px 0 rgba(33, 58, 109, 0.13);
+    margin: 2.5em auto 1.5em auto;
+    max-width: 410px;
     display: flex;
     flex-direction: column;
-    gap: 1.7em;
+    gap: 1.1em;
+    align-items: stretch;
 }
-.checkout-summary {
-    background: #f7f8fa;
-    border-radius: 10px;
-    padding: 1.2em 1em 1em 1em;
-    margin-bottom: 1em;
-    border-left: 4px solid #425d77;
-}
-.checkout-summary h3 {
-    margin-top: 0;
+.form label {
+    font-weight: 600;
     color: #425d77;
-    font-size: 1.18em;
+    margin-bottom: 0.22em;
+    margin-top: 0.7em;
+    display: block;
 }
-.checkout-summary .total-price {
-    color: #74662e;
+.form input[type="text"],
+.form input[type="email"],
+.form input[type="tel"],
+.form input[type="password"] {
+    width: 100%;
+    padding: 0.8em 1em;
+    border: 1.5px solid #e3e6ed;
+    border-radius: 7px;
+    font-size: 1.03em;
+    background: #f7f8fa;
+    color: #213a6d;
+    box-sizing: border-box;
+    margin-bottom: 0.4em;
+    margin-top: 0.1em;
+    transition: border 0.2s;
+}
+.form .btn {
+    margin-top: 1.1em;
+    padding: 0.8em 0;
     font-size: 1.08em;
+    border-radius: 7px;
+    background: #425d77;
+    color: #fff;
+    border: none;
+    font-weight: 600;
+    box-shadow: 0 2px 8px 0 rgba(33, 58, 109, 0.07);
+    cursor: pointer;
+    transition: background 0.2s;
+    width: 100%;
+    display: block;
+}
+.form .btn:hover {
+    background: #213a6d;
+}
+.form {
+    margin-top: 2.7em;
+    margin-bottom: 1.7em;
+}
+
+.form input[type="text"],
+.form input[type="password"] {
+    width: 100%;
+    padding: 0.8em 1em;
+    border: 1.5px solid #e3e6ed;
+    border-radius: 7px;
+    font-size: 1.03em;
+    background: #f7f8fa;
+    color: #213a6d;
+    box-sizing: border-box;
+    margin-bottom: 0.2em;
+    transition: border 0.2s;
+}
+.form input[type="text"]:focus,
+.form input[type="password"]:focus {
+    border: 1.5px solid #b4c2e3;
+    outline: none;
+}
+.form .btn {
+    margin-top: 0.8em;
+    padding: 0.7em 0;
+    font-size: 1.08em;
+    border-radius: 7px;
+    background: #425d77;
+    color: #fff;
+    border: none;
+    font-weight: 600;
+    box-shadow: 0 2px 8px 0 rgba(33, 58, 109, 0.07);
+    cursor: pointer;
+    transition: background 0.2s;
+}
+.form .btn:hover {
+    background: #213a6d;
+}
+.flash, .message, .alert {
+    color: #b3261e !important;
+    background: #ffeaea;
+    border-left: 4px solid #e57373;
+    padding: 0.9em 1em;
+    border-radius: 7px;
+    margin-bottom: 1.2em;
+    font-weight: 500;
+    font-size: 1.05em;
+    text-align: center;
+}
+@media (max-width: 600px) {
+    .form {
+        padding: 1.2em 0.7em 1em 0.7em;
+        max-width: 98vw;
+    }
+}
+.checkout-summary-clean {
+    background: #fff;
+    border-radius: 14px;
+    box-shadow: 0 2px 8px rgba(33,58,109,0.09);
+    padding: 1.6em 1.6em 1.1em 1.6em;
+    margin-bottom: 2em;
+    max-width: 420px;
+    margin-left: auto;
+    margin-right: auto;
+}
+.car-header {
+    display: flex;
+    align-items: center;
+    gap: 1.1em;
+    margin-bottom: 1em;
+}
+.checkout-car-img-clean {
+    width: 80px;
+    height: 54px;
+    object-fit: cover;
+    border-radius: 8px;
+    box-shadow: 0 2px 6px rgba(33,58,109,0.07);
+    background: #f7f8fa;
+    border: 1px solid #e3e6ed;
+}
+.car-name-clean {
+    font-size: 1.13em;
+    font-weight: 700;
+    color: #213a6d;
+    margin-bottom: 0.12em;
+    letter-spacing: 0.01em;
+}
+.car-year-color-clean {
+    font-size: 0.96em;
+    color: #425d77;
+    margin-bottom: 0.05em;
+}
+.summary-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 0.8em;
+}
+.summary-table td {
+    padding: 0.32em 0.2em;
+    vertical-align: top;
+    font-size: 1.04em;
+}
+.summary-table .summary-label {
+    color: #425d77;
+    font-weight: 600;
+    width: 38%;
+    text-align: right;
+    padding-right: 0.7em;
+}
+.total-price-clean {
+    color: #74662e;
+    font-size: 1.13em;
     font-weight: bold;
 }
-.checkout-summary .admin-warning {
+.admin-warning-clean {
     color: #b15c00;
     background: #fffbe6;
-    padding: 0.5em 0.9em;
-    border-radius: 6px;
-    font-size: 0.98em;
+    padding: 0.6em 1em;
+    border-radius: 7px;
+    font-size: 1em;
+    margin-top: 1.2em;
+    text-align: center;
+    border: 1px solid #f8e1b0;
+    box-shadow: 0 1px 3px rgba(66,93,119,0.04);
+}
+
+.checkout-form-unified {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+}
+
+.checkout-main-card {
+    background: #fff;
+    border-radius: 14px;
+    box-shadow: 0 2px 8px rgba(33,58,109,0.09);
+    padding: 2.1em 2.2em 1.2em 2.2em;
+    margin-bottom: 2em;
+    width: 100%;
+    max-width: 500px;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5em;
+}
+.car-header {
+    display: flex;
+    align-items: center;
+    gap: 1.1em;
+    margin-bottom: 0.3em;
+}
+.checkout-car-img-clean {
+    width: 80px;
+    height: 54px;
+    object-fit: cover;
+    border-radius: 8px;
+    box-shadow: 0 2px 6px rgba(33,58,109,0.07);
+    background: #f7f8fa;
+    border: 1px solid #e3e6ed;
+}
+.car-name-clean {
+    font-size: 1.13em;
+    font-weight: 700;
+    color: #213a6d;
+    margin-bottom: 0.12em;
+    letter-spacing: 0.01em;
+}
+.car-year-color-clean {
+    font-size: 0.96em;
+    color: #425d77;
+    margin-bottom: 0.05em;
+}
+.summary-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 0.6em;
+}
+.summary-table td {
+    padding: 0.32em 0.2em;
+    vertical-align: top;
+    font-size: 1.04em;
+}
+.summary-table .summary-label {
+    color: #425d77;
+    font-weight: 600;
+    width: 38%;
+    text-align: right;
+    padding-right: 0.7em;
+}
+.total-price-clean {
+    color: #74662e;
+    font-size: 1.13em;
+    font-weight: bold;
+}
+.admin-warning-clean {
+    color: #b15c00;
+    background: #fffbe6;
+    padding: 0.6em 1em;
+    border-radius: 7px;
+    font-size: 1em;
+    margin-top: 0.7em;
+    margin-bottom: 0.7em;
+    text-align: center;
+    border: 1px solid #f8e1b0;
+    box-shadow: 0 1px 3px rgba(66,93,119,0.04);
+}
+.user-info-unified {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6em;
+    margin-bottom: 0.3em;
+}
+.user-info-unified h4 {
+    margin-bottom: 0.4em;
+    color: #425d77;
+    font-size: 1.07em;
+}
+.user-info-unified label {
+    color: #425d77;
+    font-weight: 600;
+    margin-bottom: 0.18em;
+    margin-top: 0.4em;
+}
+.user-info-unified input[type="text"],
+.user-info-unified input[type="email"],
+.user-info-unified input[type="tel"],
+.user-info-unified input[type="password"],
+.destination-section select,
+.destination-section input[type="text"] {
+    width: 100%;
+    padding: 0.7em 0.9em;
+    border: 1.5px solid #e3e6ed;
+    border-radius: 7px;
+    font-size: 1em;
+    background: #f7f8fa;
+    color: #213a6d;
+    box-sizing: border-box;
+    margin-bottom: 0.5em;
+}
+.destination-section {
+    margin-bottom: 1.2em;
+}
+.destination-section label {
+    color: #425d77;
+    font-weight: 600;
+    margin-bottom: 0.18em;
+    margin-top: 0.7em;
+    display: block;
+}
+.destination-section select {
+    appearance: none;
+    background: #f7f8fa url('data:image/svg+xml;utf8,<svg fill="%23425d77" height="16" viewBox="0 0 20 20" width="16" xmlns="http://www.w3.org/2000/svg"><path d="M7.293 7.293a1 1 0 0 1 1.414 0L10 8.586l1.293-1.293a1 1 0 0 1 1.414 1.414l-2 2a1 1 0 0 1-1.414 0l-2-2a1 1 0 0 1 0-1.414z"/></svg>') no-repeat right 0.9em center/1.1em 1.1em;
+    padding-right: 2.5em;
+    border: 1.5px solid #e3e6ed;
+    border-radius: 7px;
+}
+.destination-section input[type="text"] {
+    margin-top: 0.5em;
+}
+.rishus-section-unified {
+    margin-bottom: 0.6em;
+}
+.checkout-actions-unified {
+    display: flex;
+    gap: 1.1em;
+    justify-content: flex-end;
+    margin-top: 1.1em;
+}
+.btn-primary-unified {
+    background: #425d77;
+    color: #fff;
+    border: none;
+    border-radius: 7px;
+    padding: 0.8em 1.2em;
+    font-size: 1.04em;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 1px 3px rgba(33,58,109,0.06);
+    transition: background 0.15s;
+}
+.btn-primary-unified:hover {
+    background: #2e3d5a;
+}
+.btn-cancel-unified {
+    background: #e5e9f2;
+    color: #425d77;
+    border: none;
+    border-radius: 7px;
+    padding: 0.8em 1.2em;
+    font-size: 1.04em;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: none;
+    box-shadow: 0 1px 3px rgba(33,58,109,0.05);
+    transition: background 0.15s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.btn-cancel-unified:hover {
+    background: #d7dbe8;
+}
+@media (max-width: 600px) {
+    .checkout-main-card {
+        max-width: 98vw;
+        padding: 1.2em 0.5em;
+    }
+    .checkout-form-unified {
+        padding: 0 0.5em;
+    }
+    .checkout-car-img-clean {
+        width: 60px;
+        height: 40px;
+    }
+    .checkout-actions-unified {
+        flex-direction: column;
+        gap: 0.7em;
+        align-items: stretch;
+    }
+}
+
+.user-info {
+    width: 100%;
+    max-width: 420px;
+    margin-left: auto;
+    margin-right: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 0.7em;
+}
+.user-info h4 {
+    margin-bottom: 0.4em;
+    color: #425d77;
+    font-size: 1.07em;
+}
+.user-info label {
+    color: #425d77;
+    font-weight: 600;
+    margin-bottom: 0.18em;
+    margin-top: 0.4em;
+}
+.user-info input[type="text"],
+.user-info input[type="email"] {
+    width: 100%;
+    padding: 0.7em 0.9em;
+    border: 1.5px solid #e3e6ed;
+    border-radius: 7px;
+    font-size: 1em;
+    background: #f7f8fa;
+    color: #213a6d;
+    box-sizing: border-box;
+}
+.rishus-section {
+    width: 100%;
+    max-width: 420px;
+    margin-left: auto;
+    margin-right: auto;
     margin-top: 1em;
+    margin-bottom: 0.7em;
+}
+.checkout-actions {
+    width: 100%;
+    max-width: 420px;
+    margin-left: auto;
+    margin-right: auto;
+    display: flex;
+    gap: 1.1em;
+    margin-top: 1.2em;
+    justify-content: flex-end;
+}
+.checkout-actions .btn {
+    min-width: 180px;
+    font-size: 1.04em;
+}
+@media (max-width: 600px) {
+    .checkout-summary-clean, .user-info, .rishus-section, .checkout-actions {
+        max-width: 98vw;
+        padding: 1.2em 0.5em;
+    }
+    .checkout-form {
+        padding: 0 0.5em;
+    }
+    .checkout-car-img-clean {
+        width: 60px;
+        height: 40px;
+    }
 }
 .user-info {
     margin-bottom: 1em;
