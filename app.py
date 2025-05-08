@@ -649,6 +649,85 @@ def backend_destination_delete(dest_id):
 # --- Edit Reservation ---
 from flask import abort
 
+@app.route('/backend/reservations/edit/<reservation_id>', methods=['GET', 'POST'])
+def backend_edit_reservation(reservation_id):
+    check = require_admin()
+    if check:
+        return check
+    from datetime import datetime, timedelta
+    booking = bookings_col.find_one({'_id': ObjectId(reservation_id)})
+    if not booking:
+        abort(404)
+    users = list(users_col.find({}))
+    cars = list(cars_col.find({}))
+
+    # Mark cars as available/unavailable for dropdown
+    now = datetime.utcnow()
+    for car in cars:
+        car['available'] = True
+        for b in bookings_col.find({'car_id': str(car['_id']), '_id': {'$ne': booking['_id']}}):
+            # Only consider overlapping bookings that are approved or pending (not expired)
+            if b.get('status') in ('approved', 'pending', 'pending_update'):
+                # Expire pending/pending_update if >48h
+                if b.get('status') in ('pending', 'pending_update'):
+                    try:
+                        req_at = datetime.strptime(b.get('requested_at', ''), '%Y-%m-%d %H:%M')
+                        if (now - req_at) > timedelta(hours=48):
+                            bookings_col.update_one({'_id': b['_id']}, {'$set': {'status': 'expired'}})
+                            continue
+                    except Exception:
+                        continue
+                s1, e1 = b['start_time'], b['end_time']
+                s2, e2 = booking['start_time'], booking['end_time']
+                # Mark unavailable if overlap with any booking except this one
+                if not (booking['end_time'] <= s1 or booking['start_time'] >= e1):
+                    car['available'] = False
+                    break
+    if request.method == 'POST':
+        user_id = request.form['user_id']
+        car_id = request.form['car_id']
+        start_time = request.form['start_time']
+        end_time = request.form['end_time']
+        status = request.form['status']
+        notes = request.form.get('notes', '')
+        # Validate time logic
+        if end_time <= start_time:
+            flash('End time must be after start time.')
+            return redirect(url_for('backend_edit_reservation', reservation_id=reservation_id))
+        # Overlap check for car
+        overlap = None
+        for b in bookings_col.find({'car_id': car_id, '_id': {'$ne': booking['_id']}}):
+            if b.get('status') in ('approved', 'pending', 'pending_update'):
+                # Expire pending/pending_update if >48h
+                if b.get('status') in ('pending', 'pending_update'):
+                    try:
+                        req_at = datetime.strptime(b.get('requested_at', ''), '%Y-%m-%d %H:%M')
+                        if (now - req_at) > timedelta(hours=48):
+                            bookings_col.update_one({'_id': b['_id']}, {'$set': {'status': 'expired'}})
+                            continue
+                    except Exception:
+                        continue
+                s1, e1 = b['start_time'], b['end_time']
+                if not (end_time <= s1 or start_time >= e1):
+                    overlap = b
+                    break
+        if overlap:
+            flash('Selected car is not available for the chosen time.')
+            return redirect(url_for('backend_edit_reservation', reservation_id=reservation_id))
+        # Update booking
+        bookings_col.update_one({'_id': booking['_id']}, {'$set': {
+            'user_id': user_id,
+            'car_id': car_id,
+            'start_time': start_time,
+            'end_time': end_time,
+            'status': status,
+            'notes': notes,
+            'requested_at': now.strftime('%Y-%m-%d %H:%M') if status in ('pending', 'pending_update') else booking.get('requested_at','')
+        }})
+        flash('Reservation updated successfully.')
+        return redirect(url_for('backend_customer_details', user_id=user_id))
+    return render_template('backend_edit_reservation.html', booking=booking, users=users, cars=cars)
+
 @app.route('/edit_reservation/<reservation_id>', methods=['GET', 'POST'])
 def edit_reservation(reservation_id):
     from datetime import datetime, timedelta
