@@ -80,9 +80,38 @@
             position: relative;
             box-shadow: 2px 0 10px rgba(30,40,90,0.04);
             z-index: 9;
+            overflow: hidden;
         }
         .admin-sidebar.collapsed {
             width: 60px;
+            min-width: 60px;
+        }
+        .admin-main {
+            flex: 1;
+            background: #f5f6fa;
+            padding: 2.5em 3em;
+            min-width: 0;
+            overflow-y: auto;
+            height: 100%;
+        }
+        .admin-sidebar {
+            background: var(--sidebar-bg);
+            color: #fff;
+            width: 230px;
+            min-width: 60px;
+            height: 100%;
+            transition: width 0.23s cubic-bezier(.4,0,.2,1);
+            display: flex;
+            flex-direction: column;
+            align-items: stretch;
+            position: relative;
+            box-shadow: 2px 0 10px rgba(30,40,90,0.04);
+            z-index: 9;
+            overflow: hidden;
+        }
+        .admin-sidebar.collapsed {
+            width: 60px;
+            min-width: 60px;
         }
         .admin-sidebar.collapsed .sidebar-label {
             display: none;
@@ -104,9 +133,17 @@
             list-style: none;
             padding: 0;
             margin: 0;
+            flex: 1 1 auto;
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+            min-width: 0;
         }
         .admin-sidebar li {
             margin: 0;
+            display: flex;
+            align-items: center;
+            min-width: 0;
         }
         .admin-sidebar a {
             display: flex;
@@ -117,6 +154,9 @@
             font-size: 1.08em;
             border-left: 4px solid transparent;
             transition: background 0.15s, border 0.15s, color 0.15s;
+            min-width: 0;
+            width: 100%;
+            overflow: hidden;
         }
         .admin-sidebar a:hover, .admin-sidebar a.active {
             background: #253153;
@@ -132,10 +172,15 @@
             min-width: 24px;
             width: 24px;
             height: 24px;
+            flex-shrink: 0;
         }
         .sidebar-label {
             transition: opacity 0.2s, width 0.2s;
             white-space: nowrap;
+            min-width: 0;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            flex-shrink: 1;
         }
         .admin-sidebar.collapsed .sidebar-label {
             opacity: 0;
@@ -154,10 +199,11 @@
             margin-bottom: 8px;
         }
         .admin-main {
-            flex: 1;
+            flex: 1 1 auto;
             background: #f5f6fa;
             padding: 2.5em 3em;
             min-width: 0;
+            min-height: 0;
             overflow-y: auto;
             height: 100%;
         }
@@ -262,6 +308,11 @@
         @media (max-width: 900px) {
             .admin-main { padding: 1.2em 0.6em; }
             .admin-table th, .admin-table td { padding: 9px 6px; }
+            .admin-sidebar { width: 60px !important; min-width: 60px !important; }
+            .admin-sidebar:not(.collapsed) .sidebar-label { display: none; }
+        }
+        @media (max-width: 600px) {
+            .admin-main { padding: 0.5em 0.2em; }
         }
     </style>
 </head>
@@ -274,7 +325,7 @@
             <button class="sidebar-toggle" id="sidebarToggle" title="Toggle Sidebar">
                 <svg width="22" height="22" viewBox="0 0 20 20" fill="none"><rect y="3" width="20" height="2" rx="1" fill="currentColor"/><rect y="9" width="20" height="2" rx="1" fill="currentColor"/><rect y="15" width="20" height="2" rx="1" fill="currentColor"/></svg>
             </button>
-            <ul>
+            <ul style="display:flex;flex-direction:column;flex:1 1 auto;height:100%;">
                 <li><a href="/backend/pending"><span class="sidebar-icon"> <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg></span> <span class="sidebar-label">Pending Rentals</span></a></li>
                 <li><a href="/backend/live"><span class="sidebar-icon"> <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="7" rx="2"/><path d="M16 11V7a4 4 0 0 0-8 0v4"/></svg></span> <span class="sidebar-label">Live Rentals</span></a></li>
                 <li><a href="/backend/upcoming"><span class="sidebar-icon"> <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg></span> <span class="sidebar-label">Upcoming Rentals</span></a></li>
@@ -282,9 +333,10 @@
                 <li><a href="/backend/customers"><span class="sidebar-icon"> <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><circle cx="12" cy="7" r="4"/><path d="M5.5 21a7.5 7.5 0 0 1 13 0"/></svg></span> <span class="sidebar-label">Customers</span></a></li>
                 <li><a href="/backend/cars"><span class="sidebar-icon"> <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="6" rx="3"/><path d="M5 11V7a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v4"/><circle cx="7.5" cy="17.5" r="1.5"/><circle cx="16.5" cy="17.5" r="1.5"/></svg></span> <span class="sidebar-label">Cars</span></a></li>
                 <li><a href="/backend/destinations"><span class="sidebar-icon"> <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M21 10c0 6-9 13-9 13S3 16 3 10a9 9 0 1 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg></span> <span class="sidebar-label">Destinations</span></a></li>
+                <li><a href="{{ url_for('backend_pricing') }}"><span class="sidebar-icon"> <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><line x1="12" y1="2" x2="12" y2="22"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></span> <span class="sidebar-label">Pricing Plans</span></a></li>
             </ul>
         </aside>
-        <main class="admin-main" id="adminMain">
+        <main class="admin-main">
             {% block admin_content %}{% endblock %}
         </main>
     </div>
@@ -294,6 +346,7 @@
             const toggle = document.getElementById('sidebarToggle');
             toggle.addEventListener('click', function() {
                 sidebar.classList.toggle('collapsed');
+                document.body.classList.toggle('sidebar-collapsed');
             });
         });
     </script>

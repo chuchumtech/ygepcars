@@ -12,9 +12,28 @@
         </div>
         <table class="summary-table">
             <tr><td class="summary-label">Rental Period:</td><td>{{ start_time_friendly }}<br>to {{ end_time_friendly }}</td></tr>
-            <tr><td class="summary-label">Total Duration:</td><td>{{ duration_hours }} hour{{ 's' if duration_hours != 1 else '' }}</td></tr>
-            <tr><td class="summary-label">Total Price:</td><td class="total-price-clean">${{ total_price }}</td></tr>
+            <tr><td class="summary-label">Total Duration:</td><td>{{ duration_hours|int }} hour{{ 's' if duration_hours|int != 1 else '' }}</td></tr>
+            <tr><td class="summary-label">Total Price:</td><td class="total-price-clean">${{ total_price|int }}</td></tr>
         </table>
+        <div class="price-breakdown-card" style="background:#f7f8fa;border-radius:10px;padding:1.2em 1.5em;margin-bottom:1.2em;box-shadow:0 1px 6px rgba(33,58,109,0.08);max-width:440px;margin-left:auto;margin-right:auto;">
+            <div style="font-weight:700;color:#213a6d;font-size:1.13em;margin-bottom:0.7em;">How Your Price Was Calculated</div>
+            <div style="color:#425d77;font-size:1.08em;line-height:1.7;">
+                <div><span style="color:#425d77;">Base Hourly Rate:</span> <b>${{ hourly_rate|int }}</b></div>
+                <div><span style="color:#425d77;">Daily (24hr) Cap:</span> <b>${{ daily_cap|int }}</b></div>
+                <div><span style="color:#425d77;">Rental Length:</span> <b>{{ days }}</b> day{{ 's' if days != 1 else '' }} <span style="color:#b2b2b2;">|</span> <b>{{ hours }}</b> hour{{ 's' if hours != 1 else '' }}</div>
+                <hr style="border:none;border-top:1px solid #e0e5ef;margin:0.8em 0 0.7em 0;">
+                <div style="margin-bottom:0.4em;">
+                    Calculation: <b>{{ days }}</b> day{{ 's' if days != 1 else '' }} x ${{ daily_cap|int }} + <b>{{ hours }}</b> hour{{ 's' if hours != 1 else '' }} x ${{ hourly_rate|int }}/hr = <b>${{ total_price|int }}</b>
+                </div>
+                {% if rate_source == 'special' %}
+                    <div style="color:#b15c00;font-weight:500;">Special rate applied for your dates!</div>
+                {% elif rate_source == 'global' %}
+                    <div style="color:#425d77;">Default rate applied.</div>
+                {% else %}
+                    <div style="color:#425d77;">Standard rate applied.</div>
+                {% endif %}
+            </div>
+        </div>
         <div class="admin-warning-clean"><b>Note:</b> All reservations are subject to admin approval.</div>
         <div class="user-info-unified">
             <h4>Your Information</h4>

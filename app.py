@@ -28,6 +28,8 @@ db = client['ygep']  # Use 'ygep' as the main database
 users_col = db['users']
 cars_col = db['cars']
 bookings_col = db['bookings']
+standard_rates_col = db['standard_rates']
+special_rates_col = db['special_rates']
 
 @app.context_processor
 def inject_now():
@@ -44,6 +46,7 @@ def init_db():
 
 
 # --- Routes ---
+from models.pricing_utils import get_applicable_rate, calculate_price
 
 def require_admin():
     if not session.get('user_id'):
@@ -171,15 +174,23 @@ def checkout():
     try:
         dt_start = datetime.strptime(start_time, dt_fmt)
         dt_end = datetime.strptime(end_time, dt_fmt)
-        duration_hours = int((dt_end - dt_start).total_seconds() // 3600)
+        duration_hours = round((dt_end - dt_start).total_seconds() / 3600, 2)
         if duration_hours < 1:
             duration_hours = 1
-        total_price = min(duration_hours * 15, 70)
-        start_time_friendly = dt_start.strftime('%A, %B %-d, %Y at %-I:%M %p')
-        end_time_friendly = dt_end.strftime('%A, %B %-d, %Y at %-I:%M %p')
+        # Get rates from DB
+        std_rates = {r['car_id']: r for r in standard_rates_col.find({})}
+        special_rates = list(special_rates_col.find({}))
+        hourly_rate, daily_cap, rate_source = get_applicable_rate(car_id, dt_start, dt_end, std_rates, special_rates)
+        if hourly_rate is None or daily_cap is None:
+            flash('No pricing plan found for this car. Please contact admin.')
+            return redirect(url_for('index'))
+        total_price, days, hours = calculate_price(dt_start, dt_end, hourly_rate, daily_cap)
+        start_time_friendly = dt_start.strftime('%b %d, %Y %I:%M %p')
+        end_time_friendly = dt_end.strftime('%b %d, %Y %I:%M %p')
     except Exception:
         duration_hours = 1
         total_price = 15
+        hourly_rate = daily_cap = days = hours = rate_source = None
         start_time_friendly = start_time
         end_time_friendly = end_time
     if request.method == 'POST':
@@ -199,7 +210,20 @@ def checkout():
         session.pop('reserve_start_time', None)
         session.pop('reserve_end_time', None)
         return redirect(url_for('index'))
-    return render_template('checkout.html', car=car, user=user, start_time_friendly=start_time_friendly, end_time_friendly=end_time_friendly, duration_hours=duration_hours, total_price=total_price)
+    return render_template(
+        'checkout.html',
+        car=car,
+        user=user,
+        start_time_friendly=start_time_friendly,
+        end_time_friendly=end_time_friendly,
+        duration_hours=duration_hours,
+        total_price=total_price,
+        hourly_rate=hourly_rate,
+        daily_cap=daily_cap,
+        days=days,
+        hours=hours,
+        rate_source=rate_source
+    )
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
@@ -338,6 +362,61 @@ def book():
 
 # --- Admin Portal ---
 from flask import abort, Blueprint
+
+@app.route('/backend/pricing')
+def backend_pricing():
+    check = require_admin()
+    if check:
+        return check
+    cars = list(cars_col.find({}))
+    # Standard rates
+    std_rates = {r['car_id']: r for r in standard_rates_col.find({})}
+    # Special rates
+    special_rates = list(special_rates_col.find({}))
+    # Add car names to special_rates for display
+    for rate in special_rates:
+        if rate['car_id'] == 'global':
+            rate['car_name'] = 'All Cars'
+        else:
+            car = cars_col.find_one({'_id': ObjectId(rate['car_id'])})
+            rate['car_name'] = car['name'] if car else 'Unknown'
+    return render_template('backend_pricing.html', cars=cars, standard_rates=std_rates, special_rates=special_rates)
+
+@app.route('/backend/pricing/set_standard', methods=['POST'])
+def backend_set_standard_rate():
+    check = require_admin()
+    if check:
+        return check
+    car_id = request.form['car_id']
+    hourly_rate = float(request.form['hourly_rate'])
+    daily_cap = float(request.form['daily_cap'])
+    standard_rates_col.update_one({'car_id': car_id}, {'$set': {'hourly_rate': hourly_rate, 'daily_cap': daily_cap}}, upsert=True)
+    flash('Standard rate updated.')
+    return redirect(url_for('backend_pricing'))
+
+@app.route('/backend/pricing/add_special', methods=['POST'])
+def backend_add_special_rate():
+    check = require_admin()
+    if check:
+        return check
+    car_id = request.form['car_id']
+    start_date = request.form['start_date']
+    end_date = request.form['end_date']
+    hourly_rate = float(request.form['hourly_rate'])
+    daily_cap = float(request.form['daily_cap'])
+    special_rates_col.insert_one({'car_id': car_id, 'start_date': start_date, 'end_date': end_date, 'hourly_rate': hourly_rate, 'daily_cap': daily_cap})
+    flash('Special rate added.')
+    return redirect(url_for('backend_pricing'))
+
+@app.route('/backend/pricing/delete_special', methods=['POST'])
+def backend_delete_special_rate():
+    check = require_admin()
+    if check:
+        return check
+    rate_id = request.form['rate_id']
+    special_rates_col.delete_one({'_id': ObjectId(rate_id)})
+    flash('Special rate deleted.')
+    return redirect(url_for('backend_pricing'))
 
 @app.route('/backend')
 def backend_dashboard():

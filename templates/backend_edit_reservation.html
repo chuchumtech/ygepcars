@@ -41,9 +41,47 @@
             </select>
         </div>
         <div class="form-group">
+            <label class="form-label">Destination</label>
+            <select name="destination" id="destination" class="form-control" required>
+                <option value="">Select a destination</option>
+                <option value="Monsey" {% if booking.destination == 'Monsey' %}selected{% endif %}>Monsey</option>
+                <option value="Lakewood" {% if booking.destination == 'Lakewood' %}selected{% endif %}>Lakewood</option>
+                <option value="Brooklyn" {% if booking.destination == 'Brooklyn' %}selected{% endif %}>Brooklyn</option>
+                <option value="Baltimore" {% if booking.destination == 'Baltimore' %}selected{% endif %}>Baltimore</option>
+                <option value="Other" {% if booking.destination == 'Other' %}selected{% endif %}>Other</option>
+            </select>
+            <input type="text" name="custom_destination" id="custom_destination" class="form-control" placeholder="Enter destination" style="margin-top:0.5em; display: {% if booking.destination == 'Other' %}block{% else %}none{% endif %};" value="{{ booking.custom_destination or '' }}">
+        </div>
+        <div class="form-group rishus-section">
+            <label class="form-label">Rishus (Permission Required?)</label>
+            <div>
+                <input type="radio" id="rishus_yes" name="rishus" value="yes" required {% if booking.rishus == 'yes' %}checked{% endif %}>
+                <label for="rishus_yes">Yes</label>
+                <input type="radio" id="rishus_no" name="rishus" value="no" required {% if booking.rishus == 'no' %}checked{% endif %}>
+                <label for="rishus_no">No</label>
+            </div>
+        </div>
+        <div class="form-group">
             <label class="form-label" for="notes">Notes</label>
             <textarea class="form-control" name="notes" id="notes">{{ booking.notes or '' }}</textarea>
         </div>
+        <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var destSelect = document.getElementById('destination');
+            var customDest = document.getElementById('custom_destination');
+            if (destSelect) {
+                destSelect.addEventListener('change', function() {
+                    if (destSelect.value === 'Other') {
+                        customDest.style.display = 'block';
+                        customDest.required = true;
+                    } else {
+                        customDest.style.display = 'none';
+                        customDest.required = false;
+                    }
+                });
+            }
+        });
+        </script>
         <div class="form-actions" style="margin-top:1.6em;display:flex;gap:1em;">
             <button type="submit" class="btn btn-primary">Save Changes</button>
             <a href="/backend/customers/{{ booking.user_id }}" class="btn btn-secondary">Cancel</a>
