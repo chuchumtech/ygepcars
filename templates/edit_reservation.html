@@ -2,26 +2,26 @@
 {% block content %}
 <h2>Edit Reservation</h2>
 <div class="modern-card">
-    <form method="POST">
-        <div class="form-group">
-            <label>Car:</label>
-            <div>{{ car.name }} ({{ car.year }}, {{ car.color }})</div>
-        </div>
-        <div class="form-group">
-            <label for="start_time">Start Time:</label>
-            <input type="datetime-local" name="start_time" id="start_time" required value="{{ booking.start_time }}">
-        </div>
-        <div class="form-group">
-            <label for="end_time">End Time:</label>
-            <input type="datetime-local" name="end_time" id="end_time" required value="{{ booking.end_time }}">
-        </div>
-        <div style="margin-top:1.4em;">
-            <button type="submit" class="btn btn-primary">Submit Update Request</button>
-            <a href="/calendar" class="btn btn-secondary">Cancel</a>
-        </div>
-        <div class="admin-warning-clean" style="margin-top:1.5em;">
-            <b>Note:</b> Your update request will need admin approval and must not overlap with other bookings.
-        </div>
-    </form>
+    <form method="POST" autocomplete="off" style="max-width: 430px;">
+    <div class="form-group">
+        <label class="form-label">Car</label>
+        <div style="font-weight:500; color:#22304d;">{{ car.name }} ({{ car.year }}, {{ car.color }})</div>
+    </div>
+    <div class="form-group">
+        <label class="form-label" for="start_time">Start Time</label>
+        <input type="datetime-local" class="form-control" name="start_time" id="start_time" required value="{{ booking.start_time }}">
+    </div>
+    <div class="form-group">
+        <label class="form-label" for="end_time">End Time</label>
+        <input type="datetime-local" class="form-control" name="end_time" id="end_time" required value="{{ booking.end_time }}">
+    </div>
+    <div class="form-actions">
+        <button type="submit" class="btn btn-primary">Submit Update Request</button>
+        <a href="/calendar" class="btn btn-secondary">Cancel</a>
+    </div>
+    <div class="admin-warning-clean" style="margin-top:1.5em; color:#b45309;">
+        <b>Note:</b> Your update request will need admin approval and must not overlap with other bookings.
+    </div>
+</form>
 </div>
 {% endblock %}

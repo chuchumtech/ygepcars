@@ -1,0 +1,289 @@
+{% extends 'admin_base.html' %}
+{% block admin_content %}
+<style>
+.customer-detail-container {
+    max-width: 980px;
+    margin: 2.5em auto 0 auto;
+    background: #fff;
+    border-radius: 18px;
+    box-shadow: 0 4px 32px rgba(59,130,246,0.10);
+    padding: 0 0 2.5em 0;
+    overflow: hidden;
+}
+.customer-header {
+    display: flex;
+    align-items: center;
+    gap: 2em;
+    padding: 2.5em 2.5em 1.5em 2.5em;
+    border-bottom: 1px solid #f0f3fa;
+    background: linear-gradient(90deg, #f5f8ff 70%, #eaf1fb 100%);
+}
+
+/* Modern 3-dots dropdown menu styles */
+.dropdown-menu-container {
+    position: relative;
+    display: inline-block;
+}
+.dropdown-menu-btn {
+    background: #f3f7fa;
+    border: none;
+    border-radius: 50%;
+    width: 38px;
+    height: 38px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background 0.2s;
+    box-shadow: 0 2px 8px rgba(59,130,246,0.07);
+}
+.dropdown-menu-btn:hover, .dropdown-menu-btn:focus {
+    background: #e8f0fe;
+    outline: none;
+}
+.dropdown-menu-list {
+    position: absolute;
+    top: 42px;
+    right: 0;
+    min-width: 180px;
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 4px 24px rgba(59,130,246,0.10);
+    padding: 7px 0;
+    margin: 0;
+    z-index: 10;
+    list-style: none;
+    border: 1px solid #e5eaf3;
+}
+.dropdown-menu-item {
+    width: 100%;
+    background: none;
+    border: none;
+    outline: none;
+    text-align: left;
+    padding: 12px 22px;
+    font-size: 1em;
+    color: #22304d;
+    cursor: pointer;
+    transition: background 0.16s, color 0.16s;
+    border-radius: 0;
+    font-family: inherit;
+    display: block;
+}
+.dropdown-menu-item:hover, .dropdown-menu-item:focus {
+    background: #e8f0fe;
+    color: #2563eb;
+}
+.dropdown-menu-list li {
+    padding: 0;
+    margin: 0;
+}
+
+.customer-avatar {
+    width: 74px;
+    height: 74px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #3b82f6 40%, #2563eb 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.2em;
+    color: #fff;
+    font-weight: 600;
+    box-shadow: 0 2px 8px rgba(59,130,246,0.12);
+}
+.customer-profile-info {
+    flex: 1;
+}
+.customer-profile-info h2 {
+    margin: 0 0 0.5em 0;
+    font-size: 1.7em;
+    font-weight: 700;
+    color: #22304d;
+}
+.customer-profile-info .profile-row {
+    margin-bottom: 0.4em;
+    font-size: 1.08em;
+}
+.customer-profile-info .badge {
+    margin-left: 0.5em;
+    font-size: 0.98em;
+    vertical-align: middle;
+}
+.customer-actions {
+    margin-top: 1.2em;
+    display: flex;
+    gap: 1em;
+    flex-wrap: wrap;
+}
+.customer-actions form {
+    display: inline-block;
+    margin: 0;
+}
+.customer-actions .input-group {
+    display: flex;
+    gap: 0.5em;
+}
+.customer-actions input[type="password"] {
+    border-radius: 7px;
+    border: 1.5px solid var(--input-border);
+    padding: 7px 13px;
+    font-size: 1em;
+    background: var(--input-bg);
+    outline: none;
+    transition: border 0.2s;
+}
+.customer-actions input[type="password"]:focus {
+    border-color: var(--input-focus);
+}
+.customer-actions button {
+    border-radius: 7px;
+    font-size: 1em;
+}
+.customer-rentals-section {
+    padding: 2em 2.5em 0 2.5em;
+}
+.customer-rentals-section h4 {
+    margin: 0 0 1em 0;
+    font-size: 1.18em;
+    color: #22304d;
+    letter-spacing: 0.01em;
+}
+.customer-rentals-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    background: #f9fbfe;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 1px 6px rgba(59,130,246,0.04);
+}
+.customer-rentals-table th, .customer-rentals-table td {
+    padding: 0.8em 1em;
+    text-align: left;
+    font-size: 1em;
+}
+.customer-rentals-table th {
+    background: #f3f7fa;
+    font-weight: 600;
+    color: #2563eb;
+    border-bottom: 2px solid #e5eaf3;
+}
+.customer-rentals-table tr:nth-child(even) {
+    background: #f5f8ff;
+}
+.customer-rentals-table tr:last-child td {
+    border-bottom: none;
+}
+@media (max-width: 700px) {
+    .customer-header, .customer-rentals-section {
+        padding: 1.1em 0.7em 1.1em 0.7em;
+    }
+    .customer-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1em;
+    }
+}
+</style>
+{% with messages = get_flashed_messages() %}
+  {% if messages %}
+    <div class="alert alert-warning" style="margin: 2em auto 0 auto; max-width: 900px;">
+      {% for message in messages %}
+        <div style="margin-bottom: 0.5em;">{{ message }}</div>
+      {% endfor %}
+    </div>
+  {% endif %}
+{% endwith %}
+<div class="customer-detail-container">
+    <div class="customer-header" style="position:relative;">
+    <div style="position:absolute;top:2.5em;right:2.5em;z-index:2;">
+        <div class="customer-actions">
+            <div class="dropdown-menu-container">
+                <button class="dropdown-menu-btn" id="userActionMenuBtn" aria-haspopup="true" aria-expanded="false" title="User actions">
+                    <span style="font-size:1.6em;line-height:1;">&#x22EE;</span>
+                </button>
+                <ul class="dropdown-menu-list" id="userActionMenu" style="display:none;">
+                    <li><button type="button" class="dropdown-menu-item" onclick="openEditUserModal()">Edit User Info</button></li>
+                    <li><button type="button" class="dropdown-menu-item" onclick="openChangePasswordModal()">Change Password</button></li>
+                    <li>
+                        <form method="post" action="/backend/customers/{{ user._id|string }}/toggle_lock" style="display:inline;">
+                            <input type="hidden" name="user_id" value="{{ user._id|string }}">
+                            <button type="submit" class="dropdown-menu-item">{% if user.locked %}Unlock User{% else %}Lock User{% endif %}</button>
+                        </form>
+                    </li>
+                    <li style="margin:0;padding:0;">
+                        <form method="post" action="/backend/customers/{{ user._id|string }}/toggle_admin" style="display:block;margin:0;padding:0;">
+                            <input type="hidden" name="user_id" value="{{ user._id|string }}">
+                            <button type="submit" class="dropdown-menu-item" style="width:100%;text-align:left;padding:12px 22px;background:none;border:none;outline:none;cursor:pointer;">{% if user.is_admin %}Remove Admin{% else %}Make Admin{% endif %}</button>
+                        </form>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+        <div class="customer-avatar">
+            {{ user.name[0]|upper if user.name else '?' }}
+        </div>
+        <div class="customer-profile-info">
+            <h2>{{ user.name }}</h2>
+            <div class="profile-row"><strong>Email:</strong> {{ user.email }}</div>
+            <div class="profile-row"><strong>Phone:</strong> {{ user.phone or '-' }}</div>
+            <div class="profile-row"><strong>Admin:</strong> {% if user.is_admin %}<span class="badge bg-success">Yes</span>{% else %}<span class="badge bg-secondary">No</span>{% endif %}</div>
+            <div class="profile-row"><strong>Account Status:</strong> {% if user.locked %}<span class="badge bg-danger">Locked</span>{% else %}<span class="badge bg-success">Active</span>{% endif %}</div>
+        </div>
+    </div>
+    <div class="customer-rentals-section">
+        <h4>Rental History</h4>
+        <div style="overflow-x:auto;">
+            <table class="customer-rentals-table">
+                <tr>
+                    <th>Car</th>
+                    <th>Start</th>
+                    <th>End</th>
+                    <th>Total Time</th>
+                    <th>Status</th>
+                    
+                </tr>
+                {% for b in bookings %}
+                <tr class="rental-row" style="cursor:pointer;" onclick="window.location='/edit_reservation/{{ b._id }}'">
+                    <td>{{ b.car_name }}</td>
+                    <td>{{ b.start_time|friendly_date }}</td>
+                    <td>{{ b.end_time|friendly_date }}</td>
+                    <td>{{ b.total_time }}</td>
+                    <td>{{ b.status }}</td>
+                    
+                </tr>
+
+                {% endfor %}
+            </table>
+            
+        
+</table>
+
+            {% if bookings|length == 0 %}<p style="margin-top:1em;color:#888;">No rentals found.</p>{% endif %}
+        </div>
+    </div>
+</div>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const btn = document.getElementById('userActionMenuBtn');
+    const menu = document.getElementById('userActionMenu');
+    if (btn && menu) {
+        btn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            const expanded = btn.getAttribute('aria-expanded') === 'true';
+            btn.setAttribute('aria-expanded', !expanded);
+            menu.style.display = expanded ? 'none' : 'block';
+        });
+        document.addEventListener('click', function(e) {
+            if (menu.style.display === 'block') {
+                menu.style.display = 'none';
+                btn.setAttribute('aria-expanded', 'false');
+            }
+        });
+        menu.addEventListener('click', function(e) { e.stopPropagation(); });
+    }
+});
+</script>
+{% endblock %}

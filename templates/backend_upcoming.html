@@ -1,0 +1,27 @@
+{% extends 'admin_base.html' %}
+{% block admin_content %}
+<div class="modern-card" style="box-shadow:0 2px 16px rgba(59,130,246,0.08);padding:2.2em 2em 1.2em 2em;max-width:1100px;margin:auto;background:#fff;border-radius:14px;">
+<h2 style="margin-top:0;">Upcoming Rentals</h2>
+<div style="overflow-x:auto;">
+<table class="admin-table">
+    <tr>
+        <th>Car</th>
+        <th>User</th>
+        <th>Start</th>
+        <th>End</th>
+        <th>Status</th>
+    </tr>
+    {% for b in bookings %}
+    <tr>
+        <td>{{ b.car_name }}</td>
+        <td>{{ b.user_name }}</td>
+        <td>{{ b.start_time }}</td>
+        <td>{{ b.end_time }}</td>
+        <td><span class="status-badge status-{{ b.status }}">{{ b.status|capitalize }}</span></td>
+    </tr>
+    {% endfor %}
+</table>
+</div>
+{% if bookings|length == 0 %}<p>No upcoming rentals.</p>{% endif %}
+</div>
+{% endblock %}

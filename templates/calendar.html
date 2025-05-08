@@ -12,6 +12,7 @@
         <th>Car</th>
         <th>Start</th>
         <th>End</th>
+        <th>Status</th>
         <th>Actions</th>
     </tr>
     {% for b in bookings %}
@@ -19,6 +20,11 @@
         <td>{{ b[1] }}</td>
         <td>{{ b[6] }}</td>
         <td>{{ b[7] }}</td>
+        <td>
+            <span class="status-badge status-{{ b[8]|default('pending') }}">
+                {{ b[8]|capitalize if b[8] else 'Pending' }}
+            </span>
+        </td>
         <td>
             <a href="/edit_reservation/{{ b[0] }}" class="btn btn-small">Edit</a>
             <form action="/delete_reservation/{{ b[0] }}" method="post" style="display:inline;">
@@ -28,6 +34,21 @@
     </tr>
     {% endfor %}
 </table>
+<style>
+.status-badge {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 12px;
+    font-size: 0.93em;
+    font-weight: 600;
+    color: #fff;
+}
+.status-approved { background: #27ae60; }
+.status-pending, .status-pending_update { background: #f39c12; }
+.status-expired { background: #b2bec3; }
+.status-denied { background: #c0392b; }
+</style>
+
 {% else %}
 <p style="text-align:center; margin-top:30px;">You have no reservations at this time.</p>
 {% endif %}

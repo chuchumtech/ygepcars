@@ -11,6 +11,15 @@ from datetime import datetime
 app = Flask(__name__)
 app.secret_key = 'replace_this_with_a_secret_key'
 
+# Jinja filter for friendly date
+@app.template_filter('friendly_date')
+def friendly_date(dt_str):
+    try:
+        dt = datetime.strptime(dt_str, "%Y-%m-%d %H:%M")
+        return dt.strftime("%b %d, %Y %I:%M %p")
+    except Exception:
+        return dt_str
+
 # MongoDB Atlas connection
 MONGO_URI = "mongodb+srv://shlomo:RzperDVpwMyPVyTV@ygep.cmuf7f8.mongodb.net/?retryWrites=true&w=majority&appName=ygep"
 client = MongoClient(MONGO_URI)
@@ -35,6 +44,19 @@ def init_db():
 
 
 # --- Routes ---
+
+def require_admin():
+    if not session.get('user_id'):
+        flash('Not authorized. Please log in.')
+        session.clear()
+        return redirect(url_for('login'))
+    admin_user = users_col.find_one({'_id': ObjectId(session['user_id'])})
+    if not admin_user or not admin_user.get('is_admin', False):
+        flash('Admin access required. You have been logged out.')
+        session.clear()
+        return redirect(url_for('login'))
+    return None
+
 @app.route('/')
 def index():
     # Generate 30-min interval times for dropdowns
@@ -313,6 +335,316 @@ def book():
         conn.commit()
         flash('Booking successful!')
     return redirect(url_for('calendar'))
+
+# --- Admin Portal ---
+from flask import abort, Blueprint
+
+@app.route('/backend')
+def backend_dashboard():
+    return redirect(url_for('backend_pending'))
+
+@app.route('/backend/pending')
+def backend_pending():
+    # Show all bookings with status pending or pending_update
+    bookings = []
+    for b in bookings_col.find({'status': {'$in': ['pending', 'pending_update']}}):
+        car = cars_col.find_one({'_id': ObjectId(b['car_id'])})
+        user = users_col.find_one({'_id': ObjectId(b['user_id'])})
+        bookings.append({
+            '_id': str(b['_id']),
+            'car_name': car['name'] if car else 'Unknown',
+            'user_name': user['name'] if user else 'Unknown',
+            'start_time': b['start_time'],
+            'end_time': b['end_time'],
+            'status': b['status'],
+            'requested_at': b.get('requested_at', '')
+        })
+    return render_template('backend_pending.html', bookings=bookings)
+
+@app.route('/backend/approve/<booking_id>', methods=['POST'])
+def backend_approve(booking_id):
+    check = require_admin()
+    if check:
+        return check
+    bookings_col.update_one({'_id': ObjectId(booking_id)}, {'$set': {'status': 'approved'}})
+    flash('Booking approved.')
+    return redirect(url_for('backend_pending'))
+
+
+@app.route('/backend/deny/<booking_id>', methods=['POST'])
+def backend_deny(booking_id):
+    check = require_admin()
+    if check:
+        return check
+    bookings_col.update_one({'_id': ObjectId(booking_id)}, {'$set': {'status': 'denied'}})
+    flash('Booking denied.')
+    return redirect(url_for('backend_pending'))
+
+
+@app.route('/backend/live')
+def backend_live():
+    from datetime import datetime
+    now = datetime.utcnow().strftime('%Y-%m-%d %H:%M')
+    bookings = []
+    for b in bookings_col.find({'status': 'approved'}):
+        if b['start_time'] <= now <= b['end_time']:
+            car = cars_col.find_one({'_id': ObjectId(b['car_id'])})
+            user = users_col.find_one({'_id': ObjectId(b['user_id'])})
+            bookings.append({
+                'car_name': car['name'] if car else 'Unknown',
+                'user_name': user['name'] if user else 'Unknown',
+                'start_time': b['start_time'],
+                'end_time': b['end_time'],
+                'status': b['status']
+            })
+    return render_template('backend_live.html', bookings=bookings)
+
+@app.route('/backend/upcoming')
+def backend_upcoming():
+    from datetime import datetime
+    now = datetime.utcnow().strftime('%Y-%m-%d %H:%M')
+    bookings = []
+    for b in bookings_col.find({'status': 'approved'}):
+        if b['start_time'] > now:
+            car = cars_col.find_one({'_id': ObjectId(b['car_id'])})
+            user = users_col.find_one({'_id': ObjectId(b['user_id'])})
+            bookings.append({
+                'car_name': car['name'] if car else 'Unknown',
+                'user_name': user['name'] if user else 'Unknown',
+                'start_time': b['start_time'],
+                'end_time': b['end_time'],
+                'status': b['status']
+            })
+    return render_template('backend_upcoming.html', bookings=bookings)
+
+@app.route('/backend/past')
+def backend_past():
+    from datetime import datetime
+    now = datetime.utcnow().strftime('%Y-%m-%d %H:%M')
+    bookings = []
+    for b in bookings_col.find({'status': 'approved'}):
+        if b['end_time'] < now:
+            car = cars_col.find_one({'_id': ObjectId(b['car_id'])})
+            user = users_col.find_one({'_id': ObjectId(b['user_id'])})
+            bookings.append({
+                'car_name': car['name'] if car else 'Unknown',
+                'user_name': user['name'] if user else 'Unknown',
+                'start_time': b['start_time'],
+                'end_time': b['end_time'],
+                'status': b['status']
+            })
+    return render_template('backend_past.html', bookings=bookings)
+
+@app.route('/backend/customers')
+def backend_customers():
+    users = []
+    for u in users_col.find():
+        users.append({
+            '_id': str(u['_id']),
+            'name': u.get('name', ''),
+            'email': u.get('email', ''),
+            'is_admin': u.get('is_admin', False)
+        })
+    return render_template('backend_customers.html', users=users)
+
+@app.route('/backend/customers/<user_id>/toggle_admin', methods=['POST'])
+def backend_toggle_admin(user_id):
+    check = require_admin()
+    if check:
+        return check
+    orig_user_id = user_id
+    form_user_id = request.form.get('user_id')
+    if form_user_id:
+        user_id = form_user_id
+    flash(f'[DEBUG] Received user_id: {user_id} (from form: {form_user_id}, url: {orig_user_id})')
+    try:
+        user_obj_id = ObjectId(user_id)
+        flash(f'[DEBUG] Converted to ObjectId: {user_obj_id}')
+    except Exception as e:
+        flash(f'Invalid user id: {user_id} ({e})')
+        return redirect(url_for('backend_customers'))
+    user = users_col.find_one({'_id': user_obj_id})
+    if not user:
+        flash(f'[DEBUG] User not found for _id={user_obj_id}')
+        return redirect(url_for('backend_customers'))
+    if user.get('is_admin', False):
+        result = users_col.update_one({'_id': user_obj_id}, {'$set': {'is_admin': False}})
+        flash(f'Admin privileges removed. [DEBUG] Matched: {result.matched_count}, Modified: {result.modified_count}')
+    else:
+        result = users_col.update_one({'_id': user_obj_id}, {'$set': {'is_admin': True}})
+        flash(f'User made admin. [DEBUG] Matched: {result.matched_count}, Modified: {result.modified_count}')
+    next_url = request.args.get('next')
+    if next_url:
+        return redirect(next_url)
+    referer = request.headers.get('Referer', '')
+    if f'/backend/customers/{user_id}' in referer:
+        return redirect(url_for('backend_customer_details', user_id=user_id))
+    return redirect(url_for('backend_customers'))
+
+
+@app.route('/backend/customers/<user_id>')
+def backend_customer_details(user_id):
+    user = users_col.find_one({'_id': ObjectId(user_id)})
+    if not user:
+        flash('User not found.')
+        return redirect(url_for('backend_customers'))
+    bookings = []
+    from datetime import datetime
+    def get_total_time(start_str, end_str):
+        try:
+            start = datetime.strptime(start_str, "%Y-%m-%d %H:%M")
+            end = datetime.strptime(end_str, "%Y-%m-%d %H:%M")
+            delta = end - start
+            total_hours = int(delta.total_seconds() // 3600)
+            days = total_hours // 24
+            hours = total_hours % 24
+            if days > 0:
+                if hours > 0:
+                    return f"{days} day{'s' if days > 1 else ''} {hours} hour{'s' if hours > 1 else ''}"
+                else:
+                    return f"{days} day{'s' if days > 1 else ''}"
+            else:
+                return f"{hours} hour{'s' if hours != 1 else ''}"
+        except Exception:
+            return "-"
+
+    for b in bookings_col.find({'user_id': user_id}):
+        car = cars_col.find_one({'_id': ObjectId(b['car_id'])})
+        bookings.append({
+            'car_name': car['name'] if car else 'Unknown',
+            'start_time': b['start_time'],
+            'end_time': b['end_time'],
+            'status': b['status'],
+            '_id': b['_id'],
+            'total_time': get_total_time(b['start_time'], b['end_time'])
+        })
+    return render_template('backend_customer_details.html', user=user, bookings=bookings)
+
+@app.route('/backend/customers/<user_id>/edit', methods=['POST'])
+def backend_customer_edit(user_id):
+    check = require_admin()
+    if check:
+        return check
+    name = request.form.get('name','').strip()
+    email = request.form.get('email','').strip()
+    phone = request.form.get('phone','').strip()
+    if not name or not email or not phone:
+        flash('All fields are required.')
+        return redirect(url_for('backend_customer_details', user_id=user_id))
+    users_col.update_one({'_id': ObjectId(user_id)}, {'$set': {'name': name, 'email': email, 'phone': phone}})
+    flash('User info updated.')
+    return redirect(url_for('backend_customer_details', user_id=user_id))
+
+
+@app.route('/backend/customers/<user_id>/change_password', methods=['POST'])
+def backend_customer_change_password(user_id):
+    user = users_col.find_one({'_id': ObjectId(user_id)})
+    if not user:
+        flash('User not found.')
+        return redirect(url_for('backend_customers'))
+    new_password = request.form.get('new_password')
+    if not new_password or len(new_password) < 6:
+        flash('Password must be at least 6 characters.')
+        return redirect(url_for('backend_customer_details', user_id=user_id))
+    hashed = generate_password_hash(new_password, method='pbkdf2:sha256')
+    users_col.update_one({'_id': ObjectId(user_id)}, {'$set': {'password': hashed}})
+    flash('Password updated.')
+    return redirect(url_for('backend_customer_details', user_id=user_id))
+
+@app.route('/backend/customers/<user_id>/toggle_lock', methods=['POST'])
+def backend_customer_toggle_lock(user_id):
+    user = users_col.find_one({'_id': ObjectId(user_id)})
+    if not user:
+        flash('User not found.')
+        return redirect(url_for('backend_customers'))
+    locked = user.get('locked', False)
+    users_col.update_one({'_id': ObjectId(user_id)}, {'$set': {'locked': not locked}})
+    flash('Account locked.' if not locked else 'Account unlocked.')
+    return redirect(url_for('backend_customer_details', user_id=user_id))
+
+@app.route('/backend/cars')
+def backend_cars():
+    cars = []
+    for car in cars_col.find():
+        cars.append({
+            '_id': str(car['_id']),
+            'name': car['name'],
+            'year': car['year'],
+            'color': car['color'],
+            'image': car.get('image', '')
+        })
+    return render_template('backend_cars.html', cars=cars)
+
+@app.route('/backend/cars/add', methods=['GET', 'POST'])
+def backend_car_add():
+    check = require_admin()
+    if check:
+        return check
+    if request.method == 'POST':
+        cars_col.insert_one({
+            'name': request.form['name'],
+            'year': request.form['year'],
+            'color': request.form['color'],
+            'image': request.form['image']
+        })
+        flash('Car added.')
+        return redirect(url_for('backend_cars'))
+    return render_template('backend_car_form.html', car=None)
+
+
+@app.route('/backend/cars/edit/<car_id>', methods=['GET', 'POST'])
+def backend_car_edit(car_id):
+    car = cars_col.find_one({'_id': ObjectId(car_id)})
+    if request.method == 'POST':
+        cars_col.update_one({'_id': ObjectId(car_id)}, {'$set': {
+            'name': request.form['name'],
+            'year': request.form['year'],
+            'color': request.form['color'],
+            'image': request.form['image']
+        }})
+        flash('Car updated.')
+        return redirect(url_for('backend_cars'))
+    return render_template('backend_car_form.html', car=car)
+
+@app.route('/backend/cars/delete/<car_id>', methods=['POST'])
+def backend_car_delete(car_id):
+    check = require_admin()
+    if check:
+        return check
+    cars_col.delete_one({'_id': ObjectId(car_id)})
+    flash('Car deleted.')
+    return redirect(url_for('backend_cars'))
+
+
+@app.route('/backend/destinations')
+def backend_destinations():
+    destinations = []
+    for d in db['destinations'].find():
+        destinations.append({'_id': str(d['_id']), 'name': d['name']})
+    return render_template('backend_destinations.html', destinations=destinations)
+
+@app.route('/backend/destinations/add', methods=['GET', 'POST'])
+def backend_destination_add():
+    if request.method == 'POST':
+        db['destinations'].insert_one({'name': request.form['name']})
+        flash('Destination added.')
+        return redirect(url_for('backend_destinations'))
+    return render_template('backend_destination_form.html', destination=None)
+
+@app.route('/backend/destinations/edit/<dest_id>', methods=['GET', 'POST'])
+def backend_destination_edit(dest_id):
+    dest = db['destinations'].find_one({'_id': ObjectId(dest_id)})
+    if request.method == 'POST':
+        db['destinations'].update_one({'_id': ObjectId(dest_id)}, {'$set': {'name': request.form['name']}})
+        flash('Destination updated.')
+        return redirect(url_for('backend_destinations'))
+    return render_template('backend_destination_form.html', destination=dest)
+
+@app.route('/backend/destinations/delete/<dest_id>', methods=['POST'])
+def backend_destination_delete(dest_id):
+    db['destinations'].delete_one({'_id': ObjectId(dest_id)})
+    flash('Destination deleted.')
+    return redirect(url_for('backend_destinations'))
 
 # --- Edit Reservation ---
 from flask import abort

@@ -1,0 +1,33 @@
+{% extends 'admin_base.html' %}
+{% block admin_content %}
+<div class="modern-card" style="box-shadow:0 2px 16px rgba(59,130,246,0.08);padding:2.2em 2em 1.2em 2em;max-width:1100px;margin:auto;background:#fff;border-radius:14px;">
+<h2 style="margin-top:0;">Cars</h2>
+<a href="/backend/cars/add" class="btn btn-primary" style="margin-bottom: 1em;">Add Car</a>
+<div style="overflow-x:auto;">
+<table class="admin-table">
+    <tr>
+        <th>Name</th>
+        <th>Year</th>
+        <th>Color</th>
+        <th>Image</th>
+        <th>Actions</th>
+    </tr>
+    {% for car in cars %}
+    <tr>
+        <td>{{ car.name }}</td>
+        <td>{{ car.year }}</td>
+        <td>{{ car.color }}</td>
+        <td>{% if car.image %}<img src="{{ car.image }}" alt="Car image" style="height:32px;max-width:60px;border-radius:4px;">{% endif %}</td>
+        <td>
+            <a href="/backend/cars/edit/{{ car._id }}" class="btn btn-secondary btn-small">Edit</a>
+            <form action="/backend/cars/delete/{{ car._id }}" method="post" style="display:inline;">
+                <button class="btn btn-danger btn-small">Delete</button>
+            </form>
+        </td>
+    </tr>
+    {% endfor %}
+</table>
+</div>
+{% if cars|length == 0 %}<p>No cars in inventory.</p>{% endif %}
+</div>
+{% endblock %}
