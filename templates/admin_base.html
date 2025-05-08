@@ -317,6 +317,16 @@
     </style>
 </head>
 <body>
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        <div class="flash-messages" style="margin:18px auto 0 auto;max-width:600px;">
+          {% for message in messages %}
+            <div class="flash-message" style="background:#e0f2fe;color:#1e293b;padding:0.85em 1.2em;border-radius:8px;margin-bottom:0.7em;font-size:1.09em;box-shadow:0 1px 6px rgba(33,58,109,0.07);">{{ message }}</div>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+
     <header class="admin-portal-header">
         <span style="margin-left: 32px;">YGEP Car Rental Admin Portal</span>
     </header>

@@ -1,0 +1,52 @@
+.btn, .btn:visited, .btn:active, .btn:focus {
+    text-decoration: none !important;
+}
+#destModal label {
+    font-weight: 500;
+    margin-bottom: 0.2em;
+    display: block;
+}
+#destModal input.form-control {
+    border-radius: 7px;
+    border: 1px solid #e0e0e0;
+    padding: 0.56em 0.9em;
+    font-size: 1.08em;
+    margin-top: 0.2em;
+}
+#destModal button.btn-primary {
+    background: #2563eb;
+    border: none;
+    color: #fff;
+    border-radius: 7px;
+    padding: 0.53em 1.45em;
+    font-size: 1.07em;
+    transition: background 0.2s;
+}
+#destModal button.btn-primary:hover {
+    background: #1d4ed8;
+}
+#destModal button.btn-danger {
+    background: #ef4444;
+    border: none;
+    color: #fff;
+    border-radius: 7px;
+    padding: 0.53em 1.2em;
+    font-size: 1.07em;
+    transition: background 0.2s;
+}
+#destModal button.btn-danger:hover {
+    background: #dc2626;
+}
+#destModal button#modal_close_btn {
+    color: #888;
+    background: none;
+    border: none;
+    font-size: 1.6em;
+    padding: 0;
+    line-height: 1;
+    cursor: pointer;
+    transition: color 0.2s;
+}
+#destModal button#modal_close_btn:hover {
+    color: #222;
+}

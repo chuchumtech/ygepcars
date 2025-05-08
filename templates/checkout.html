@@ -13,7 +13,9 @@
         <table class="summary-table">
             <tr><td class="summary-label">Rental Period:</td><td>{{ start_time_friendly }}<br>to {{ end_time_friendly }}</td></tr>
             <tr><td class="summary-label">Total Duration:</td><td>{{ duration_hours|int }} hour{{ 's' if duration_hours|int != 1 else '' }}</td></tr>
-            <tr><td class="summary-label">Total Price:</td><td class="total-price-clean">${{ total_price|int }}</td></tr>
+            <tr><td class="summary-label">Total Price:</td><td class="total-price-clean" id="base-total-price">${{ total_price|int }}</td></tr>
+<tr id="toll-row" style="display:none;"><td class="summary-label">Estimated Toll:</td><td id="toll-amount"></td></tr>
+<tr><td class="summary-label">Grand Total:</td><td class="total-price-clean" id="grand-total-price">${{ total_price|int }}</td></tr>
         </table>
         <div class="price-breakdown-card" style="background:#f7f8fa;border-radius:10px;padding:1.2em 1.5em;margin-bottom:1.2em;box-shadow:0 1px 6px rgba(33,58,109,0.08);max-width:440px;margin-left:auto;margin-right:auto;">
             <div style="font-weight:700;color:#213a6d;font-size:1.13em;margin-bottom:0.7em;">How Your Price Was Calculated</div>
@@ -47,13 +49,13 @@
         <div class="destination-section">
             <label for="destination">Where will you be going?</label>
             <select name="destination" id="destination" required>
-                <option value="">Select a destination</option>
-                <option value="Monsey">Monsey</option>
-                <option value="Lakewood">Lakewood</option>
-                <option value="Brooklyn">Brooklyn</option>
-                <option value="Baltimore">Baltimore</option>
-                <option value="Other">Other</option>
-            </select>
+    <option value="">Select a destination</option>
+    {% for dest in destinations %}
+        <option value="{{ dest.name }}">{{ dest.display_title }}</option>
+    {% endfor %}
+    <option value="Other">Other</option>
+</select>
+<div id="toll-info" style="display:none;color:#213a6d;font-weight:500;margin-top:0.7em;"></div>
             <input type="text" name="custom_destination" id="custom_destination" placeholder="Enter destination" style="display:none; margin-top:0.7em;" />
         </div>
         <div class="rishus-section-unified">
@@ -71,19 +73,46 @@
         </div>
     </div>
 <script>
+// Destinations data for JS lookup
+var destinationTolls = {
+    {% for dest in destinations %}
+        "{{ dest.name }}": {{ dest.estimated_toll|float }},
+    {% endfor %}
+};
 document.addEventListener('DOMContentLoaded', function() {
     var destSelect = document.getElementById('destination');
     var customDest = document.getElementById('custom_destination');
+    var tollInfo = document.getElementById('toll-info');
+    var tollRow = document.getElementById('toll-row');
+    var tollAmount = document.getElementById('toll-amount');
+    var baseTotal = parseFloat(document.getElementById('base-total-price').textContent.replace('$',''));
+    var grandTotal = document.getElementById('grand-total-price');
+    function updateToll() {
+        var val = destSelect.value;
+        if (destinationTolls[val]) {
+            tollInfo.style.display = 'block';
+            tollInfo.textContent = 'Estimated Toll to Destination: $' + destinationTolls[val].toFixed(2);
+            tollRow.style.display = '';
+            tollAmount.textContent = '$' + destinationTolls[val].toFixed(2);
+            grandTotal.textContent = '$' + (baseTotal + destinationTolls[val]).toFixed(2);
+        } else {
+            tollInfo.style.display = 'none';
+            tollRow.style.display = 'none';
+            tollAmount.textContent = '';
+            grandTotal.textContent = '$' + baseTotal.toFixed(2);
+        }
+        if (val === 'Other') {
+            customDest.style.display = 'block';
+            customDest.required = true;
+        } else {
+            customDest.style.display = 'none';
+            customDest.required = false;
+        }
+    }
     if (destSelect) {
-        destSelect.addEventListener('change', function() {
-            if (destSelect.value === 'Other') {
-                customDest.style.display = 'block';
-                customDest.required = true;
-            } else {
-                customDest.style.display = 'none';
-                customDest.required = false;
-            }
-        });
+        destSelect.addEventListener('change', updateToll);
+        // Run on load in case of preselected
+        updateToll();
     }
 });
 </script>

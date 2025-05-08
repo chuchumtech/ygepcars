@@ -361,7 +361,8 @@ def book():
     return redirect(url_for('calendar'))
 
 # --- Admin Portal ---
-from flask import abort, Blueprint
+from flask import abort, Blueprint, jsonify
+
 
 @app.route('/backend/pricing')
 def backend_pricing():
@@ -699,13 +700,25 @@ def backend_car_delete(car_id):
 def backend_destinations():
     destinations = []
     for d in db['destinations'].find():
-        destinations.append({'_id': str(d['_id']), 'name': d['name']})
+        destinations.append({
+            '_id': str(d['_id']),
+            'name': d.get('name', ''),
+            'display_title': d.get('display_title', d.get('name', '')),
+            'estimated_toll': float(d.get('estimated_toll', 0.0)),
+        })
     return render_template('backend_destinations.html', destinations=destinations)
 
 @app.route('/backend/destinations/add', methods=['GET', 'POST'])
 def backend_destination_add():
     if request.method == 'POST':
-        db['destinations'].insert_one({'name': request.form['name']})
+        name = request.form['name']
+        display_title = request.form.get('display_title', name)
+        estimated_toll = float(request.form.get('estimated_toll', 0.0))
+        db['destinations'].insert_one({
+            'name': name,
+            'display_title': display_title,
+            'estimated_toll': estimated_toll
+        })
         flash('Destination added.')
         return redirect(url_for('backend_destinations'))
     return render_template('backend_destination_form.html', destination=None)
@@ -714,7 +727,14 @@ def backend_destination_add():
 def backend_destination_edit(dest_id):
     dest = db['destinations'].find_one({'_id': ObjectId(dest_id)})
     if request.method == 'POST':
-        db['destinations'].update_one({'_id': ObjectId(dest_id)}, {'$set': {'name': request.form['name']}})
+        name = request.form['name']
+        display_title = request.form.get('display_title', name)
+        estimated_toll = float(request.form.get('estimated_toll', 0.0))
+        db['destinations'].update_one({'_id': ObjectId(dest_id)}, {'$set': {
+            'name': name,
+            'display_title': display_title,
+            'estimated_toll': estimated_toll
+        }})
         flash('Destination updated.')
         return redirect(url_for('backend_destinations'))
     return render_template('backend_destination_form.html', destination=dest)
@@ -724,6 +744,36 @@ def backend_destination_delete(dest_id):
     db['destinations'].delete_one({'_id': ObjectId(dest_id)})
     flash('Destination deleted.')
     return redirect(url_for('backend_destinations'))
+
+# --- Modal AJAX Endpoints ---
+@app.route('/backend/destinations/modal_edit', methods=['POST'])
+def backend_destination_modal_edit():
+    data = request.form
+    dest_id = data.get('_id')
+    if not dest_id:
+        return jsonify({'success': False, 'error': 'Missing destination ID'})
+    name = data.get('name', '')
+    display_title = data.get('display_title', name)
+    try:
+        estimated_toll = float(data.get('estimated_toll', 0.0))
+    except Exception:
+        estimated_toll = 0.0
+    db['destinations'].update_one({'_id': ObjectId(dest_id)}, {'$set': {
+        'name': name,
+        'display_title': display_title,
+        'estimated_toll': estimated_toll
+    }})
+    return jsonify({'success': True})
+
+@app.route('/backend/destinations/modal_delete', methods=['POST'])
+def backend_destination_modal_delete():
+    data = request.form
+    dest_id = data.get('_id')
+    if not dest_id:
+        return jsonify({'success': False, 'error': 'Missing destination ID'})
+    db['destinations'].delete_one({'_id': ObjectId(dest_id)})
+    return jsonify({'success': True})
+
 
 # --- Edit Reservation ---
 from flask import abort

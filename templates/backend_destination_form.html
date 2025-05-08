@@ -1,14 +1,35 @@
 {% extends 'admin_base.html' %}
 {% block admin_content %}
-<h2>{{ 'Edit' if destination else 'Add' }} Destination</h2>
-<form method="post" autocomplete="off" style="max-width: 400px;">
-    <div class="form-group">
-        <label class="form-label">Name</label>
-        <input type="text" class="form-control" name="name" value="{{ destination.name if destination else '' }}" required>
+<div class="modern-card" style="box-shadow:0 2px 16px rgba(59,130,246,0.08);padding:2.7em 2.3em 2.2em 2.3em;max-width:410px;width:96vw;margin:auto;background:#fff;border-radius:14px;">
+  <h2 style="margin-top:0;margin-bottom:1.7em;font-size:1.45em;">{{ 'Edit' if destination else 'Add' }} Destination</h2>
+  <form method="post" autocomplete="off" style="width:100%;max-width:100%;">
+    <div class="form-group" style="margin-bottom:1.6em;display:flex;flex-direction:column;gap:0.38em;">
+      <label class="form-label">Name</label>
+      <input type="text" class="form-control" name="name"  value="{{ destination.name if destination else '' }}" required>
     </div>
-    <div class="form-actions">
-        <button type="submit" class="btn btn-primary">Save</button>
-        <a href="/backend/destinations" class="btn btn-secondary">Cancel</a>
+    <div class="form-group" style="margin-bottom:1.6em;display:flex;flex-direction:column;gap:0.38em;">
+      <label class="form-label">Display Title</label>
+      <input type="text" class="form-control" name="display_title"  value="{{ destination.display_title if destination else '' }}" required>
     </div>
-</form>
+    <div class="form-group" style="margin-bottom:2em;display:flex;flex-direction:column;gap:0.38em;">
+      <label class="form-label">Estimated Toll ($)</label>
+      <div class="input-group">
+        <span class="input-group-icon">
+          <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:1em;height:1em;vertical-align:middle;"><path d="M8 2v12M11.5 4.5c0-1.38-1.57-2.5-3.5-2.5s-3.5 1.12-3.5 2.5c0 1.38 1.57 2.5 3.5 2.5s3.5 1.12 3.5 2.5c0 1.38-1.57 2.5-3.5 2.5s-3.5-1.12-3.5-2.5" stroke="#3B82F6" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </span>
+        <input type="number" step="0.01" min="0" class="form-control" name="estimated_toll"  value="{{ destination.estimated_toll if destination else '' }}" required>
+      </div>
+    </div>
+    <div class="form-actions" style="display:flex;gap:1.3em;align-items:center;margin-top:2.5em;">
+      <button type="submit" class="btn btn-primary">Save</button>
+      <a href="/backend/destinations" class="btn btn-secondary">Cancel</a>
+    </div>
+  </form>
+</div>
+<style>
+.input-group { position: relative; display: flex; align-items: center; width: 100%; }
+.input-group-icon { position: absolute; left: 1em; z-index: 2; pointer-events: none; color: #3B82F6; display: flex; align-items: center; }
+.input-group input.form-control { padding-left: 2.2em; width: 100%; box-sizing: border-box; }
+.form-control { width: 100%; min-width: 0; box-sizing: border-box; }
+</style>
 {% endblock %}
