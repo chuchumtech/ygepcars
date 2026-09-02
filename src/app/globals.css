@@ -1,0 +1,127 @@
+@import "tailwindcss";
+
+/* ---------------------------------------------------------------------------
+   Palette taken from ygep.org: deep navy, a muted slate blue, and the olive
+   gold used on the seal.
+   --------------------------------------------------------------------------- */
+@theme {
+  --color-navy-50:  #f4f6fb;
+  --color-navy-100: #e5e9f2;
+  --color-navy-200: #c7d0e4;
+  --color-navy-300: #9daed0;
+  --color-navy-400: #6b83b0;
+  --color-navy-500: #425d77;
+  --color-navy-600: #2e4a72;
+  --color-navy-700: #213a6d;
+  --color-navy-800: #1c2957;
+  --color-navy-900: #141d3f;
+
+  --color-gold-50:  #fbf9f0;
+  --color-gold-100: #f4efd9;
+  --color-gold-200: #e8dcae;
+  --color-gold-300: #d4c07a;
+  --color-gold-400: #a89250;
+  --color-gold-500: #74662e;
+  --color-gold-600: #5d5225;
+
+  --color-ink:    #16202e;
+  --color-muted:  #5d6b7f;
+  --color-line:   #e3e6ed;
+  --color-canvas: #f6f7fa;
+
+  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
+
+  --radius-card: 0.875rem;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  background: var(--color-canvas);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+}
+
+/* Focus ring that is visible on both the navy header and the light canvas. */
+:where(a, button, input, select, textarea, [tabindex]):focus-visible {
+  outline: 2px solid var(--color-navy-600);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Registered as a utility, not a component class, so the variants below can
+   compose it with @apply. */
+@utility btn {
+  @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2.5
+         text-sm font-semibold transition select-none
+         disabled:cursor-not-allowed disabled:opacity-50;
+}
+
+@layer components {
+  .card {
+    @apply rounded-[var(--radius-card)] border border-[var(--color-line)] bg-white;
+  }
+
+  .card-pad {
+    @apply rounded-[var(--radius-card)] border border-[var(--color-line)] bg-white p-5;
+  }
+
+  .label {
+    @apply mb-1.5 block text-sm font-medium text-[var(--color-muted)];
+  }
+
+  .input {
+    @apply w-full rounded-lg border border-[var(--color-line)] bg-white px-3 py-2.5
+           text-[15px] text-[var(--color-ink)] shadow-xs transition
+           placeholder:text-navy-300
+           focus:border-navy-500 focus:outline-none focus:ring-2 focus:ring-navy-500/20
+           disabled:cursor-not-allowed disabled:bg-navy-50 disabled:text-muted;
+  }
+
+  .btn-primary {
+    @apply btn bg-navy-700 text-white hover:bg-navy-800 active:bg-navy-900;
+  }
+
+  .btn-secondary {
+    @apply btn border border-[var(--color-line)] bg-white text-navy-700 hover:bg-navy-50;
+  }
+
+  .btn-ghost {
+    @apply btn text-navy-700 hover:bg-navy-100;
+  }
+
+  .btn-danger {
+    @apply btn border border-red-200 bg-white text-red-700 hover:bg-red-50;
+  }
+
+  .btn-sm {
+    @apply px-3 py-1.5 text-[13px];
+  }
+
+  .chip {
+    @apply inline-flex items-center gap-1.5 rounded-full px-2.5 py-1
+           text-xs font-semibold whitespace-nowrap;
+  }
+
+  .th {
+    @apply px-4 py-2.5 text-left text-[11px] font-semibold uppercase
+           tracking-wider text-[var(--color-muted)];
+  }
+
+  .td {
+    @apply px-4 py-3 align-middle text-sm;
+  }
+
+  .link {
+    @apply font-medium text-navy-700 underline underline-offset-2 hover:text-navy-900;
+  }
+}
+
+/* Print: the office prints the day sheet off the calendar. */
+@media print {
+  .no-print { display: none !important; }
+  body { background: #fff; }
+}

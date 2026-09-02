@@ -1,0 +1,40 @@
+import "server-only";
+import { createClient } from "@/lib/supabase/server";
+import type { CalendarData } from "@/components/calendar/types";
+
+export const RESERVATION_SELECT =
+  "*, vehicle:cars_vehicles(id, name, color, image_url), student:cars_profiles!cars_reservations_user_id_fkey(id, full_name, email, phone)";
+
+/** Everything the calendar needs for one window, in a single round trip each. */
+export async function loadCalendarData(from: Date, to: Date): Promise<CalendarData> {
+  const supabase = await createClient();
+
+  const [reservations, blackouts, vehicles, destinations, students] = await Promise.all([
+    supabase
+      .from("cars_reservations")
+      .select(RESERVATION_SELECT)
+      .lt("starts_at", to.toISOString())
+      .gt("ends_at", from.toISOString())
+      .order("starts_at"),
+    supabase
+      .from("cars_blackouts")
+      .select("*, vehicle:cars_vehicles(id, name)")
+      .lt("starts_at", to.toISOString())
+      .gt("ends_at", from.toISOString()),
+    supabase.from("cars_vehicles").select("*").order("sort_order"),
+    supabase.from("cars_destinations").select("*").order("sort_order"),
+    supabase
+      .from("cars_profiles")
+      .select("id, full_name, email, phone, status")
+      .eq("role", "student")
+      .order("full_name"),
+  ]);
+
+  return {
+    reservations: (reservations.data ?? []) as CalendarData["reservations"],
+    blackouts: (blackouts.data ?? []) as CalendarData["blackouts"],
+    vehicles: (vehicles.data ?? []) as CalendarData["vehicles"],
+    destinations: (destinations.data ?? []) as CalendarData["destinations"],
+    students: (students.data ?? []) as CalendarData["students"],
+  };
+}
