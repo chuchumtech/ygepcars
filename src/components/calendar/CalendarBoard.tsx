@@ -16,6 +16,11 @@ import { MonthGrid } from "./MonthGrid";
 import { TimeGrid, type TimeColumn } from "./TimeGrid";
 import { AgendaList } from "./AgendaList";
 import { ReservationDialog } from "./ReservationDialog";
+import {
+  NewReservationDialog,
+  addHours,
+  type NewReservationSeed,
+} from "@/components/reservations/NewReservationDialog";
 import { toEvents, type CalendarData, type CalEvent } from "./types";
 
 const SHOW_FILTERS = [
@@ -46,6 +51,7 @@ export function CalendarBoard({
   const searchParams = useSearchParams();
 
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [newSeed, setNewSeed] = useState<NewReservationSeed | null>(null);
   const [carFilter, setCarFilter] = useState<string>("all");
   const [statusFilter, setStatusFilter] = useState<string>("open");
   const [query, setQuery] = useState("");
@@ -99,6 +105,27 @@ export function CalendarBoard({
     if (next.view) params.set("view", next.view);
     if (next.date) params.set("date", next.date);
     router.push(`/admin?${params.toString()}`, { scroll: false });
+  }
+
+  /**
+   * Clicking free space on the calendar is how the office books a car for
+   * somebody standing at the desk: the day, the hour and -- in the day view,
+   * where the columns are cars -- the car all come with the click, so all that
+   * is left to type is who it is for.
+   */
+  function newOnDay(date: string) {
+    setNewSeed({ startDate: date, endDate: date, startTime: "09:00", endTime: "17:00" });
+  }
+
+  function newAt(date: string, hour: number, vehicleId?: string) {
+    const startTime = `${String(hour).padStart(2, "0")}:00`;
+    setNewSeed({
+      startDate: date,
+      endDate: date,
+      startTime,
+      endTime: addHours(startTime, 4),
+      vehicleId,
+    });
   }
 
   function openEvent(event: CalEvent) {
@@ -255,22 +282,43 @@ export function CalendarBoard({
         <span className="ml-auto">{events.length} shown</span>
       </div>
 
+      {view === "month" || view === "week" || view === "day" ? (
+        <p className="no-print -mt-1 text-xs text-ink-soft">
+          {view === "month"
+            ? "Click an empty day to book a car on it."
+            : view === "day"
+              ? "Click a free hour in a car's column to book that car."
+              : "Click a free hour to book a car then."}
+        </p>
+      ) : null}
+
       {view === "month" ? (
         <MonthGrid
           anchor={anchor}
           events={events}
           onSelectEvent={openEvent}
           onSelectDay={(date) => navigate({ view: "day", date })}
+          onNewOnDay={newOnDay}
         />
       ) : null}
 
       {view === "week" ? (
-        <TimeGrid columns={weekColumns} events={events} onSelectEvent={openEvent} />
+        <TimeGrid
+          columns={weekColumns}
+          events={events}
+          onSelectEvent={openEvent}
+          onNewAt={newAt}
+        />
       ) : null}
 
       {view === "day" ? (
         dayColumns.length > 0 ? (
-          <TimeGrid columns={dayColumns} events={events} onSelectEvent={openEvent} />
+          <TimeGrid
+            columns={dayColumns}
+            events={events}
+            onSelectEvent={openEvent}
+            onNewAt={newAt}
+          />
         ) : (
           <p className="card-pad text-sm text-ink-soft">No cars to show.</p>
         )
@@ -300,6 +348,17 @@ export function CalendarBoard({
         destinations={data.destinations}
         onClose={() => setSelectedId(null)}
       />
+
+      {newSeed ? (
+        <NewReservationDialog
+          open
+          onClose={() => setNewSeed(null)}
+          seed={newSeed}
+          vehicles={data.vehicles}
+          destinations={data.destinations}
+          students={data.students}
+        />
+      ) : null}
     </div>
   );
 }

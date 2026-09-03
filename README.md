@@ -345,6 +345,19 @@ the previous file is deleted once the new one is up. A photo the office did not
 upload — an old `/public` path, or a link elsewhere — is left alone when the
 row changes.
 
+## Booking from the calendar
+
+The office books a car for somebody standing at the desk by clicking where it
+goes. An empty day in the month view opens the form on that day; a free hour in
+the week view opens it at that hour; a free hour in the day view, where the
+columns are cars, brings the car with it. All that is left to type is who it is
+for.
+
+Those are real buttons filling the empty space rather than a click handler on
+the cell, so they are reachable by keyboard and announce what they do. The
+booked blocks and the day number are painted above them, so clicking a
+reservation still opens the reservation.
+
 ## The reservation dialog
 
 Opening a reservation used to lay out a dozen buttons and every field the row

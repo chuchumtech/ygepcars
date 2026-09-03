@@ -9,7 +9,7 @@ import {
   shiftDays,
   viewBounds,
 } from "@/lib/calendar";
-import { formatTimeShort, todayLocal } from "@/lib/dates";
+import { formatDayLong, formatTimeShort, todayLocal } from "@/lib/dates";
 import { useOffShabbosim } from "@/components/OffShabbosimProvider";
 import type { HebrewMonth } from "@/lib/hebrew";
 import { eventStyles } from "./EventChip";
@@ -61,11 +61,14 @@ export function MonthGrid({
   events,
   onSelectEvent,
   onSelectDay,
+  onNewOnDay,
 }: {
   anchor: string;
   events: CalEvent[];
   onSelectEvent: (event: CalEvent) => void;
   onSelectDay: (date: string) => void;
+  /** Clicking the empty part of a day starts a booking on it. */
+  onNewOnDay: (date: string) => void;
 }) {
   const bounds = viewBounds("month", anchor);
   const anchorMonth = parseLocalDate(anchor).m;
@@ -182,7 +185,7 @@ export function MonthGrid({
               return (
                 <div
                   key={day}
-                  className={`border-r border-line/70 px-1 pt-1 last:border-r-0 ${
+                  className={`group/day relative border-r border-line/70 px-1 pt-1 last:border-r-0 ${
                     off
                       ? "bg-brand-light/60"
                       : note?.isYomTov
@@ -192,18 +195,42 @@ export function MonthGrid({
                           : "bg-parchment/40"
                   }`}
                 >
-                  <div className="flex items-center justify-between gap-1">
+                  {/*
+                    A real button filling the cell rather than a click handler
+                    on the div: it is reachable by keyboard and it announces
+                    what it does. Everything else in the cell -- the day
+                    number, the notes, and the event bars, which are painted
+                    over the row after this -- sits above it, so this only
+                    catches the empty space.
+                  */}
+                  <button
+                    type="button"
+                    onClick={() => onNewOnDay(day)}
+                    aria-label={`Add a reservation on ${formatDayLong(day)}`}
+                    title={[
+                      formatDayLong(day),
+                      note?.hebrew,
+                      note?.parshaEn ? `Parshas ${note.parshaEn}` : note?.holidayEn,
+                      off ? `${off.label} — the yeshiva is off` : null,
+                      "Click to add a reservation",
+                    ]
+                      .filter(Boolean)
+                      .join(" · ")}
+                    className="absolute inset-0 z-0 transition hover:bg-brand/[0.06]"
+                  />
+
+                  <div className="pointer-events-none relative z-10 flex items-center justify-between gap-1">
                     <button
                       type="button"
                       onClick={() => onSelectDay(day)}
-                      className={`flex h-6 w-6 items-center justify-center rounded-full text-xs font-semibold transition hover:bg-parchment-deep ${
+                      className={`pointer-events-auto flex h-6 w-6 items-center justify-center rounded-full text-xs font-semibold transition hover:bg-parchment-deep ${
                         isToday
                           ? "bg-slate-500 text-white hover:bg-slate-600"
                           : inMonth
                             ? "text-ink"
                             : "text-navy-300"
                       }`}
-                      aria-label={`Open ${day}`}
+                      aria-label={`Open ${formatDayLong(day)}`}
                     >
                       {parseLocalDate(day).d}
                     </button>
@@ -217,10 +244,9 @@ export function MonthGrid({
                   {reading ? (
                     <p
                       dir="rtl"
-                      className={`truncate text-[9px] leading-tight ${
+                      className={`pointer-events-none relative z-10 truncate text-[9px] leading-tight ${
                         note?.isYomTov ? "font-bold text-gold" : "text-ink-soft"
                       }`}
-                      title={note?.parshaEn ?? note?.holidayEn ?? reading}
                     >
                       {reading}
                     </p>
@@ -228,8 +254,7 @@ export function MonthGrid({
 
                   {off ? (
                     <p
-                      className="mt-0.5 w-fit max-w-full truncate rounded-full bg-brand px-1.5 text-[9px] font-bold leading-tight text-white"
-                      title={`${off.label} — the yeshiva is off this ${off.part === "shabbos" ? "Shabbos" : off.part === "friday" ? "Friday" : "Sunday"}`}
+                      className="pointer-events-none relative z-10 mt-0.5 w-fit max-w-full truncate rounded-full bg-brand px-1.5 text-[9px] font-bold leading-tight text-white"
                     >
                       {off.label}
                     </p>

@@ -34,10 +34,16 @@ export function TimeGrid({
   columns,
   events,
   onSelectEvent,
+  onNewAt,
 }: {
   columns: TimeColumn[];
   events: CalEvent[];
   onSelectEvent: (event: CalEvent) => void;
+  /**
+   * Clicking an empty hour starts a booking there. In the week view the
+   * column is a day; in the day view it is a car, so the car comes with it.
+   */
+  onNewAt: (date: string, hour: number, vehicleId?: string) => void;
 }) {
   const today = todayLocal();
   const hours = Array.from({ length: 24 }, (_, i) => i);
@@ -131,6 +137,20 @@ export function TimeGrid({
                         className="absolute inset-x-0 border-t border-line/70"
                         style={{ top: hour * HOUR_HEIGHT }}
                       />
+                      {/*
+                        The empty hour is a button rather than a click handler
+                        on the column, so it is reachable by keyboard and says
+                        what it does. The booked blocks are painted after this
+                        and sit above it, so this only catches free time.
+                      */}
+                      <button
+                        type="button"
+                        onClick={() => onNewAt(column.date, hour, column.vehicleId)}
+                        aria-label={`Add a reservation at ${hourLabel(hour)} on ${column.heading}`}
+                        title={`${hourLabel(hour)} — click to add a reservation`}
+                        className="absolute inset-x-0 z-0 transition hover:bg-brand/[0.07]"
+                        style={{ top: hour * HOUR_HEIGHT, height: HOUR_HEIGHT }}
+                      />
                     </Fragment>
                   ))}
 
@@ -146,7 +166,7 @@ export function TimeGrid({
                         type="button"
                         onClick={() => onSelectEvent(block.event)}
                         title={`${block.event.title} · ${formatTime(block.event.startsAt)}`}
-                        className={`absolute overflow-hidden rounded-md px-1.5 py-0.5 text-left text-[11px] leading-tight transition hover:z-20 hover:brightness-95 ${styles.className}`}
+                        className={`absolute z-10 overflow-hidden rounded-md px-1.5 py-0.5 text-left text-[11px] leading-tight transition hover:z-20 hover:brightness-95 ${styles.className}`}
                         style={{
                           top: block.top + 1,
                           height: block.height - 2,
