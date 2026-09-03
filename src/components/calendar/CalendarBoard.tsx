@@ -18,11 +18,14 @@ import { AgendaList } from "./AgendaList";
 import { ReservationDialog } from "./ReservationDialog";
 import { toEvents, type CalendarData, type CalEvent } from "./types";
 
-const STATUS_FILTERS = [
+const SHOW_FILTERS = [
   { value: "open", label: "Open" },
-  { value: "all", label: "All" },
-  { value: "pending", label: "Pending" },
+  { value: "all", label: "Everything" },
+  { value: "pending", label: "Pending requests" },
+  { value: "hold", label: "On hold" },
   { value: "approved", label: "Approved" },
+  { value: "waitlist", label: "Waitlist only" },
+  { value: "blackout", label: "Blocked off" },
   { value: "completed", label: "Completed" },
   { value: "cancelled", label: "Cancelled" },
   { value: "declined", label: "Declined" },
@@ -52,14 +55,33 @@ export function CalendarBoard({
   const events = useMemo(() => {
     const needle = query.trim().toLowerCase();
     return allEvents.filter((event) => {
-      if (carFilter !== "all" && event.vehicleId !== carFilter) return false;
+      // A waitlist entry with no car named would take whichever frees up, so
+      // narrowing to one car should not hide it.
+      if (carFilter !== "all" && event.vehicleId && event.vehicleId !== carFilter) {
+        return false;
+      }
 
-      if (event.kind === "reservation") {
-        if (statusFilter === "open") {
-          if (!["pending", "approved"].includes(event.status ?? "")) return false;
-        } else if (statusFilter !== "all" && event.status !== statusFilter) {
-          return false;
-        }
+      switch (statusFilter) {
+        case "all":
+          break;
+        case "open":
+          // A hold blocks the car just as a booking does, so it belongs in the
+          // default view even though nobody has confirmed it.
+          if (
+            event.kind === "reservation" &&
+            !["pending", "approved", "hold"].includes(event.status ?? "")
+          ) {
+            return false;
+          }
+          break;
+        case "waitlist":
+          if (event.kind !== "waitlist") return false;
+          break;
+        case "blackout":
+          if (event.kind !== "blackout") return false;
+          break;
+        default:
+          if (event.kind !== "reservation" || event.status !== statusFilter) return false;
       }
 
       if (needle) {
@@ -81,6 +103,9 @@ export function CalendarBoard({
 
   function openEvent(event: CalEvent) {
     if (event.kind === "reservation") setSelectedId(event.id);
+    // The queue is reordered and offered from its own screen, so send the
+    // office there rather than half-reproducing it in a dialog.
+    if (event.kind === "waitlist") router.push("/admin/waitlist");
   }
 
   const bounds = viewBounds(view, anchor);
@@ -177,9 +202,9 @@ export function CalendarBoard({
             className="input h-9 w-auto py-1.5 text-sm"
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            aria-label="Filter by status"
+            aria-label="Filter what the calendar shows"
           >
-            {STATUS_FILTERS.map((option) => (
+            {SHOW_FILTERS.map((option) => (
               <option key={option.value} value={option.value}>
                 {option.label}
               </option>
@@ -219,6 +244,13 @@ export function CalendarBoard({
         <span className="flex items-center gap-1.5">
           <span className="h-2.5 w-4 rounded border border-navy-400 bg-parchment-deep" aria-hidden />
           Approved
+        </span>
+        <span className="flex items-center gap-1.5">
+          <span
+            className="h-2.5 w-4 rounded border border-dashed border-slate-400 bg-slate-100"
+            aria-hidden
+          />
+          Waitlist
         </span>
         <span className="ml-auto">{events.length} shown</span>
       </div>

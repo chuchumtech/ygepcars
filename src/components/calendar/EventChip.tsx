@@ -12,6 +12,15 @@ import type { CalEvent } from "./types";
 export function eventStyles(event: CalEvent) {
   const color = carColor(event.vehicleIndex);
 
+  if (event.kind === "waitlist") {
+    // Nobody has this car: a queue entry is drawn flat and grey so it never
+    // reads as a booking at a glance.
+    return {
+      className: "border border-dashed border-slate-400 bg-slate-100 text-slate-700",
+      dot: "bg-slate-400",
+    };
+  }
+
   if (event.kind === "blackout") {
     return {
       className:

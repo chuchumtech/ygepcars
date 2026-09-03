@@ -137,6 +137,31 @@ export type DaySegment = {
 };
 
 /**
+ * The first and last local day an event actually occupies.
+ *
+ * An event ending exactly at midnight belongs to the day before, not to a
+ * sliver of the next one -- a car returned at midnight on Tuesday did not take
+ * up Wednesday.
+ */
+export function eventDayRange(
+  startsAt: string | Date,
+  endsAt: string | Date,
+): { first: string; last: string } {
+  const start = typeof startsAt === "string" ? new Date(startsAt) : startsAt;
+  const end = typeof endsAt === "string" ? new Date(endsAt) : endsAt;
+
+  const startParts = instantToLocalParts(start);
+  const endParts = instantToLocalParts(end);
+
+  const last =
+    endParts.time === "00:00" && endParts.date > startParts.date
+      ? shiftDays(endParts.date, -1)
+      : endParts.date;
+
+  return { first: startParts.date, last: last < startParts.date ? startParts.date : last };
+}
+
+/**
  * Splits an event into one piece per local day it touches, so a Thursday-night
  * to Sunday-afternoon reservation draws as three blocks in a week grid rather
  * than one impossible one.

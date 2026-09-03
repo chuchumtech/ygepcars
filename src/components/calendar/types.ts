@@ -1,4 +1,11 @@
-import type { Blackout, Destination, Profile, Reservation, Vehicle } from "@/lib/types";
+import type {
+  Blackout,
+  Destination,
+  Profile,
+  Reservation,
+  Vehicle,
+  WaitlistEntryWithRefs,
+} from "@/lib/types";
 
 export type AdminReservation = Reservation & {
   vehicle: Pick<Vehicle, "id" | "name" | "color" | "image_url"> | null;
@@ -7,17 +14,19 @@ export type AdminReservation = Reservation & {
 
 export type CalendarData = {
   reservations: AdminReservation[];
+  waitlist: WaitlistEntryWithRefs[];
   blackouts: (Blackout & { vehicle: Pick<Vehicle, "id" | "name"> | null })[];
   vehicles: Vehicle[];
   destinations: Destination[];
   students: Pick<Profile, "id" | "full_name" | "email" | "phone" | "status">[];
 };
 
-/** A reservation or blackout flattened into something the grids can draw. */
+/** A reservation, blackout or waitlist entry flattened for the grids. */
 export type CalEvent = {
   id: string;
-  kind: "reservation" | "blackout";
-  vehicleId: string;
+  kind: "reservation" | "blackout" | "waitlist";
+  /** Null on a waitlist entry that would take whichever car frees up. */
+  vehicleId: string | null;
   vehicleIndex: number;
   startsAt: string;
   endsAt: string;
@@ -27,7 +36,8 @@ export type CalEvent = {
 };
 
 export function toEvents(
-  data: Pick<CalendarData, "reservations" | "blackouts" | "vehicles">,
+  data: Pick<CalendarData, "reservations" | "blackouts" | "vehicles"> &
+    Partial<Pick<CalendarData, "waitlist">>,
 ): CalEvent[] {
   const order = new Map(data.vehicles.map((v, index) => [v.id, index]));
 
@@ -55,7 +65,30 @@ export function toEvents(
     subtitle: b.vehicle?.name ?? "",
   }));
 
-  return [...reservations, ...blackouts].sort(
+  // Only the live end of the queue belongs on a calendar: a converted entry is
+  // already drawn as the reservation it became, and an expired or cancelled one
+  // is history the office does not need laid over its week.
+  const waitlist: CalEvent[] = (data.waitlist ?? [])
+    .filter((w) => w.status === "waiting" || w.status === "offered")
+    .map((w) => ({
+      id: w.id,
+      kind: "waitlist" as const,
+      vehicleId: w.vehicle_id,
+      vehicleIndex: w.vehicle_id ? (order.get(w.vehicle_id) ?? 0) : 0,
+      startsAt: w.starts_at,
+      endsAt: w.ends_at,
+      status: null,
+      title: w.student?.full_name || "Unknown student",
+      subtitle: [
+        w.status === "offered" ? "Offered" : `Waiting #${w.position}`,
+        w.vehicle?.name ?? "Any car",
+        w.destination_label || w.purpose,
+      ]
+        .filter(Boolean)
+        .join(" · "),
+    }));
+
+  return [...reservations, ...blackouts, ...waitlist].sort(
     (a, b) => new Date(a.startsAt).getTime() - new Date(b.startsAt).getTime(),
   );
 }

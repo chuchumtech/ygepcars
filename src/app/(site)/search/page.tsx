@@ -201,7 +201,7 @@ export default async function SearchPage({
                       </div>
                     </>
                   ) : (
-                    <div className="space-y-2">
+                    <div className="flex flex-col gap-2 sm:items-end">
                       {canBook ? (
                         <WaitlistButton
                           vehicle={vehicle}

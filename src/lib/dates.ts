@@ -108,6 +108,17 @@ export function formatTime(value: Date | string): string {
   return fmt({ hour: "numeric", minute: "2-digit" }).format(d);
 }
 
+/**
+ * "9am", "9:30am" -- the same clock time with every character it can spare
+ * dropped, for calendar chips where a name has to fit beside it.
+ */
+export function formatTimeShort(value: Date | string): string {
+  const full = formatTime(value);
+  return full.replace(":00", "").replace(/\s(AM|PM)$/, (_, period: string) =>
+    period.toLowerCase(),
+  );
+}
+
 /** "Fri, Sep 5, 2:00 PM to 8:30 PM" or with both dates when they differ. */
 export function formatRange(start: Date | string, end: Date | string): string {
   const s = typeof start === "string" ? new Date(start) : start;
