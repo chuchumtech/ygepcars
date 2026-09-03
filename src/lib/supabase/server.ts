@@ -1,4 +1,5 @@
 import { createServerClient } from "@supabase/ssr";
+import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 import { cookies } from "next/headers";
 import { supabaseAnonKey, supabaseServiceKey, supabaseUrl } from "@/lib/env";
 
@@ -30,13 +31,17 @@ export async function createClient() {
 
 /**
  * Service-role client. Bypasses row level security entirely, so it is only for
- * things the office genuinely cannot do as itself: creating a profile row for a
- * brand new sign-up, and reading auth metadata.
+ * things the office genuinely cannot do as itself: creating the auth user and
+ * profile row for a brand new sign-up, and reading auth metadata.
+ *
+ * This is a plain client rather than the cookie-aware one: it must never pick
+ * up a visitor's session, and `auth.admin` only works when the service key is
+ * the credential on the request.
  *
  * Never import this into a Client Component.
  */
 export function createAdminClient() {
-  return createServerClient(supabaseUrl(), supabaseServiceKey(), {
-    cookies: { getAll: () => [], setAll: () => {} },
+  return createSupabaseClient(supabaseUrl(), supabaseServiceKey(), {
+    auth: { autoRefreshToken: false, persistSession: false },
   });
 }
