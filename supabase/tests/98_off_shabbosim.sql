@@ -35,6 +35,17 @@ insert into cars_off_shabbosim (shabbos_on, label) values ('2026-10-03','Shabbos
   on conflict (shabbos_on) do update set label = excluded.label;
 select shabbos_on, label from cars_off_shabbosim where shabbos_on = '2026-10-03';
 
+\echo 'An off Shabbos can run into the Friday, the Sunday, both or neither:'
+update cars_off_shabbosim
+   set includes_friday = true, includes_sunday = true
+ where shabbos_on = '2026-10-03';
+select shabbos_on, includes_friday, includes_sunday from cars_off_shabbosim
+ where shabbos_on = '2026-10-03';
+
+\echo 'and a fresh one covers the Shabbos alone until the office says otherwise:'
+select shabbos_on, includes_friday, includes_sunday from cars_off_shabbosim
+ where shabbos_on = '2026-10-10';
+
 \echo 'and the office can take one off again:'
 delete from cars_off_shabbosim where shabbos_on = '2026-10-10';
 select count(*) as remaining from cars_off_shabbosim;

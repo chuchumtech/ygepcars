@@ -299,24 +299,32 @@ end are asked for -- searching, editing a request, the office's own booking
 form, maintenance blackouts and the print range -- so the same calendar behaves
 the same way everywhere.
 
-Every day carries its Hebrew date, every Shabbos its parsha, and yom tov is
-tinted with its name. The Hebrew calendar comes from `@hebcal/core` on the
-Diaspora schedule, and `src/lib/hebrew.ts` loads it lazily -- the tables are a
-couple of hundred kilobytes, so nothing is fetched until somebody actually
-opens a picker, and the grid renders complete without them in the meantime.
+Every day carries its Hebrew date, every Shabbos its parsha and yom tov its
+name, all in Hebrew without nikud -- "נצבים־וילך" is what anybody here would
+call it. The English transliteration is kept alongside for the tooltip. The
+calendar comes from `@hebcal/core` on the Diaspora schedule, and
+`src/lib/hebrew.ts` loads it lazily -- the tables are a couple of hundred
+kilobytes, so nothing is fetched until somebody actually opens a picker, and
+the grid renders complete without them in the meantime.
 
 ### Off Shabbosim
 
 The office marks off Shabbosim at `/admin/shabbosim`, working from a list of
 upcoming Saturdays with their parshiyos already worked out. One click marks one
-off, with a label -- bein hazmanim, yeshiva closed, or anything typed in. They
-show up by name on every picker, for students too.
+off, with a label -- bein hazmanim, yeshiva closed, or anything typed in -- and
+a tick for whether it runs into the Friday, the Sunday, both or neither, since
+that varies from one to the next.
 
-Marking a Shabbos off blocks nothing. Those are usually the weekends students
-most want a car, so the office still wants the requests -- just with their eyes
-open. Each layout loads the list once and hands it down through
-`OffShabbosimProvider`, so every calendar on the page has it without a screen
-threading it through.
+It is information, not a rule. Nothing is blocked, and nothing is hidden: the
+parsha still shows on an off Shabbos exactly as it does on any other, and the
+off Shabbos appears as a small chip under it, on each day it covers. Those are
+usually the weekends students most want a car, so the office still wants the
+requests -- just with their eyes open.
+
+`loadOffShabbosim()` spreads each row across the days it covers, so a calendar
+looks up a single date and gets an answer. Each layout loads the list once and
+hands it down through `OffShabbosimProvider`, so every calendar on the page has
+it without a screen threading it through.
 
 ## Checks
 

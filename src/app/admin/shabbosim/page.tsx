@@ -16,6 +16,8 @@ export type ShabbosRow = {
   holiday: string;
   offLabel: string | null;
   note: string;
+  includesFriday: boolean;
+  includesSunday: boolean;
 };
 
 export default async function ShabbosimPage() {
@@ -32,18 +34,21 @@ export default async function ShabbosimPage() {
   const [{ data: marked }, notes] = await Promise.all([
     supabase
       .from("cars_off_shabbosim")
-      .select("shabbos_on, label, note")
+      .select("shabbos_on, label, note, includes_friday, includes_sunday")
       .gte("shabbos_on", first)
       .lte("shabbos_on", last),
     loadHebrewMonth(new Date(`${first}T12:00:00`), new Date(`${last}T12:00:00`)),
   ]);
 
-  const off = new Map(
-    ((marked ?? []) as { shabbos_on: string; label: string; note: string }[]).map((r) => [
-      r.shabbos_on,
-      r,
-    ]),
-  );
+  type Marked = {
+    shabbos_on: string;
+    label: string;
+    note: string;
+    includes_friday: boolean;
+    includes_sunday: boolean;
+  };
+
+  const off = new Map(((marked ?? []) as Marked[]).map((r) => [r.shabbos_on, r]));
 
   const rows: ShabbosRow[] = dates.map((date) => {
     const note = notes.get(date);
@@ -55,6 +60,8 @@ export default async function ShabbosimPage() {
       holiday: note?.holiday ?? "",
       offLabel: entry ? entry.label || "Off" : null,
       note: entry?.note ?? "",
+      includesFriday: entry?.includes_friday ?? false,
+      includesSunday: entry?.includes_sunday ?? false,
     };
   });
 
@@ -62,7 +69,7 @@ export default async function ShabbosimPage() {
     <div className="space-y-5">
       <PageHeader
         title="Shabbosim"
-        description="Mark the Shabbosim the yeshiva is off. It is a label only — students still see them on the calendar and can still request a car, which is usually exactly what happens on an off Shabbos."
+        description="Mark the Shabbosim the yeshiva is off, and say whether each one runs into the Friday or the Sunday. It is a label only — the parsha still shows, students still see the days on the calendar, and they can still request a car, which is usually exactly what happens on an off Shabbos."
       />
       <ShabbosimManager rows={rows} />
     </div>

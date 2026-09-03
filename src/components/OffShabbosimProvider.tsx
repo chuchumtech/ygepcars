@@ -2,8 +2,18 @@
 
 import { createContext, useContext } from "react";
 
-/** YYYY-MM-DD of a Saturday the yeshiva is off -> the label to show. */
-export type OffShabbosim = Record<string, string>;
+/** One day covered by an off Shabbos. */
+export type OffDay = {
+  /** What kind of off Shabbos, e.g. "Bein hazmanim". */
+  label: string;
+  /** Which day of the off Shabbos this is. */
+  part: "friday" | "shabbos" | "sunday";
+  /** The Saturday it belongs to, so the three days read as one thing. */
+  shabbos: string;
+};
+
+/** Every day an off Shabbos covers -> what it is. Keyed YYYY-MM-DD. */
+export type OffShabbosim = Record<string, OffDay>;
 
 const OffShabbosimContext = createContext<OffShabbosim>({});
 

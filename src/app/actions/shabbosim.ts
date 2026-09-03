@@ -7,6 +7,11 @@ import { text } from "@/app/actions/shared";
 
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
 
+/** An unticked checkbox is absent from the form data rather than false. */
+function checked(formData: FormData, name: string): boolean {
+  return formData.get(name) !== null;
+}
+
 function refreshEverywhereItShows() {
   revalidatePath("/admin", "layout");
   revalidatePath("/", "layout");
@@ -41,6 +46,13 @@ export async function toggleOffShabbosAction(formData: FormData) {
   refreshEverywhereItShows();
 }
 
+/**
+ * Renames an off Shabbos and says which days it covers.
+ *
+ * Some off Shabbosim start Friday, some run through Sunday, some are the
+ * Shabbos alone, so the office ticks whichever apply rather than the app
+ * guessing. Unticked boxes are absent from the form data, hence `checked`.
+ */
 export async function updateOffShabbosLabelAction(formData: FormData) {
   await requireAdmin();
   const supabase = await createClient();
@@ -50,7 +62,12 @@ export async function updateOffShabbosLabelAction(formData: FormData) {
 
   await supabase
     .from("cars_off_shabbosim")
-    .update({ label: text(formData, "label") || "Off", note: text(formData, "note") })
+    .update({
+      label: text(formData, "label") || "Off",
+      note: text(formData, "note"),
+      includes_friday: checked(formData, "includes_friday"),
+      includes_sunday: checked(formData, "includes_sunday"),
+    })
     .eq("shabbos_on", date);
 
   refreshEverywhereItShows();

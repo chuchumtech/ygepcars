@@ -47,8 +47,8 @@ things that matter most and are easiest to get wrong:
   through the count function; the email log is office-only.
 
 * **`98_off_shabbosim.sql`** — the office can mark a Shabbos off, relabel one
-  (the Saturday is the primary key, so marking it twice is impossible) and take
-  one off again; a student and a signed-out visitor can both read the list,
+  (the Saturday is the primary key, so marking it twice is impossible), say
+  whether it runs into the Friday or the Sunday, and take one off again; a student and a signed-out visitor can both read the list,
   because the date picker needs it, but a student cannot add one, and their
   update and delete change nothing rather than clearing the list.
 
@@ -73,6 +73,7 @@ for f in supabase/tests/00_supabase_stub.sql \
          supabase/migrations/0008_cars_student_details.sql \
          supabase/migrations/0009_cars_returns_and_incidents.sql \
          supabase/migrations/0010_cars_off_shabbosim.sql \
+         supabase/migrations/0011_cars_off_shabbosim_edges.sql \
          supabase/tests/90_behaviour.sql \
          supabase/tests/91_rls.sql \
          supabase/tests/92_waitlist.sql \

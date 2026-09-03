@@ -12,9 +12,12 @@ import {
 } from "@/lib/calendar";
 import { todayLocal } from "@/lib/dates";
 import type { HebrewMonth } from "@/lib/hebrew";
-import { useOffShabbosim } from "@/components/OffShabbosimProvider";
+import { useOffShabbosim, type OffShabbosim } from "@/components/OffShabbosimProvider";
 
 const WEEKDAYS = ["S", "M", "T", "W", "T", "F", "S"];
+
+/** How each covered day of an off Shabbos reads in a tooltip. */
+const PART = { friday: "Friday", shabbos: "Shabbos", sunday: "Sunday" } as const;
 
 /** Where a day sits in the current selection. */
 type CellState = "start" | "end" | "both" | "middle" | null;
@@ -160,7 +163,7 @@ function CalendarPanel({
   onAnchor: (next: string) => void;
   min?: string;
   max?: string;
-  offShabbosim: Record<string, string>;
+  offShabbosim: OffShabbosim;
   today: string;
   stateOf: (day: string) => CellState;
   onPick: (day: string) => void;
@@ -176,6 +179,8 @@ function CalendarPanel({
 
   const notes = useHebrewNotes(open, days);
   const anchorMonth = parseLocalDate(anchor).m;
+  // Only give up the extra row of height when this month actually has one.
+  const anyOff = days.some((day) => offShabbosim[day]);
 
   return (
     <div
@@ -235,7 +240,8 @@ function CalendarPanel({
           const state = stateOf(day);
           const edge = state === "start" || state === "end" || state === "both";
           const isToday = day === today;
-          const offLabel = offShabbosim[day];
+          const off = offShabbosim[day];
+          const reading = note?.parsha ?? (note?.isYomTov ? note.holiday : undefined);
 
           return (
             <button
@@ -244,11 +250,16 @@ function CalendarPanel({
               disabled={disabled}
               onClick={() => onPick(day)}
               onMouseEnter={onHover && !disabled ? () => onHover(day) : undefined}
-              title={[note?.hebrew, note?.parsha, note?.holiday, offLabel]
+              title={[
+                note?.hebrew,
+                note?.parshaEn ? `Parshas ${note.parshaEn}` : null,
+                note?.holidayEn,
+                off ? `${off.label} — the yeshiva is off this ${PART[off.part]}` : null,
+              ]
                 .filter(Boolean)
                 .join(" · ")}
               className={[
-                "tap flex h-[3.9rem] flex-col items-center justify-center px-1 transition",
+                `tap flex ${anyOff ? "h-[4.6rem]" : "h-[3.9rem]"} flex-col items-center justify-center px-1 transition`,
                 state === "both" || state === null ? "rounded-lg" : "",
                 state === "start" ? "rounded-l-lg" : "",
                 state === "end" ? "rounded-r-lg" : "",
@@ -262,11 +273,18 @@ function CalendarPanel({
                         ? "text-ink hover:bg-parchment-deep"
                         : "text-ink-soft/50 hover:bg-parchment-deep",
                 !edge && isToday ? "ring-1 ring-brand" : "",
-                !edge && state !== "middle" && note?.isYomTov ? "bg-gold-light" : "",
-                !edge && state !== "middle" && !note?.isYomTov && note?.holiday
-                  ? "bg-gold-light/40"
-                  : "",
-                !edge && state !== "middle" && offLabel ? "bg-brand-light" : "",
+                // One background, decided here rather than by whichever of
+                // several conflicting utilities the stylesheet happens to
+                // emit last.
+                edge || state === "middle"
+                  ? ""
+                  : note?.isYomTov
+                    ? "bg-gold-light"
+                    : off
+                      ? "bg-brand-light"
+                      : note?.holiday
+                        ? "bg-gold-light/40"
+                        : "",
               ].join(" ")}
             >
               <span className="text-sm font-semibold leading-none">
@@ -281,19 +299,27 @@ function CalendarPanel({
                   {note.hebrewDay}
                 </span>
               ) : null}
-              {offLabel || note?.parsha || (note?.isYomTov && note.holiday) ? (
+              {reading ? (
                 <span
+                  dir="rtl"
                   className={`mt-0.5 w-full truncate text-center text-[10px] leading-tight ${
                     edge
                       ? "text-white/80"
-                      : offLabel
-                        ? "font-bold text-brand"
-                        : note?.isYomTov
-                          ? "font-bold text-gold"
-                          : "text-ink-soft"
+                      : note?.isYomTov
+                        ? "font-bold text-gold"
+                        : "text-ink-soft"
                   }`}
                 >
-                  {offLabel ?? note?.parsha ?? note?.holiday}
+                  {reading}
+                </span>
+              ) : null}
+              {off ? (
+                <span
+                  className={`mt-0.5 max-w-full truncate rounded-full px-1.5 py-px text-[9px] font-bold leading-tight ${
+                    edge ? "bg-white/25 text-white" : "bg-brand text-white"
+                  }`}
+                >
+                  {off.label}
                 </span>
               ) : null}
             </button>
@@ -347,7 +373,7 @@ export function DateRangeField({
   min?: string;
   max?: string;
   /** Overrides the off Shabbosim the layout already provides. */
-  offShabbosim?: Record<string, string>;
+  offShabbosim?: OffShabbosim;
   /** When given, hidden inputs are rendered so the field works in a plain form. */
   startName?: string;
   endName?: string;
@@ -515,7 +541,7 @@ export function DateField({
   onChange: (next: string) => void;
   min?: string;
   max?: string;
-  offShabbosim?: Record<string, string>;
+  offShabbosim?: OffShabbosim;
   name?: string;
   label: string;
   id: string;

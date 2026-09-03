@@ -12,6 +12,14 @@ import type { ShabbosRow } from "./page";
 
 const PRESETS = ["Bein hazmanim", "Yeshiva closed", "Shabbos at home", "Off"];
 
+/** Which days this off Shabbos actually covers, in words. */
+function coverage(row: ShabbosRow): string {
+  if (row.includesFriday && row.includesSunday) return "Friday to Sunday";
+  if (row.includesFriday) return "From Friday";
+  if (row.includesSunday) return "Through Sunday";
+  return "Shabbos only";
+}
+
 /**
  * The whole point is that the office never types a date. Every Shabbos for the
  * next few months is listed with its parsha already worked out; marking one off
@@ -95,17 +103,27 @@ function ShabbosRowItem({
               </span>
             ) : null}
             {isOff ? (
-              <span className="chip bg-brand text-white">{row.offLabel}</span>
+              <>
+                <span className="chip bg-brand text-white">{row.offLabel}</span>
+                <span className="text-xs font-semibold text-ink-soft">
+                  {coverage(row)}
+                </span>
+              </>
             ) : null}
           </div>
 
           <p className="mt-0.5 text-sm text-ink-soft">
             {row.parsha ? (
               <>
-                Parshas <strong className="font-semibold text-ink">{row.parsha}</strong>
+                Parshas{" "}
+                <strong className="font-semibold text-ink" dir="rtl">
+                  {row.parsha}
+                </strong>
               </>
             ) : row.holiday ? (
-              <strong className="font-semibold text-gold">{row.holiday}</strong>
+              <strong className="font-semibold text-gold" dir="rtl">
+                {row.holiday}
+              </strong>
             ) : (
               "—"
             )}
@@ -116,7 +134,7 @@ function ShabbosRowItem({
         <div className="flex shrink-0 gap-2">
           {isOff ? (
             <button type="button" className="btn-secondary btn-sm" onClick={onEdit}>
-              {editing ? "Close" : "Rename"}
+              {editing ? "Close" : "Edit"}
             </button>
           ) : null}
 
@@ -137,7 +155,7 @@ function ShabbosRowItem({
       {editing ? (
         <form
           action={updateOffShabbosLabelAction}
-          className="mt-3 grid gap-3 border-t border-line/70 pt-3 sm:grid-cols-[12rem_1fr_auto] sm:items-end"
+          className="mt-3 grid gap-3 border-t border-line/70 pt-3 sm:grid-cols-[12rem_1fr_auto_auto] sm:items-end"
         >
           <input type="hidden" name="shabbos_on" value={row.date} />
 
@@ -160,6 +178,30 @@ function ShabbosRowItem({
             <span className="label">Note (optional)</span>
             <input className="input" name="note" defaultValue={row.note} />
           </label>
+
+          <fieldset className="min-w-0">
+            <legend className="label">Also off</legend>
+            <div className="flex h-11 items-center gap-4">
+              <label className="flex items-center gap-2 text-sm font-semibold text-ink">
+                <input
+                  type="checkbox"
+                  name="includes_friday"
+                  defaultChecked={row.includesFriday}
+                  className="h-4 w-4 accent-brand"
+                />
+                Friday
+              </label>
+              <label className="flex items-center gap-2 text-sm font-semibold text-ink">
+                <input
+                  type="checkbox"
+                  name="includes_sunday"
+                  defaultChecked={row.includesSunday}
+                  className="h-4 w-4 accent-brand"
+                />
+                Sunday
+              </label>
+            </div>
+          </fieldset>
 
           <SubmitButton className="btn-primary btn-sm" pendingLabel="Saving...">
             Save

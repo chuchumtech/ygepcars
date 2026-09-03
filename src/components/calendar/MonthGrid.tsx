@@ -176,15 +176,14 @@ export function MonthGrid({
               const inMonth = parseLocalDate(day).m === anchorMonth;
               const isToday = day === today;
               const note = notes.get(day);
-              const offLabel = offShabbosim[day];
-              const label =
-                offLabel ?? note?.parsha ?? (note?.isYomTov ? note.holiday : undefined);
+              const off = offShabbosim[day];
+              const reading = note?.parsha ?? (note?.isYomTov ? note.holiday : undefined);
 
               return (
                 <div
                   key={day}
                   className={`border-r border-line/70 px-1 pt-1 last:border-r-0 ${
-                    offLabel
+                    off
                       ? "bg-brand-light/60"
                       : note?.isYomTov
                         ? "bg-gold-light/60"
@@ -215,18 +214,24 @@ export function MonthGrid({
                     ) : null}
                   </div>
 
-                  {label ? (
+                  {reading ? (
                     <p
+                      dir="rtl"
                       className={`truncate text-[9px] leading-tight ${
-                        offLabel
-                          ? "font-bold text-brand"
-                          : note?.isYomTov
-                            ? "font-bold text-gold"
-                            : "text-ink-soft"
+                        note?.isYomTov ? "font-bold text-gold" : "text-ink-soft"
                       }`}
-                      title={label}
+                      title={note?.parshaEn ?? note?.holidayEn ?? reading}
                     >
-                      {label}
+                      {reading}
+                    </p>
+                  ) : null}
+
+                  {off ? (
+                    <p
+                      className="mt-0.5 w-fit max-w-full truncate rounded-full bg-brand px-1.5 text-[9px] font-bold leading-tight text-white"
+                      title={`${off.label} — the yeshiva is off this ${off.part === "shabbos" ? "Shabbos" : off.part === "friday" ? "Friday" : "Sunday"}`}
+                    >
+                      {off.label}
                     </p>
                   ) : null}
                 </div>
