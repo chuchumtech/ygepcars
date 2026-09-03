@@ -181,7 +181,7 @@ function CalendarPanel({
     <div
       role="dialog"
       aria-label={label}
-      className="absolute left-0 top-full z-50 mt-2 w-[25rem] max-w-[calc(100vw-2rem)] rounded-2xl border border-line/70 bg-surface p-3 shadow-lift"
+      className="absolute inset-x-0 top-full z-50 mt-2 min-w-[20rem] rounded-2xl border border-line/70 bg-surface p-3 shadow-lift"
     >
       <div className="mb-2 flex items-center justify-between">
         <button
@@ -248,7 +248,7 @@ function CalendarPanel({
                 .filter(Boolean)
                 .join(" · ")}
               className={[
-                "tap flex h-[3.4rem] flex-col items-center justify-center px-px transition",
+                "tap flex h-[3.9rem] flex-col items-center justify-center px-1 transition",
                 state === "both" || state === null ? "rounded-lg" : "",
                 state === "start" ? "rounded-l-lg" : "",
                 state === "end" ? "rounded-r-lg" : "",
@@ -283,7 +283,7 @@ function CalendarPanel({
               ) : null}
               {offLabel || note?.parsha || (note?.isYomTov && note.holiday) ? (
                 <span
-                  className={`mt-0.5 w-full truncate text-center text-[8px] leading-tight ${
+                  className={`mt-0.5 w-full truncate text-center text-[10px] leading-tight ${
                     edge
                       ? "text-white/80"
                       : offLabel
