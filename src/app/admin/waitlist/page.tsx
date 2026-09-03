@@ -60,7 +60,7 @@ export default async function WaitlistPage() {
         destinations={(destinations.data ?? []) as Destination[]}
       />
 
-      <p className="text-xs text-muted">
+      <p className="text-xs text-ink-soft">
         Students only ever see how many people are waiting on a window — never who
         they are. Estimates shown here are quoted fresh from current rates when you
         book someone in, so a rate change since they joined is picked up

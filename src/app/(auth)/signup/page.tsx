@@ -7,13 +7,13 @@ export const metadata: Metadata = { title: "Create an account" };
 export default function SignupPage() {
   return (
     <div className="card-pad">
-      <h1 className="text-xl font-bold text-slate-500">Create your account</h1>
-      <p className="mt-1 text-sm text-muted">
+      <h1 className="text-xl font-bold text-ink">Create your account</h1>
+      <p className="mt-1 text-sm text-ink-soft">
         The office reviews new accounts before you can request a car. This usually
         takes a day or less.
       </p>
       <SignupForm />
-      <p className="mt-5 border-t border-[var(--color-line)] pt-4 text-center text-sm text-muted">
+      <p className="mt-5 border-t border-line/70 pt-4 text-center text-sm text-ink-soft">
         Already registered?{" "}
         <Link href="/login" className="link">
           Sign in

@@ -40,7 +40,7 @@ export function PaymentsPanel({
   return (
     <section>
       <div className="mb-3 flex flex-wrap items-center gap-2">
-        <h2 className="text-sm font-semibold uppercase tracking-wider text-muted">
+        <h2 className="text-sm font-semibold uppercase tracking-wider text-ink-soft">
           Payments
         </h2>
         <span
@@ -49,7 +49,7 @@ export function PaymentsPanel({
               ? "bg-red-100 text-red-700"
               : balanceCents < 0
                 ? "bg-emerald-100 text-emerald-800"
-                : "bg-navy-100 text-navy-700"
+                : "bg-parchment-deep text-ink"
           }`}
         >
           {balanceCents > 0
@@ -133,11 +133,11 @@ export function PaymentsPanel({
       ) : null}
 
       {payments.length === 0 ? (
-        <p className="card-pad text-sm text-muted">Nothing recorded yet.</p>
+        <p className="card-pad text-sm text-ink-soft">Nothing recorded yet.</p>
       ) : (
         <div className="card overflow-x-auto">
           <table className="w-full min-w-[36rem]">
-            <thead className="border-b border-[var(--color-line)] bg-navy-50">
+            <thead className="border-b border-line/70 bg-parchment">
               <tr>
                 <th className="th">Date</th>
                 <th className="th">Method</th>
@@ -146,12 +146,12 @@ export function PaymentsPanel({
                 <th className="th" />
               </tr>
             </thead>
-            <tbody className="divide-y divide-[var(--color-line)]">
+            <tbody className="divide-y divide-line/70">
               {payments.map((payment) => (
                 <tr key={payment.id}>
                   <td className="td whitespace-nowrap">{formatDate(payment.paid_on)}</td>
                   <td className="td capitalize">{payment.method}</td>
-                  <td className="td text-muted">
+                  <td className="td text-ink-soft">
                     {[payment.reference, payment.note].filter(Boolean).join(" · ") || "--"}
                   </td>
                   <td
@@ -166,7 +166,7 @@ export function PaymentsPanel({
                       <input type="hidden" name="payment_id" value={payment.id} />
                       <button
                         type="submit"
-                        className="text-xs text-muted hover:text-red-700"
+                        className="text-xs text-ink-soft hover:text-red-700"
                         onClick={(event) => {
                           if (!confirm("Remove this payment from the ledger?")) {
                             event.preventDefault();

@@ -19,6 +19,20 @@ what was actually paid.
 Next.js 16 (App Router, Server Components, Server Actions) · TypeScript ·
 Tailwind CSS v4 · Supabase (Postgres + Auth).
 
+## Design
+
+Shares its design system with the yeshiva's other apps (canteen, dinner): the
+crest's slate blue `#517188` and antique gold `#8a783d` on warm parchment
+`#f6f3ec`, Plus Jakarta Sans, generous corner radii and soft layered shadows.
+Token names match those apps exactly (`ink`, `ink-soft`, `line`, `parchment`,
+`surface`, `brand`, `gold`) so the products read as one family.
+
+The landing page is the search box and nothing else. The house rules, the
+fleet and the toll sheet all appear where they are actually needed -- on the
+booking form, in the results, at the destination picker -- so repeating them up
+front only put three screens of reading in front of the one thing anybody came
+to do.
+
 The previous Flask app is kept for reference in [`old/`](old/) and is no longer
 wired up to anything.
 

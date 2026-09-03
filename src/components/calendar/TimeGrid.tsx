@@ -48,20 +48,20 @@ export function TimeGrid({
         <div className="min-w-[42rem]">
           {/* Column headings */}
           <div
-            className="sticky top-0 z-10 grid border-b border-[var(--color-line)] bg-white/95 backdrop-blur"
+            className="sticky top-0 z-10 grid border-b border-line/70 bg-white/95 backdrop-blur"
             style={{ gridTemplateColumns: `4rem repeat(${columns.length}, minmax(0, 1fr))` }}
           >
             <div />
             {columns.map((column) => (
               <div
                 key={column.key}
-                className={`border-l border-[var(--color-line)] px-2 py-2 text-center ${
-                  column.highlight ?? column.date === today ? "bg-navy-50" : ""
+                className={`border-l border-line/70 px-2 py-2 text-center ${
+                  column.highlight ?? column.date === today ? "bg-parchment" : ""
                 }`}
               >
-                <p className="text-xs font-semibold text-slate-500">{column.heading}</p>
+                <p className="text-xs font-semibold text-ink">{column.heading}</p>
                 {column.subheading ? (
-                  <p className="text-[11px] text-muted">{column.subheading}</p>
+                  <p className="text-[11px] text-ink-soft">{column.subheading}</p>
                 ) : null}
               </div>
             ))}
@@ -79,7 +79,7 @@ export function TimeGrid({
               {hours.map((hour) => (
                 <div
                   key={hour}
-                  className="absolute right-1 -translate-y-1/2 text-[10px] tabular-nums text-muted"
+                  className="absolute right-1 -translate-y-1/2 text-[10px] tabular-nums text-ink-soft"
                   style={{ top: hour * HOUR_HEIGHT }}
                 >
                   {hour === 0 ? "" : hourLabel(hour)}
@@ -121,14 +121,14 @@ export function TimeGrid({
               return (
                 <div
                   key={column.key}
-                  className={`relative border-l border-[var(--color-line)] ${
-                    column.highlight ?? column.date === today ? "bg-navy-50/40" : ""
+                  className={`relative border-l border-line/70 ${
+                    column.highlight ?? column.date === today ? "bg-parchment/40" : ""
                   }`}
                 >
                   {hours.map((hour) => (
                     <Fragment key={hour}>
                       <div
-                        className="absolute inset-x-0 border-t border-[var(--color-line)]"
+                        className="absolute inset-x-0 border-t border-line/70"
                         style={{ top: hour * HOUR_HEIGHT }}
                       />
                     </Fragment>

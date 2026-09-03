@@ -80,7 +80,7 @@ export default async function StudentsPage({
 
       <div className="flex flex-wrap items-end gap-4">
         <div>
-          <p className="mb-1.5 text-[11px] font-semibold uppercase tracking-wider text-muted">
+          <p className="mb-1.5 text-[11px] font-semibold uppercase tracking-wider text-ink-soft">
             Show
           </p>
           <div className="flex flex-wrap gap-1">
@@ -92,7 +92,7 @@ export default async function StudentsPage({
                 className={`chip border transition ${
                   filter === option.value
                     ? "border-slate-500 bg-slate-500 text-white"
-                    : "border-[var(--color-line)] bg-white text-slate-600 hover:bg-slate-50"
+                    : "border-line/70 bg-white text-ink hover:bg-parchment"
                 }`}
               >
                 {option.label}
@@ -119,7 +119,7 @@ export default async function StudentsPage({
 
       <div className="card overflow-x-auto">
         <table className="w-full min-w-[44rem]">
-          <thead className="border-b border-[var(--color-line)] bg-navy-50">
+          <thead className="border-b border-line/70 bg-parchment">
             <tr>
               <th className="th">Student</th>
               <th className="th">Status</th>
@@ -129,25 +129,25 @@ export default async function StudentsPage({
               <th className="th text-right">Balance</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-[var(--color-line)]">
+          <tbody className="divide-y divide-line/70">
             {people.map((person) => {
               const balance = balanceById.get(person.id);
               const owed = balance?.balance_cents ?? 0;
 
               return (
-                <tr key={person.id} className="transition hover:bg-navy-50">
+                <tr key={person.id} className="transition hover:bg-parchment">
                   <td className="td">
                     <Link
                       href={`/admin/students/${person.id}`}
-                      className="font-semibold text-navy-800 hover:underline"
+                      className="font-semibold text-ink hover:underline"
                     >
                       {person.full_name || "(no name)"}
                     </Link>
-                    <p className="text-xs text-muted">
+                    <p className="text-xs text-ink-soft">
                       {person.email}
                       {person.role === "admin" ? " · office admin" : ""}
                     </p>
-                    <p className="text-xs text-muted">
+                    <p className="text-xs text-ink-soft">
                       Joined {formatDate(person.created_at)}
                     </p>
                   </td>
@@ -175,7 +175,7 @@ export default async function StudentsPage({
             })}
             {people.length === 0 ? (
               <tr>
-                <td className="td text-muted" colSpan={6}>
+                <td className="td text-ink-soft" colSpan={6}>
                   Nobody matches that.
                 </td>
               </tr>

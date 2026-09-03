@@ -75,14 +75,14 @@ export function SearchForm({
   const max = addDaysLocal(min, 365);
 
   return (
-    <form onSubmit={submit} className={compact ? "" : "card-pad shadow-sm"}>
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-[1fr_1fr_auto]">
+    <form onSubmit={submit} className={compact ? "" : "card-pad"}>
+      <div className="grid gap-y-5 gap-x-8 sm:grid-cols-2">
         <fieldset className="min-w-0">
           <legend className="label">Pick up</legend>
           <div className="flex gap-2">
             <input
               type="date"
-              className="input"
+              className="input min-w-0 px-3"
               value={values.startDate}
               min={min}
               max={max}
@@ -91,7 +91,7 @@ export function SearchForm({
               aria-label="Pickup date"
             />
             <select
-              className="input w-[8.5rem] shrink-0"
+              className="input w-[7.25rem] shrink-0 px-3"
               value={values.startTime}
               onChange={(e) => update({ startTime: e.target.value })}
               aria-label="Pickup time"
@@ -110,7 +110,7 @@ export function SearchForm({
           <div className="flex gap-2">
             <input
               type="date"
-              className="input"
+              className="input min-w-0 px-3"
               value={values.endDate}
               min={values.startDate}
               max={max}
@@ -119,7 +119,7 @@ export function SearchForm({
               aria-label="Return date"
             />
             <select
-              className="input w-[8.5rem] shrink-0"
+              className="input w-[7.25rem] shrink-0 px-3"
               value={values.endTime}
               onChange={(e) => update({ endTime: e.target.value })}
               aria-label="Return time"
@@ -133,14 +133,13 @@ export function SearchForm({
           </div>
         </fieldset>
 
-        <div className="flex items-end">
-          <button type="submit" className="btn-primary h-[46px] w-full lg:w-auto lg:px-7">
-            Search
-          </button>
-        </div>
       </div>
 
-      {error ? <p className="mt-3 text-sm font-medium text-red-700">{error}</p> : null}
+      <button type="submit" className="btn-primary mt-5 h-12 w-full text-base">
+        Search
+      </button>
+
+      {error ? <p className="mt-3 text-sm font-semibold text-bad">{error}</p> : null}
     </form>
   );
 }

@@ -66,8 +66,8 @@ export default async function AdminCalendarPage({
     <div className="space-y-6">
       <div className="no-print flex flex-wrap items-end justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-slate-500">Calendar</h1>
-          <p className="mt-1 text-sm text-muted">
+          <h1 className="text-2xl font-bold tracking-tight text-ink">Calendar</h1>
+          <p className="mt-1 text-sm text-ink-soft">
             Every reservation, request and blocked-off day for both cars.
           </p>
         </div>

@@ -103,7 +103,7 @@ export function PrintControls({
               className={`chip border transition ${
                 active
                   ? "border-slate-500 bg-slate-500 text-white"
-                  : "border-[var(--color-line)] bg-white text-slate-600 hover:bg-slate-50"
+                  : "border-line/70 bg-white text-ink hover:bg-parchment"
               }`}
             >
               {preset.label}

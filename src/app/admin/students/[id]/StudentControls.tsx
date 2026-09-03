@@ -31,7 +31,7 @@ export function StudentControls({ profile }: { profile: Profile }) {
   return (
     <section className="card-pad space-y-4">
       <div className="flex flex-wrap items-center gap-2">
-        <h2 className="text-sm font-semibold uppercase tracking-wider text-muted">
+        <h2 className="text-sm font-semibold uppercase tracking-wider text-ink-soft">
           Account
         </h2>
 
@@ -119,7 +119,7 @@ export function StudentControls({ profile }: { profile: Profile }) {
       ) : null}
 
       {editing ? (
-        <form action={detailAction} className="space-y-4 border-t border-[var(--color-line)] pt-4">
+        <form action={detailAction} className="space-y-4 border-t border-line/70 pt-4">
           <input type="hidden" name="student_id" value={profile.id} />
 
           {detailState.error ? <Alert tone="error">{detailState.error}</Alert> : null}
@@ -185,8 +185,8 @@ export function StudentControls({ profile }: { profile: Profile }) {
           </Row>
           {profile.notes ? (
             <div className="sm:col-span-2">
-              <dt className="text-muted">Office notes</dt>
-              <dd className="mt-1 whitespace-pre-wrap rounded-lg bg-gold-50 px-3 py-2 text-navy-800">
+              <dt className="text-ink-soft">Office notes</dt>
+              <dd className="mt-1 whitespace-pre-wrap rounded-lg bg-gold-50 px-3 py-2 text-ink">
                 {profile.notes}
               </dd>
             </div>
@@ -199,9 +199,9 @@ export function StudentControls({ profile }: { profile: Profile }) {
 
 function Row({ label, children }: { label: string; children: React.ReactNode }) {
   return (
-    <div className="flex justify-between gap-4 border-b border-[var(--color-line)] py-1.5">
-      <dt className="text-muted">{label}</dt>
-      <dd className="text-right font-medium text-navy-800">{children}</dd>
+    <div className="flex justify-between gap-4 border-b border-line/70 py-1.5">
+      <dt className="text-ink-soft">{label}</dt>
+      <dd className="text-right font-medium text-ink">{children}</dd>
     </div>
   );
 }

@@ -97,17 +97,17 @@ export default async function PrintPage({
           <div className="flex items-center gap-3">
             <Image src="/logo.png" alt="" width={54} height={54} className="h-14 w-auto" />
             <div>
-              <h1 className="text-lg font-bold text-slate-500">{orgName}</h1>
-              <p className="text-sm text-muted">Car run sheet</p>
+              <h1 className="text-lg font-bold text-ink">{orgName}</h1>
+              <p className="text-sm text-ink-soft">Car run sheet</p>
             </div>
           </div>
           <div className="text-right text-sm">
-            <p className="font-semibold text-navy-800">
+            <p className="font-semibold text-ink">
               {from === to
                 ? formatDayLong(`${from}T12:00:00Z`)
                 : `${formatDayLong(`${from}T12:00:00Z`)} — ${formatDayLong(`${to}T12:00:00Z`)}`}
             </p>
-            <p className="text-muted">
+            <p className="text-ink-soft">
               {shown.length} {shown.length === 1 ? "rental" : "rentals"} ·{" "}
               {formatMoney(totalCents)}
             </p>
@@ -124,18 +124,18 @@ export default async function PrintPage({
 
           return (
             <section key={day} className="mb-6 break-inside-avoid">
-              <h2 className="mb-2 border-b border-[var(--color-line)] pb-1 text-sm font-bold text-slate-500">
+              <h2 className="mb-2 border-b border-line/70 pb-1 text-sm font-bold text-ink">
                 {formatDayLong(`${day}T12:00:00Z`)}
               </h2>
 
               {dayRows.length === 0 && dayBlackouts.length === 0 ? (
-                <p className="py-2 text-sm text-muted">Nothing out.</p>
+                <p className="py-2 text-sm text-ink-soft">Nothing out.</p>
               ) : null}
 
               {dayRows.length > 0 ? (
                 <table className="w-full text-sm">
                   <thead>
-                    <tr className="text-left text-[11px] uppercase tracking-wider text-muted">
+                    <tr className="text-left text-[11px] uppercase tracking-wider text-ink-soft">
                       <th className="py-1.5 pr-3 font-semibold">Out</th>
                       <th className="py-1.5 pr-3 font-semibold">Back</th>
                       <th className="py-1.5 pr-3 font-semibold">Student</th>
@@ -149,7 +149,7 @@ export default async function PrintPage({
                     {dayRows.map((reservation) => (
                       <tr
                         key={`${day}-${reservation.id}`}
-                        className="border-t border-[var(--color-line)] align-top"
+                        className="border-t border-line/70 align-top"
                       >
                         <td className="py-2 pr-3 tabular-nums">
                           {formatTime(reservation.starts_at)}
@@ -158,11 +158,11 @@ export default async function PrintPage({
                           {formatTime(reservation.ends_at)}
                         </td>
                         <td className="py-2 pr-3">
-                          <span className="font-medium text-navy-800">
+                          <span className="font-medium text-ink">
                             {reservation.student?.full_name ?? "--"}
                           </span>
                           {reservation.student?.phone ? (
-                            <span className="block text-xs text-muted">
+                            <span className="block text-xs text-ink-soft">
                               {reservation.student.phone}
                             </span>
                           ) : null}
@@ -170,7 +170,7 @@ export default async function PrintPage({
                         <td className="py-2 pr-3">{reservation.vehicle?.name ?? "--"}</td>
                         <td className="py-2 pr-3">
                           {reservation.destination_label || "--"}
-                          <span className="block text-xs text-muted">
+                          <span className="block text-xs text-ink-soft">
                             {describeDuration(
                               hoursBetween(reservation.starts_at, reservation.ends_at),
                             )}
@@ -192,7 +192,7 @@ export default async function PrintPage({
               ) : null}
 
               {dayBlackouts.length > 0 ? (
-                <ul className="mt-2 text-xs text-muted">
+                <ul className="mt-2 text-xs text-ink-soft">
                   {dayBlackouts.map((blackout) => (
                     <li key={`${day}-${blackout.id}`}>
                       {blackout.vehicle?.name ?? "Car"} out of service
@@ -205,7 +205,7 @@ export default async function PrintPage({
           );
         })}
 
-        <footer className="mt-8 border-t border-[var(--color-line)] pt-3 text-xs text-muted">
+        <footer className="mt-8 border-t border-line/70 pt-3 text-xs text-ink-soft">
           <p>
             Fleet: {fleet.map((vehicle) => vehicle.name).join(" · ") || "no cars set up"}
           </p>
@@ -216,7 +216,7 @@ export default async function PrintPage({
         </footer>
       </article>
 
-      <p className="no-print mt-6 text-sm text-muted">
+      <p className="no-print mt-6 text-sm text-ink-soft">
         <Link href="/admin" className="link">
           Back to the calendar
         </Link>

@@ -62,8 +62,8 @@ export function BookingForm({
       {state.error ? <Alert tone="error">{state.error}</Alert> : null}
 
       <section className="card-pad space-y-4">
-        <h2 className="text-base font-bold text-slate-500">Where are you going?</h2>
-        <p className="-mt-2 text-sm text-muted">
+        <h2 className="text-base font-bold text-ink">Where are you going?</h2>
+        <p className="-mt-2 text-sm text-ink-soft">
           Tolls are billed as one flat fee for the trip, based on the destination.
         </p>
 
@@ -73,8 +73,8 @@ export function BookingForm({
               key={option.id}
               className={`flex cursor-pointer items-center gap-3 rounded-lg border px-4 py-3 transition ${
                 option.id === destinationId
-                  ? "border-navy-600 bg-navy-50 ring-1 ring-navy-600"
-                  : "border-[var(--color-line)] hover:border-navy-300 hover:bg-navy-50/50"
+                  ? "border-navy-600 bg-parchment ring-1 ring-navy-600"
+                  : "border-line/70 hover:border-navy-300 hover:bg-parchment/50"
               }`}
             >
               <input
@@ -87,11 +87,11 @@ export function BookingForm({
                 required
               />
               <span className="min-w-0 flex-1">
-                <span className="block text-sm font-medium text-navy-800">
+                <span className="block text-sm font-medium text-ink">
                   {option.name}
                 </span>
                 {option.description ? (
-                  <span className="block text-xs text-muted">{option.description}</span>
+                  <span className="block text-xs text-ink-soft">{option.description}</span>
                 ) : null}
               </span>
               <span className="shrink-0 text-sm font-bold tabular-nums text-gold-500">
@@ -121,7 +121,7 @@ export function BookingForm({
       </section>
 
       <section className="card-pad space-y-4">
-        <h2 className="text-base font-bold text-slate-500">A few details</h2>
+        <h2 className="text-base font-bold text-ink">A few details</h2>
 
         <Field
           label="Reason for the trip"
@@ -148,11 +148,11 @@ export function BookingForm({
       </section>
 
       <section className="card-pad">
-        <h2 className="text-base font-bold text-slate-500">Estimated total</h2>
+        <h2 className="text-base font-bold text-ink">Estimated total</h2>
 
         <dl className="mt-3 text-sm">
-          <div className="flex justify-between border-b border-[var(--color-line)] py-2">
-            <dt className="text-muted">
+          <div className="flex justify-between border-b border-line/70 py-2">
+            <dt className="text-ink-soft">
               {estimate.billableHours} hour{estimate.billableHours === 1 ? "" : "s"} at{" "}
               {formatMoney(vehicle.hourly_rate_cents)}/hr
               {estimate.capApplied ? " (daily cap applied)" : ""}
@@ -161,21 +161,21 @@ export function BookingForm({
               {formatMoney(estimate.timeChargeCents)}
             </dd>
           </div>
-          <div className="flex justify-between border-b border-[var(--color-line)] py-2">
-            <dt className="text-muted">
+          <div className="flex justify-between border-b border-line/70 py-2">
+            <dt className="text-ink-soft">
               Tolls{destination ? ` — ${destination.name}` : ""}
             </dt>
             <dd className="font-medium tabular-nums">{formatMoney(estimate.tollCents)}</dd>
           </div>
           <div className="flex justify-between pt-3">
-            <dt className="text-base font-bold text-navy-800">Estimate</dt>
-            <dd className="text-xl font-bold tabular-nums text-navy-800">
+            <dt className="text-base font-bold text-ink">Estimate</dt>
+            <dd className="text-xl font-bold tabular-nums text-ink">
               {formatMoney(estimate.totalCents)}
             </dd>
           </div>
         </dl>
 
-        <p className="mt-3 text-xs text-muted">
+        <p className="mt-3 text-xs text-ink-soft">
           This is an estimate, not a bill. Nothing is charged online — the office
           settles up with you and can adjust the tolls if the trip changes.
         </p>

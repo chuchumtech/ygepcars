@@ -27,7 +27,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
 
   return (
     <div className="flex min-h-dvh flex-col lg:flex-row">
-      <aside className="app-sidebar no-print gold-rule bg-white shadow-[var(--shadow-card)] lg:flex lg:w-60 lg:shrink-0 lg:flex-col lg:border-r lg:border-[var(--color-line)] lg:border-b-0 lg:shadow-none">
+      <aside className="app-sidebar no-print border-b border-line/70 bg-surface lg:flex lg:w-60 lg:shrink-0 lg:flex-col lg:border-r lg:border-b-0">
         <div className="flex items-center gap-3 px-4 py-4">
           <Image
             src="/logo.png"
@@ -37,8 +37,8 @@ export default async function AdminLayout({ children }: { children: React.ReactN
             className="h-10 w-auto"
           />
           <div className="min-w-0 leading-tight">
-            <p className="text-sm font-bold text-slate-500">Office portal</p>
-            <p className="truncate text-xs font-medium text-gold-500">Car Rental</p>
+            <p className="text-sm font-bold text-ink">Office portal</p>
+            <p className="truncate text-xs font-semibold text-ink-soft">Car Rental</p>
           </div>
         </div>
 
@@ -48,16 +48,16 @@ export default async function AdminLayout({ children }: { children: React.ReactN
           waitingCount={waiting ?? 0}
         />
 
-        <div className="border-t border-[var(--color-line)] px-4 py-3 lg:mt-auto">
-          <p className="truncate text-xs font-medium text-slate-500">
+        <div className="border-t border-line/70 px-4 py-3 lg:mt-auto">
+          <p className="truncate text-xs font-semibold text-ink">
             {admin.profile.full_name}
           </p>
           <div className="mt-1.5 flex items-center gap-3">
-            <Link href="/" className="text-xs text-muted hover:text-gold-500">
+            <Link href="/" className="text-xs text-ink-soft hover:text-brand">
               Student site
             </Link>
             <form action={signOutAction}>
-              <button type="submit" className="text-xs text-muted hover:text-gold-500">
+              <button type="submit" className="text-xs text-ink-soft hover:text-brand">
                 Sign out
               </button>
             </form>

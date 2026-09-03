@@ -13,12 +13,12 @@ export default async function LoginPage({
 
   return (
     <div className="card-pad">
-      <h1 className="text-xl font-bold text-slate-500">Sign in</h1>
-      <p className="mt-1 text-sm text-muted">
+      <h1 className="text-xl font-bold text-ink">Sign in</h1>
+      <p className="mt-1 text-sm text-ink-soft">
         Use the email and password you registered with.
       </p>
       <LoginForm next={params.next ?? "/"} />
-      <p className="mt-5 border-t border-[var(--color-line)] pt-4 text-center text-sm text-muted">
+      <p className="mt-5 border-t border-line/70 pt-4 text-center text-sm text-ink-soft">
         First time here?{" "}
         <Link href="/signup" className="link">
           Create an account

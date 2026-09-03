@@ -38,24 +38,24 @@ export default async function SettingsPage() {
       <SettingsForm values={values} />
 
       <section>
-        <h2 className="mb-3 text-sm font-semibold uppercase tracking-wider text-muted">
+        <h2 className="mb-3 text-sm font-semibold uppercase tracking-wider text-ink-soft">
           Recent activity
         </h2>
         {log.length === 0 ? (
-          <p className="card-pad text-sm text-muted">Nothing logged yet.</p>
+          <p className="card-pad text-sm text-ink-soft">Nothing logged yet.</p>
         ) : (
-          <div className="card divide-y divide-[var(--color-line)]">
+          <div className="card divide-y divide-line/70">
             {log.map((entry) => (
               <div key={entry.id} className="flex justify-between gap-4 px-4 py-2.5 text-sm">
                 <span>
-                  <span className="font-medium text-navy-800">
+                  <span className="font-medium text-ink">
                     {entry.actor_name || "Someone"}
                   </span>{" "}
-                  <span className="text-muted">
+                  <span className="text-ink-soft">
                     {entry.action} a {entry.entity_type}
                   </span>
                 </span>
-                <span className="shrink-0 text-xs text-muted">
+                <span className="shrink-0 text-xs text-ink-soft">
                   {formatDateTime(entry.created_at)}
                 </span>
               </div>

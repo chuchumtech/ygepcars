@@ -24,8 +24,8 @@ export function SettingsForm({ values }: { values: Record<string, unknown> }) {
       {state.success ? <Alert tone="success">{state.success}</Alert> : null}
 
       <section className="rounded-lg border border-gold-200 bg-gold-50/60 p-4">
-        <h2 className="text-sm font-bold text-slate-600">Booking rules</h2>
-        <p className="mt-0.5 text-xs text-muted">
+        <h2 className="text-sm font-bold text-ink">Booking rules</h2>
+        <p className="mt-0.5 text-xs text-ink-soft">
           These apply to students booking themselves. The office is not bound by
           them when adding a reservation by hand.
         </p>
@@ -59,7 +59,7 @@ export function SettingsForm({ values }: { values: Record<string, unknown> }) {
           </Field>
         </div>
 
-        <p className="mt-3 text-xs text-muted">
+        <p className="mt-3 text-xs text-ink-soft">
           After the hold window runs out on an unpaid reservation, the car goes
           back into the pool for anyone to book, but the reservation stays
           pending. If the student pays later and nobody else has taken the car,
@@ -113,7 +113,7 @@ export function SettingsForm({ values }: { values: Record<string, unknown> }) {
         </Field>
       </div>
 
-      <p className="text-xs text-muted">
+      <p className="text-xs text-ink-soft">
         All times run on {ORG_TIMEZONE.replace("_", " ")}.
       </p>
 

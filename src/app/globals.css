@@ -1,140 +1,156 @@
 @import "tailwindcss";
 
 /* ---------------------------------------------------------------------------
-   Palette lifted from ygep.org: a slate blue for headings and the wordmark,
-   deep navy for body text, and the olive gold from the seal for accents and
-   the rule that sits under the masthead.
+   Design tokens shared with the other yeshiva apps (canteen, dinner): the
+   crest's slate blue and antique gold on warm parchment. Same names and same
+   values, so the two products read as one family.
    --------------------------------------------------------------------------- */
 @theme {
-  /* Slate blue -- the colour of the lettering in the logo. */
-  --color-slate-50:  #f4f6f9;
-  --color-slate-100: #e5eaf1;
-  --color-slate-200: #c9d3df;
-  --color-slate-300: #a3b3c5;
-  --color-slate-400: #7189a3;
-  --color-slate-500: #425d77;
-  --color-slate-600: #3a5169;
-  --color-slate-700: #2e4054;
+  --color-ink: #16202b;
+  --color-ink-soft: #5a6b7a;
+  --color-line: #e3ded2;
 
-  /* Deep navy -- body copy and the strongest surfaces. */
-  --color-navy-50:  #f4f6fb;
-  --color-navy-100: #e5e9f2;
-  --color-navy-200: #c7d0e4;
-  --color-navy-300: #9daed0;
-  --color-navy-400: #6b83b0;
-  --color-navy-500: #425d77;
-  --color-navy-600: #2e4a72;
-  --color-navy-700: #213a6d;
-  --color-navy-800: #1c2957;
-  --color-navy-900: #141d3f;
+  --color-parchment: #f6f3ec;
+  --color-parchment-deep: #ece7dc;
+  --color-surface: #ffffff;
 
-  /* Olive gold -- the flourish on the seal. Accent only, never a large field. */
-  --color-gold-50:  #faf8f0;
-  --color-gold-100: #f2eeda;
-  --color-gold-200: #e4dcb2;
-  --color-gold-300: #cbbc7e;
-  --color-gold-400: #9c8a45;
-  --color-gold-500: #74662e;
-  --color-gold-600: #5b5024;
+  --color-brand: #517188;
+  --color-brand-dark: #3c566b;
+  --color-brand-light: #e8eef3;
 
-  --color-ink:    #1c2957;
-  --color-muted:  #5d6b7f;
-  --color-line:   #e3e6ed;
-  --color-canvas: #f7f8fa;
+  --color-gold: #8a783d;
+  --color-gold-light: #f3efe1;
 
-  /* Segoe UI first, matching the existing yeshiva site. */
-  --font-sans: "Segoe UI", ui-sans-serif, system-ui, -apple-system, Roboto,
-    "Helvetica Neue", Arial, sans-serif;
+  --color-good: #2f7d5c;
+  --color-good-light: #e4f2eb;
+  --color-warn: #8a6d1f;
+  --color-warn-light: #f8f0d9;
+  --color-bad: #b4443a;
+  --color-bad-light: #fbeae8;
 
-  --radius-card: 0.75rem;
+  --font-sans: var(--font-jakarta), ui-sans-serif, system-ui, -apple-system,
+    "Segoe UI", Roboto, sans-serif;
 
-  --shadow-card: 0 1px 2px rgba(33, 58, 109, 0.04),
-                 0 2px 8px rgba(66, 93, 119, 0.07);
-  --shadow-raised: 0 2px 4px rgba(33, 58, 109, 0.06),
-                   0 8px 24px rgba(66, 93, 119, 0.10);
+  --radius-2xl: 1.25rem;
+  --radius-3xl: 1.75rem;
+
+  /* Aliases so the screens written against the earlier palette keep working
+     while rendering in the shared one. New work should use the names above. */
+  --color-navy-50: #f6f3ec;
+  --color-navy-100: #ece7dc;
+  --color-navy-200: #e3ded2;
+  --color-navy-300: #a9b6c1;
+  --color-navy-400: #7e93a3;
+  --color-navy-500: #517188;
+  --color-navy-600: #466175;
+  --color-navy-700: #3c566b;
+  --color-navy-800: #16202b;
+  --color-navy-900: #0f1720;
+
+  --color-slate-50: #f6f3ec;
+  --color-slate-100: #ece7dc;
+  --color-slate-200: #e3ded2;
+  --color-slate-300: #a9b6c1;
+  --color-slate-400: #7e93a3;
+  --color-slate-500: #517188;
+  --color-slate-600: #3c566b;
+  --color-slate-700: #16202b;
+
+  --color-gold-50: #f3efe1;
+  --color-gold-100: #f3efe1;
+  --color-gold-200: #e0d5ab;
+  --color-gold-300: #bfa95f;
+  --color-gold-400: #a08f4a;
+  --color-gold-500: #8a783d;
+  --color-gold-600: #6d5f2f;
+
+  --color-muted: #5a6b7a;
+  --color-canvas: #f6f3ec;
 }
 
-html {
-  -webkit-text-size-adjust: 100%;
+html,
+body {
+  height: 100%;
 }
 
 body {
-  background: var(--color-canvas);
+  background: var(--color-parchment);
   color: var(--color-ink);
   font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
 }
 
 h1, h2, h3 {
-  color: var(--color-slate-500);
-  letter-spacing: -0.01em;
+  color: var(--color-ink);
+  letter-spacing: -0.015em;
 }
 
- /* Form controls carry their own focus treatment (.input), so the global ring
-   is limited to things that do not: links, buttons, and anything focusable. */
 :where(a, button, summary, [tabindex]):focus-visible {
-  outline: 2px solid var(--color-gold-400);
+  outline: 2px solid var(--color-brand);
   outline-offset: 2px;
-  border-radius: 4px;
+  border-radius: 8px;
 }
 
-/* The gold rule beneath the masthead is the signature of the yeshiva's site. */
-@utility gold-rule {
-  border-bottom: 3px solid var(--color-gold-500);
+/* Registered as utilities rather than plain classes so the component styles
+   below can compose them with @apply -- Tailwind v4 will not @apply a class
+   defined in @layer. */
+@utility tap {
+  transition: transform 90ms ease, box-shadow 160ms ease, background-color 160ms ease;
+  &:active {
+    transform: scale(0.97);
+  }
+}
+
+@utility shadow-card {
+  box-shadow: 0 1px 2px rgb(22 32 43 / 0.05), 0 8px 24px -12px rgb(22 32 43 / 0.18);
+}
+
+@utility shadow-lift {
+  box-shadow: 0 2px 4px rgb(22 32 43 / 0.06), 0 18px 40px -18px rgb(22 32 43 / 0.35);
+}
+
+@utility no-scrollbar {
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
 }
 
 @utility card {
-  @apply rounded-[var(--radius-card)] border border-[var(--color-line)] bg-white
-         shadow-[var(--shadow-card)];
+  @apply rounded-2xl border border-line/70 bg-surface shadow-card;
 }
 
 @utility btn {
-  @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2.5
-         text-sm font-semibold transition select-none
-         disabled:cursor-not-allowed disabled:opacity-50;
+  @apply tap inline-flex h-11 items-center justify-center gap-2 rounded-xl px-5
+         text-base font-semibold transition-colors
+         disabled:cursor-not-allowed disabled:opacity-45;
 }
 
 @layer components {
   .card-pad {
-    @apply card p-5;
+    @apply card p-6;
   }
 
   .label {
-    @apply mb-1.5 block text-sm font-medium text-[var(--color-muted)];
+    @apply mb-1.5 block text-sm font-semibold text-ink-soft;
   }
 
   .input {
-    @apply w-full rounded-lg border border-[var(--color-line)] bg-white px-3 py-2.5
-           text-[15px] text-[var(--color-ink)] transition
-           placeholder:text-slate-300
-           focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-500/15
-           disabled:cursor-not-allowed disabled:bg-slate-50 disabled:text-muted;
+    @apply w-full rounded-xl border border-line bg-surface px-4 py-3 text-base
+           text-ink outline-none transition
+           placeholder:text-ink-soft/50
+           focus:border-brand focus:ring-2 focus:ring-brand/20
+           disabled:cursor-not-allowed disabled:bg-parchment disabled:text-ink-soft;
   }
 
-  .btn-primary {
-    @apply btn bg-slate-500 text-white shadow-xs
-           hover:bg-slate-600 active:bg-slate-700;
-  }
+  .btn-primary  { @apply btn bg-brand text-white shadow-card hover:bg-brand-dark; }
+  .btn-secondary{ @apply btn border border-line bg-surface text-ink hover:bg-parchment-deep; }
+  .btn-gold     { @apply btn bg-gold text-white hover:bg-gold-600; }
+  .btn-soft     { @apply btn bg-brand-light text-brand hover:bg-brand-light/70; }
+  .btn-ghost    { @apply btn bg-transparent text-ink-soft hover:bg-parchment-deep; }
+  .btn-danger   { @apply btn bg-bad-light text-bad hover:bg-bad hover:text-white; }
 
-  .btn-secondary {
-    @apply btn border border-[var(--color-line)] bg-white text-slate-600
-           hover:border-slate-300 hover:bg-slate-50;
-  }
-
-  .btn-gold {
-    @apply btn bg-gold-500 text-white hover:bg-gold-600;
-  }
-
-  .btn-ghost {
-    @apply btn text-slate-600 hover:bg-slate-100;
-  }
-
-  .btn-danger {
-    @apply btn border border-red-200 bg-white text-red-700 hover:bg-red-50;
-  }
-
-  .btn-sm {
-    @apply px-3 py-1.5 text-[13px];
-  }
+  .btn-sm { @apply h-9 rounded-lg px-3 text-sm; }
 
   .chip {
     @apply inline-flex items-center gap-1.5 rounded-full px-2.5 py-1
@@ -142,83 +158,48 @@ h1, h2, h3 {
   }
 
   .th {
-    @apply px-4 py-2.5 text-left text-[11px] font-semibold uppercase
-           tracking-wider text-[var(--color-muted)];
+    @apply px-4 py-3 text-left text-[11px] font-bold uppercase
+           tracking-wider text-ink-soft;
   }
 
-  .td {
-    @apply px-4 py-3 align-middle text-sm;
-  }
+  .td { @apply px-4 py-3 align-middle text-sm; }
 
   .link {
-    @apply font-medium text-gold-500 underline underline-offset-2 hover:text-slate-600;
+    @apply font-semibold text-brand underline underline-offset-2 hover:text-brand-dark;
   }
 
-  /* Masthead nav: gold links that settle to slate on hover, per ygep.org. */
   .nav-link {
-    @apply rounded-lg px-3 py-2 text-sm font-semibold text-gold-500 transition
-           hover:bg-gold-50 hover:text-slate-600;
+    @apply tap rounded-xl px-3 py-2 text-sm font-semibold text-ink-soft transition-colors
+           hover:bg-parchment-deep hover:text-ink;
   }
 
-  .nav-link-active {
-    @apply bg-gold-50 text-slate-600;
-  }
+  .nav-link-active { @apply bg-brand-light text-brand; }
 }
 
 /* ---------------------------------------------------------------------------
-   Print. The office prints run sheets and hands them to whoever is on desk, so
-   the page has to come out as a clean document rather than a screenshot of an
-   app: no navigation, no shadows, black on white, days kept together.
+   Print: the office prints run sheets, so the page has to come out as a
+   document rather than a screenshot of an app.
    --------------------------------------------------------------------------- */
 @media print {
-  @page {
-    margin: 14mm;
-  }
+  @page { margin: 14mm; }
 
   .no-print,
   header.app-header,
   aside.app-sidebar,
-  footer.app-footer {
-    display: none !important;
-  }
+  footer.app-footer { display: none !important; }
 
-  body {
-    background: #fff;
-    color: #000;
-    font-size: 11pt;
-  }
+  body { background: #fff; color: #000; font-size: 11pt; }
 
-  main {
-    max-width: none !important;
-    padding: 0 !important;
-    margin: 0 !important;
-  }
+  main { max-width: none !important; padding: 0 !important; margin: 0 !important; }
 
-  .card,
-  .card-pad {
+  .card, .card-pad {
     border: 1px solid #ccc !important;
     box-shadow: none !important;
     break-inside: avoid;
   }
 
-  .print-sheet section {
-    break-inside: avoid;
-  }
+  .print-sheet section { break-inside: avoid; }
+  .print-sheet table { width: 100%; border-collapse: collapse; }
 
-  .print-sheet table {
-    width: 100%;
-    border-collapse: collapse;
-  }
-
-  a {
-    text-decoration: none;
-    color: inherit;
-  }
-
-  /* Spell out where a link went, since paper has no hover. */
-  .print-url::after {
-    content: " (" attr(href) ")";
-    font-size: 9pt;
-    color: #555;
-  }
+  a { text-decoration: none; color: inherit; }
 }

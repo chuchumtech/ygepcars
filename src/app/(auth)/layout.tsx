@@ -11,14 +11,14 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
           width={509}
           height={466}
           priority
-          className="h-24 w-auto"
+          className="h-20 w-auto"
         />
-        <span className="gold-rule pb-2 text-center text-sm font-bold uppercase tracking-[0.18em] text-slate-500">
+        <span className="text-center text-sm font-bold uppercase tracking-[0.18em] text-ink-soft">
           Car Rental
         </span>
       </Link>
       <div className="w-full max-w-md">{children}</div>
-      <p className="mt-8 text-center text-xs text-muted">
+      <p className="mt-8 text-center text-xs text-ink-soft">
         Yeshiva Gedolah Meor Yitzchok of Elkins Park
       </p>
     </div>

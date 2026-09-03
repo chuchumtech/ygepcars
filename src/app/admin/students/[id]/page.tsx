@@ -73,7 +73,7 @@ export default async function StudentDetailPage({
   return (
     <div className="space-y-7">
       <div>
-        <Link href="/admin/students" className="text-sm text-muted hover:text-navy-700">
+        <Link href="/admin/students" className="text-sm text-ink-soft hover:text-ink">
           &larr; All students
         </Link>
         <PageHeader
@@ -111,7 +111,7 @@ export default async function StudentDetailPage({
 
       {pending.length > 0 ? (
         <section>
-          <h2 className="mb-3 text-sm font-semibold uppercase tracking-wider text-muted">
+          <h2 className="mb-3 text-sm font-semibold uppercase tracking-wider text-ink-soft">
             Pending requests
           </h2>
           <ReservationTable
@@ -124,7 +124,7 @@ export default async function StudentDetailPage({
       ) : null}
 
       <section>
-        <h2 className="mb-3 text-sm font-semibold uppercase tracking-wider text-muted">
+        <h2 className="mb-3 text-sm font-semibold uppercase tracking-wider text-ink-soft">
           Upcoming
         </h2>
         <ReservationTable
@@ -144,7 +144,7 @@ export default async function StudentDetailPage({
       />
 
       <section>
-        <h2 className="mb-3 text-sm font-semibold uppercase tracking-wider text-muted">
+        <h2 className="mb-3 text-sm font-semibold uppercase tracking-wider text-ink-soft">
           Rental history
         </h2>
         <ReservationTable

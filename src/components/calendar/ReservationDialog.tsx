@@ -147,7 +147,7 @@ export function ReservationDialog({
       )}
 
       {!editing ? (
-        <p className="mt-4 text-xs text-muted">
+        <p className="mt-4 text-xs text-ink-soft">
           Pickup {formatDateTime(reservation.starts_at)} ({start.date} {start.time}) ·
           Return {formatDateTime(reservation.ends_at)} ({end.date} {end.time})
         </p>
@@ -300,7 +300,7 @@ function ReadView({
         <form action={decideAction} className="card-pad space-y-3 bg-gold-50/60">
           <input type="hidden" name="reservation_id" value={reservation.id} />
           <input type="hidden" name="decision" value="hold" />
-          <p className="text-sm text-slate-600">
+          <p className="text-sm text-ink">
             The car is blocked for this student while it is held, exactly as if it
             were booked. Nothing is charged until you approve it.
           </p>
@@ -317,10 +317,10 @@ function ReadView({
       ) : null}
 
       {releasing ? (
-        <form action={decideAction} className="card-pad space-y-3 bg-slate-50">
+        <form action={decideAction} className="card-pad space-y-3 bg-parchment">
           <input type="hidden" name="reservation_id" value={reservation.id} />
           <input type="hidden" name="decision" value="released" />
-          <p className="text-sm text-slate-600">
+          <p className="text-sm text-ink">
             Frees the car straight away so somebody else can take this window. The
             record stays on the student&apos;s history, and nothing is charged.
           </p>
@@ -366,17 +366,17 @@ function ReadView({
         <p className="text-[11px] font-semibold uppercase tracking-wider text-gold-600">
           Reason for the trip
         </p>
-        <p className="mt-0.5 text-sm font-medium text-slate-700">
+        <p className="mt-0.5 text-sm font-medium text-ink">
           {reservation.purpose || "The student did not give one."}
         </p>
         {reservation.destination_label ? (
-          <p className="mt-1 text-sm text-muted">Heading to {reservation.destination_label}</p>
+          <p className="mt-1 text-sm text-ink-soft">Heading to {reservation.destination_label}</p>
         ) : null}
       </div>
 
       <div className="grid gap-5 sm:grid-cols-2">
         <div>
-          <h3 className="mb-1 text-sm font-semibold text-slate-500">Trip</h3>
+          <h3 className="mb-1 text-sm font-semibold text-ink">Trip</h3>
           <dl>
             <DetailRow label="Car">{reservation.vehicle?.name ?? "--"}</DetailRow>
             <DetailRow label="Out">{formatDateTime(reservation.starts_at)}</DetailRow>
@@ -388,7 +388,7 @@ function ReadView({
         </div>
 
         <div>
-          <h3 className="mb-1 text-sm font-semibold text-slate-500">Charges</h3>
+          <h3 className="mb-1 text-sm font-semibold text-ink">Charges</h3>
           <dl>
             <DetailRow label={`Time (${reservation.billable_hours} hrs)`}>
               {formatMoney(reservation.time_charge_cents)}
@@ -415,7 +415,7 @@ function ReadView({
       </div>
 
       <div>
-        <h3 className="mb-1 text-sm font-semibold text-slate-500">Student</h3>
+        <h3 className="mb-1 text-sm font-semibold text-ink">Student</h3>
         <dl>
           <DetailRow label="Name">{reservation.student?.full_name ?? "--"}</DetailRow>
           <DetailRow label="Phone">
@@ -442,8 +442,8 @@ function ReadView({
 
       {reservation.student_notes ? (
         <div>
-          <h3 className="mb-1 text-sm font-semibold text-slate-500">Note from the student</h3>
-          <p className="rounded-lg bg-navy-50 px-3 py-2 text-sm text-navy-800">
+          <h3 className="mb-1 text-sm font-semibold text-ink">Note from the student</h3>
+          <p className="rounded-lg bg-parchment px-3 py-2 text-sm text-ink">
             {reservation.student_notes}
           </p>
         </div>
@@ -451,8 +451,8 @@ function ReadView({
 
       {reservation.admin_notes ? (
         <div>
-          <h3 className="mb-1 text-sm font-semibold text-slate-500">Office notes</h3>
-          <p className="rounded-lg bg-gold-50 px-3 py-2 text-sm text-navy-800">
+          <h3 className="mb-1 text-sm font-semibold text-ink">Office notes</h3>
+          <p className="rounded-lg bg-gold-50 px-3 py-2 text-sm text-ink">
             {reservation.admin_notes}
           </p>
         </div>
@@ -606,7 +606,7 @@ function EditForm({
       </section>
 
       <section className="space-y-4">
-        <h3 className="text-sm font-semibold text-slate-500">Destination and tolls</h3>
+        <h3 className="text-sm font-semibold text-ink">Destination and tolls</h3>
         <div className="grid gap-4 sm:grid-cols-2">
           <Field label="Preset destination" hint="Changing this does not overwrite the toll below.">
             <select
@@ -655,7 +655,7 @@ function EditForm({
       </section>
 
       <section className="space-y-4">
-        <h3 className="text-sm font-semibold text-slate-500">Pricing</h3>
+        <h3 className="text-sm font-semibold text-ink">Pricing</h3>
         <div className="grid gap-4 sm:grid-cols-2">
           <Field label="Hourly rate">
             <input
@@ -695,27 +695,27 @@ function EditForm({
         </div>
 
         {preview ? (
-          <dl className="rounded-lg bg-navy-50 px-4 py-3 text-sm">
+          <dl className="rounded-lg bg-parchment px-4 py-3 text-sm">
             <div className="flex justify-between py-0.5">
-              <dt className="text-muted">
+              <dt className="text-ink-soft">
                 Time ({preview.billableHours} hrs
                 {preview.capApplied ? ", cap applied" : ""})
               </dt>
               <dd className="tabular-nums">{formatMoney(preview.timeChargeCents)}</dd>
             </div>
             <div className="flex justify-between py-0.5">
-              <dt className="text-muted">Tolls</dt>
+              <dt className="text-ink-soft">Tolls</dt>
               <dd className="tabular-nums">{formatMoney(preview.tollCents)}</dd>
             </div>
             {preview.adjustmentCents !== 0 ? (
               <div className="flex justify-between py-0.5">
-                <dt className="text-muted">Adjustment</dt>
+                <dt className="text-ink-soft">Adjustment</dt>
                 <dd className="tabular-nums">{formatMoney(preview.adjustmentCents)}</dd>
               </div>
             ) : null}
             <div className="mt-1 flex justify-between border-t border-navy-200 pt-1.5">
-              <dt className="font-semibold text-navy-800">New total</dt>
-              <dd className="font-bold tabular-nums text-navy-800">
+              <dt className="font-semibold text-ink">New total</dt>
+              <dd className="font-bold tabular-nums text-ink">
                 {formatMoney(preview.totalCents)}
               </dd>
             </div>

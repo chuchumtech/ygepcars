@@ -80,13 +80,13 @@ export default async function BookPage({
   return (
     <div className="mx-auto max-w-4xl">
       <div className="mb-6">
-        <Link href="/" className="text-sm text-muted hover:text-navy-700">
+        <Link href="/" className="text-sm text-ink-soft hover:text-ink">
           &larr; Back to search
         </Link>
-        <h1 className="mt-2 text-2xl font-bold tracking-tight text-slate-500">
+        <h1 className="mt-2 text-2xl font-bold tracking-tight text-ink">
           Request a reservation
         </h1>
-        <p className="mt-1 text-sm text-muted">
+        <p className="mt-1 text-sm text-ink-soft">
           Nothing is charged here. The office reviews your request and confirms it
           with you.
         </p>
@@ -128,7 +128,7 @@ export default async function BookPage({
         <aside className="space-y-4 lg:sticky lg:top-24 lg:self-start">
           <div className="card overflow-hidden">
             {vehicle.image_url ? (
-              <div className="relative aspect-[16/10] bg-navy-100">
+              <div className="relative aspect-[16/10] bg-parchment-deep">
                 <Image
                   src={vehicle.image_url}
                   alt={vehicle.name}
@@ -139,33 +139,33 @@ export default async function BookPage({
               </div>
             ) : null}
             <div className="p-4">
-              <h2 className="text-base font-bold text-slate-500">{vehicle.name}</h2>
-              <p className="mt-0.5 text-sm text-muted">
+              <h2 className="text-base font-bold text-ink">{vehicle.name}</h2>
+              <p className="mt-0.5 text-sm text-ink-soft">
                 {[vehicle.color, vehicle.seats ? `${vehicle.seats} seats` : null]
                   .filter(Boolean)
                   .join(" · ")}
               </p>
-              <div className="mt-3 border-t border-[var(--color-line)] pt-3 text-sm">
-                <p className="font-medium text-navy-800">
+              <div className="mt-3 border-t border-line/70 pt-3 text-sm">
+                <p className="font-medium text-ink">
                   {formatRange(win.startsAt, win.endsAt)}
                 </p>
-                <p className="mt-0.5 text-muted">{describeDuration(hours)}</p>
+                <p className="mt-0.5 text-ink-soft">{describeDuration(hours)}</p>
               </div>
             </div>
           </div>
 
           <div className="card-pad text-sm">
-            <p className="font-semibold text-navy-800">Requesting as</p>
-            <p className="mt-1 text-muted">{viewer.profile.full_name}</p>
-            <p className="text-muted">{viewer.profile.email}</p>
-            <p className="text-muted">{viewer.profile.phone}</p>
+            <p className="font-semibold text-ink">Requesting as</p>
+            <p className="mt-1 text-ink-soft">{viewer.profile.full_name}</p>
+            <p className="text-ink-soft">{viewer.profile.email}</p>
+            <p className="text-ink-soft">{viewer.profile.phone}</p>
             <Link href="/account" className="link mt-2 inline-block text-xs">
               Update my details
             </Link>
           </div>
 
           <div className="card-pad">
-            <p className="text-sm font-semibold text-slate-500">The rules</p>
+            <p className="text-sm font-semibold text-ink">The rules</p>
             <BookingRulesNote rules={rules} className="mt-2 text-xs" />
           </div>
         </aside>

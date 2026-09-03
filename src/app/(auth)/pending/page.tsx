@@ -15,7 +15,7 @@ export default async function PendingPage() {
 
   return (
     <div className="card-pad">
-      <h1 className="text-xl font-bold text-slate-500">
+      <h1 className="text-xl font-bold text-ink">
         {locked ? "Your account is on hold" : "Thanks for registering"}
       </h1>
 
@@ -34,16 +34,16 @@ export default async function PendingPage() {
       </div>
 
       <dl className="mt-5 text-sm">
-        <div className="flex justify-between border-b border-[var(--color-line)] py-2">
-          <dt className="text-muted">Name</dt>
+        <div className="flex justify-between border-b border-line/70 py-2">
+          <dt className="text-ink-soft">Name</dt>
           <dd className="font-medium">{viewer.profile?.full_name || "--"}</dd>
         </div>
-        <div className="flex justify-between border-b border-[var(--color-line)] py-2">
-          <dt className="text-muted">Email</dt>
+        <div className="flex justify-between border-b border-line/70 py-2">
+          <dt className="text-ink-soft">Email</dt>
           <dd className="font-medium">{viewer.email}</dd>
         </div>
         <div className="flex justify-between py-2">
-          <dt className="text-muted">Phone</dt>
+          <dt className="text-ink-soft">Phone</dt>
           <dd className="font-medium">{viewer.profile?.phone || "--"}</dd>
         </div>
       </dl>

@@ -100,14 +100,14 @@ export default async function SearchPage({
       />
 
       <div>
-        <h1 className="text-xl font-bold text-slate-500">
+        <h1 className="text-xl font-bold text-ink">
           {results.length === 0
             ? "No cars in the system yet"
             : freeCount === 0
               ? "Nothing free for that window"
               : `${freeCount} car${freeCount === 1 ? "" : "s"} available`}
         </h1>
-        <p className="mt-1 text-sm text-muted">
+        <p className="mt-1 text-sm text-ink-soft">
           {formatRange(win.startsAt, win.endsAt)} · {describeDuration(hours)}
         </p>
       </div>
@@ -130,7 +130,7 @@ export default async function SearchPage({
               className={`card overflow-hidden sm:flex ${available ? "" : "opacity-75"}`}
             >
               {vehicle.image_url ? (
-                <div className="relative aspect-[16/10] shrink-0 bg-navy-100 sm:aspect-auto sm:w-64">
+                <div className="relative aspect-[16/10] shrink-0 bg-parchment-deep sm:aspect-auto sm:w-64">
                   <Image
                     src={vehicle.image_url}
                     alt={vehicle.name}
@@ -144,7 +144,7 @@ export default async function SearchPage({
               <div className="flex flex-1 flex-col gap-4 p-5 sm:flex-row sm:items-center">
                 <div className="min-w-0 flex-1">
                   <div className="flex flex-wrap items-center gap-2">
-                    <h2 className="text-base font-bold text-slate-500">{vehicle.name}</h2>
+                    <h2 className="text-base font-bold text-ink">{vehicle.name}</h2>
                     {available ? (
                       <span className="chip bg-emerald-100 text-emerald-800">Available</span>
                     ) : (
@@ -152,7 +152,7 @@ export default async function SearchPage({
                     )}
                   </div>
 
-                  <p className="mt-1 text-sm text-muted">
+                  <p className="mt-1 text-sm text-ink-soft">
                     {[vehicle.color, vehicle.seats ? `${vehicle.seats} seats` : null]
                       .filter(Boolean)
                       .join(" · ")}
@@ -163,7 +163,7 @@ export default async function SearchPage({
                       {UNAVAILABLE_REASON[state?.reason ?? ""] ?? "Not available."}
                     </p>
                   ) : (
-                    <p className="mt-2 text-sm text-muted">
+                    <p className="mt-2 text-sm text-ink-soft">
                       {formatMoney(vehicle.hourly_rate_cents)}/hour ·{" "}
                       {estimate.billableHours} billable hour
                       {estimate.billableHours === 1 ? "" : "s"}
@@ -175,10 +175,10 @@ export default async function SearchPage({
                 <div className="shrink-0 sm:text-right">
                   {available ? (
                     <>
-                      <p className="text-[11px] font-semibold uppercase tracking-wider text-muted">
+                      <p className="text-[11px] font-semibold uppercase tracking-wider text-ink-soft">
                         Before tolls
                       </p>
-                      <p className="text-2xl font-bold tabular-nums text-navy-800">
+                      <p className="text-2xl font-bold tabular-nums text-ink">
                         {formatMoney(estimate.timeChargeCents)}
                       </p>
                       <div className="mt-3">
@@ -217,7 +217,7 @@ export default async function SearchPage({
                           waitingCount={waitingCount}
                         />
                       ) : waitingCount > 0 ? (
-                        <p className="text-xs text-muted">
+                        <p className="text-xs text-ink-soft">
                           {waitingCount}{" "}
                           {waitingCount === 1 ? "student is" : "students are"} waiting
                           on this window.

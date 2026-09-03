@@ -31,14 +31,14 @@ export function ReservationTable({
   const selected = reservations.find((r) => r.id === selectedId) ?? null;
 
   if (reservations.length === 0) {
-    return <p className="card-pad text-sm text-muted">{emptyMessage}</p>;
+    return <p className="card-pad text-sm text-ink-soft">{emptyMessage}</p>;
   }
 
   return (
     <>
       <div className="card overflow-x-auto">
         <table className="w-full min-w-[46rem]">
-          <thead className="border-b border-[var(--color-line)] bg-navy-50">
+          <thead className="border-b border-line/70 bg-parchment">
             <tr>
               <th className="th">When</th>
               {showStudent ? <th className="th">Student</th> : null}
@@ -48,18 +48,18 @@ export function ReservationTable({
               <th className="th text-right">Total</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-[var(--color-line)]">
+          <tbody className="divide-y divide-line/70">
             {reservations.map((reservation) => (
               <tr
                 key={reservation.id}
                 onClick={() => setSelectedId(reservation.id)}
-                className="cursor-pointer transition hover:bg-navy-50"
+                className="cursor-pointer transition hover:bg-parchment"
               >
                 <td className="td">
-                  <p className="font-medium text-navy-800">
+                  <p className="font-medium text-ink">
                     {formatDateTime(reservation.starts_at)}
                   </p>
-                  <p className="text-xs text-muted">
+                  <p className="text-xs text-ink-soft">
                     {describeDuration(
                       hoursBetween(reservation.starts_at, reservation.ends_at),
                     )}{" "}
@@ -69,10 +69,10 @@ export function ReservationTable({
 
                 {showStudent ? (
                   <td className="td">
-                    <p className="font-medium text-navy-800">
+                    <p className="font-medium text-ink">
                       {reservation.student?.full_name ?? "--"}
                     </p>
-                    <p className="text-xs text-muted">{reservation.student?.phone}</p>
+                    <p className="text-xs text-ink-soft">{reservation.student?.phone}</p>
                   </td>
                 ) : null}
 
@@ -88,7 +88,7 @@ export function ReservationTable({
                   </span>
                 </td>
 
-                <td className="td max-w-56 truncate text-muted">
+                <td className="td max-w-56 truncate text-ink-soft">
                   {reservation.destination_label || "--"}
                 </td>
 

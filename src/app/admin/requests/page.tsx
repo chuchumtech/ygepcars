@@ -39,7 +39,7 @@ export default async function RequestsPage() {
       />
 
       <section>
-        <h2 className="mb-3 flex items-center gap-2 text-sm font-semibold uppercase tracking-wider text-muted">
+        <h2 className="mb-3 flex items-center gap-2 text-sm font-semibold uppercase tracking-wider text-ink-soft">
           Reservation requests
           {pendingReservations.length > 0 ? (
             <span className="chip bg-amber-100 text-amber-800">
@@ -63,7 +63,7 @@ export default async function RequestsPage() {
       </section>
 
       <section>
-        <h2 className="mb-3 flex items-center gap-2 text-sm font-semibold uppercase tracking-wider text-muted">
+        <h2 className="mb-3 flex items-center gap-2 text-sm font-semibold uppercase tracking-wider text-ink-soft">
           New accounts
           {pendingAccounts.length > 0 ? (
             <span className="chip bg-amber-100 text-amber-800">
@@ -78,7 +78,7 @@ export default async function RequestsPage() {
             description="Everyone who has registered has been dealt with."
           />
         ) : (
-          <div className="card divide-y divide-[var(--color-line)]">
+          <div className="card divide-y divide-line/70">
             {pendingAccounts.map((account) => (
               <div
                 key={account.id}
@@ -86,13 +86,13 @@ export default async function RequestsPage() {
               >
                 <div className="min-w-0">
                   <div className="flex flex-wrap items-center gap-2">
-                    <p className="font-semibold text-navy-800">{account.full_name}</p>
+                    <p className="font-semibold text-ink">{account.full_name}</p>
                     <ProfileBadge status={account.status} />
                   </div>
-                  <p className="mt-0.5 text-sm text-muted">
+                  <p className="mt-0.5 text-sm text-ink-soft">
                     {account.email} · {account.phone || "no phone"}
                   </p>
-                  <p className="text-xs text-muted">
+                  <p className="text-xs text-ink-soft">
                     Registered {formatDate(account.created_at)}
                   </p>
                 </div>

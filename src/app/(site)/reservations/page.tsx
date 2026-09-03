@@ -86,23 +86,23 @@ export default async function ReservationsPage({
 
       {waitlist.length > 0 ? (
         <section>
-          <h2 className="mb-3 text-sm font-semibold uppercase tracking-wider text-muted">
+          <h2 className="mb-3 text-sm font-semibold uppercase tracking-wider text-ink-soft">
             On the waitlist
           </h2>
-          <div className="card divide-y divide-[var(--color-line)]">
+          <div className="card divide-y divide-line/70">
             {waitlist.map((entry) => (
               <div
                 key={entry.id}
                 className="flex flex-wrap items-center justify-between gap-3 p-4"
               >
                 <div className="min-w-0">
-                  <p className="font-semibold text-navy-800">
+                  <p className="font-semibold text-ink">
                     {entry.vehicle?.name ?? "Whichever car frees up"}
                   </p>
-                  <p className="text-sm text-muted">
+                  <p className="text-sm text-ink-soft">
                     {formatRange(entry.starts_at, entry.ends_at)}
                   </p>
-                  <p className="text-xs text-muted">
+                  <p className="text-xs text-ink-soft">
                     {entry.destination_label || "Destination not set"}
                     {entry.flexible ? " · nearby times work" : ""}
                   </p>
@@ -125,7 +125,7 @@ export default async function ReservationsPage({
       ) : null}
 
       <section>
-        <h2 className="mb-3 text-sm font-semibold uppercase tracking-wider text-muted">
+        <h2 className="mb-3 text-sm font-semibold uppercase tracking-wider text-ink-soft">
           Upcoming
         </h2>
         {upcoming.length === 0 ? (
@@ -149,7 +149,7 @@ export default async function ReservationsPage({
 
       {past.length > 0 ? (
         <section>
-          <h2 className="mb-3 text-sm font-semibold uppercase tracking-wider text-muted">
+          <h2 className="mb-3 text-sm font-semibold uppercase tracking-wider text-ink-soft">
             Past and closed
           </h2>
           <div className="space-y-4">
@@ -186,7 +186,7 @@ function ReservationCard({
   return (
     <article className="card overflow-hidden md:flex">
       {r.vehicle?.image_url ? (
-        <div className="relative aspect-[16/9] shrink-0 bg-navy-100 md:aspect-auto md:w-48">
+        <div className="relative aspect-[16/9] shrink-0 bg-parchment-deep md:aspect-auto md:w-48">
           <Image
             src={r.vehicle.image_url}
             alt=""
@@ -201,22 +201,22 @@ function ReservationCard({
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
             <div className="flex flex-wrap items-center gap-2">
-              <h3 className="text-base font-bold text-slate-500">
+              <h3 className="text-base font-bold text-ink">
                 {r.vehicle?.name ?? "Car"}
               </h3>
               <StatusBadge status={r.status} />
-              <span className="text-xs text-muted">{r.reference}</span>
+              <span className="text-xs text-ink-soft">{r.reference}</span>
             </div>
-            <p className="mt-1 text-sm text-muted">
+            <p className="mt-1 text-sm text-ink-soft">
               {formatRange(r.starts_at, r.ends_at)} · {describeDuration(hours)}
             </p>
           </div>
 
           <div className="text-right">
-            <p className="text-[11px] font-semibold uppercase tracking-wider text-muted">
+            <p className="text-[11px] font-semibold uppercase tracking-wider text-ink-soft">
               {r.status === "completed" ? "Total" : "Estimate"}
             </p>
-            <p className="text-xl font-bold tabular-nums text-navy-800">
+            <p className="text-xl font-bold tabular-nums text-ink">
               {formatMoney(r.total_cents)}
             </p>
           </div>

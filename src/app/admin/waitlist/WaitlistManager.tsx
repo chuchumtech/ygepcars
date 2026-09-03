@@ -20,8 +20,8 @@ const STATUS_STYLE: Record<string, string> = {
   waiting: "bg-amber-100 text-amber-800",
   offered: "bg-sky-100 text-sky-800",
   converted: "bg-emerald-100 text-emerald-800",
-  expired: "bg-navy-100 text-muted",
-  cancelled: "bg-navy-100 text-muted",
+  expired: "bg-parchment-deep text-ink-soft",
+  cancelled: "bg-parchment-deep text-ink-soft",
 };
 
 export function WaitlistManager({
@@ -41,11 +41,11 @@ export function WaitlistManager({
     <div className="space-y-6">
       <section>
         <div className="mb-3 flex flex-wrap items-baseline justify-between gap-2">
-          <h2 className="text-sm font-semibold uppercase tracking-wider text-muted">
+          <h2 className="text-sm font-semibold uppercase tracking-wider text-ink-soft">
             Open ({open.length})
           </h2>
           {open.length > 1 ? (
-            <p className="text-xs text-muted">
+            <p className="text-xs text-ink-soft">
               Arrows reorder the queue. Students never see the order — only how
               many are waiting.
             </p>
@@ -57,7 +57,7 @@ export function WaitlistManager({
             description="When a student's window is already taken they can put their name down here."
           />
         ) : (
-          <ol className="card divide-y divide-[var(--color-line)]">
+          <ol className="card divide-y divide-line/70">
             {open.map((entry, index) => (
               <li key={entry.id}>
                 <WaitlistRow
@@ -75,20 +75,20 @@ export function WaitlistManager({
 
       {closed.length > 0 ? (
         <section>
-          <h2 className="mb-3 text-sm font-semibold uppercase tracking-wider text-muted">
+          <h2 className="mb-3 text-sm font-semibold uppercase tracking-wider text-ink-soft">
             Closed
           </h2>
-          <ul className="card divide-y divide-[var(--color-line)]">
+          <ul className="card divide-y divide-line/70">
             {closed.slice(0, 25).map((entry) => (
               <li
                 key={entry.id}
                 className="flex flex-wrap items-center justify-between gap-3 px-4 py-3 text-sm"
               >
                 <span className="min-w-0">
-                  <span className="font-medium text-navy-800">
+                  <span className="font-medium text-ink">
                     {entry.student?.full_name ?? "Student"}
                   </span>
-                  <span className="text-muted">
+                  <span className="text-ink-soft">
                     {" "}
                     · {formatRange(entry.starts_at, entry.ends_at)}
                   </span>
@@ -97,7 +97,7 @@ export function WaitlistManager({
                   <span className={`chip ${STATUS_STYLE[entry.status]}`}>{entry.status}</span>
                   <form action={deleteWaitlistAction}>
                     <input type="hidden" name="waitlist_id" value={entry.id} />
-                    <button type="submit" className="text-xs text-muted hover:text-red-700">
+                    <button type="submit" className="text-xs text-ink-soft hover:text-red-700">
                       Remove
                     </button>
                   </form>
@@ -153,7 +153,7 @@ function WaitlistRow({
           </svg>
         </ReorderButton>
 
-        <span className="flex h-7 w-7 items-center justify-center rounded-full bg-slate-100 text-xs font-bold text-slate-600">
+        <span className="flex h-7 w-7 items-center justify-center rounded-full bg-parchment-deep text-xs font-bold text-ink">
           {position}
         </span>
 
@@ -180,23 +180,23 @@ function WaitlistRow({
           {entry.student ? (
             <Link
               href={`/admin/students/${entry.student.id}`}
-              className="font-semibold text-navy-800 hover:underline"
+              className="font-semibold text-ink hover:underline"
             >
               {entry.student.full_name}
             </Link>
           ) : (
-            <span className="font-semibold text-navy-800">Student</span>
+            <span className="font-semibold text-ink">Student</span>
           )}
           <span className={`chip ${STATUS_STYLE[entry.status]}`}>{entry.status}</span>
           {entry.flexible ? (
-            <span className="chip bg-navy-100 text-navy-700">Times flexible</span>
+            <span className="chip bg-parchment-deep text-ink">Times flexible</span>
           ) : null}
           {entry.vehicle_id === null ? (
-            <span className="chip bg-navy-100 text-navy-700">Any car</span>
+            <span className="chip bg-parchment-deep text-ink">Any car</span>
           ) : null}
         </div>
 
-        <p className="mt-1 flex items-center gap-2 text-sm text-navy-800">
+        <p className="mt-1 flex items-center gap-2 text-sm text-ink">
           {entry.vehicle_id ? (
             <span
               className={`h-2.5 w-2.5 shrink-0 rounded-full ${carColor(Math.max(0, vehicleIndex)).dot}`}
@@ -206,14 +206,14 @@ function WaitlistRow({
           {entry.vehicle?.name ?? "Whichever frees up"}
         </p>
 
-        <p className="text-sm text-muted">{formatRange(entry.starts_at, entry.ends_at)}</p>
-        <p className="text-xs text-muted">
+        <p className="text-sm text-ink-soft">{formatRange(entry.starts_at, entry.ends_at)}</p>
+        <p className="text-xs text-ink-soft">
           {entry.destination_label || "No destination"} · {entry.purpose || "no reason given"} ·
           asked {formatDate(entry.created_at)}
         </p>
 
         {entry.student_notes ? (
-          <p className="mt-2 rounded-lg bg-navy-50 px-3 py-2 text-xs text-navy-800">
+          <p className="mt-2 rounded-lg bg-parchment px-3 py-2 text-xs text-ink">
             {entry.student_notes}
           </p>
         ) : null}
@@ -282,8 +282,8 @@ function ReorderButton({
         title={label}
         className={
           textOnly
-            ? "rounded px-1 text-[10px] font-bold uppercase tracking-wide text-muted transition hover:text-gold-500"
-            : "rounded p-0.5 text-slate-300 transition hover:bg-slate-100 hover:text-slate-600 disabled:pointer-events-none disabled:opacity-25"
+            ? "rounded px-1 text-[10px] font-bold uppercase tracking-wide text-ink-soft transition hover:text-gold-500"
+            : "rounded p-0.5 text-slate-300 transition hover:bg-parchment-deep hover:text-ink disabled:pointer-events-none disabled:opacity-25"
         }
       >
         {children}
@@ -361,17 +361,17 @@ function ConvertDialog({
           </select>
         </Field>
 
-        <dl className="rounded-lg bg-navy-50 px-4 py-3 text-sm">
+        <dl className="rounded-lg bg-parchment px-4 py-3 text-sm">
           <div className="flex justify-between py-0.5">
-            <dt className="text-muted">Heading to</dt>
+            <dt className="text-ink-soft">Heading to</dt>
             <dd>{entry.destination_label || "not set"}</dd>
           </div>
           <div className="flex justify-between py-0.5">
-            <dt className="text-muted">Tolls will be</dt>
+            <dt className="text-ink-soft">Tolls will be</dt>
             <dd>{destination ? `$${(destination.toll_cents / 100).toFixed(2)}` : "$0.00"}</dd>
           </div>
           <div className="flex justify-between py-0.5">
-            <dt className="text-muted">Reason</dt>
+            <dt className="text-ink-soft">Reason</dt>
             <dd>{entry.purpose || "not given"}</dd>
           </div>
         </dl>

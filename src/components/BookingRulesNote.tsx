@@ -9,13 +9,13 @@ export function BookingRulesNote({
   className?: string;
 }) {
   return (
-    <ul className={`space-y-1.5 text-sm text-muted ${className}`}>
+    <ul className={`space-y-1.5 text-sm text-ink-soft ${className}`}>
       <li className="flex gap-2">
         <span aria-hidden className="text-gold-500">
           &bull;
         </span>
         <span>
-          Rentals are for <strong className="text-slate-600">at least {hoursLabel(rules.minRentalHours)}</strong>.
+          Rentals are for <strong className="text-ink">at least {hoursLabel(rules.minRentalHours)}</strong>.
         </span>
       </li>
       <li className="flex gap-2">
@@ -23,7 +23,7 @@ export function BookingRulesNote({
           &bull;
         </span>
         <span>
-          Book <strong className="text-slate-600">at least {hoursLabel(rules.minAdvanceHours)} ahead</strong> of
+          Book <strong className="text-ink">at least {hoursLabel(rules.minAdvanceHours)} ahead</strong> of
           when you want to pick up.
         </span>
       </li>
@@ -33,10 +33,10 @@ export function BookingRulesNote({
         </span>
         <span>
           The car is held for you for{" "}
-          <strong className="text-slate-600">{hoursLabel(rules.paymentHoldHours)}</strong> after you
+          <strong className="text-ink">{hoursLabel(rules.paymentHoldHours)}</strong> after you
           request it. If the office has not received payment by then the car goes
           back into the pool for anyone to book &mdash; but{" "}
-          <strong className="text-slate-600">your request stays open</strong>, so if you pay later and
+          <strong className="text-ink">your request stays open</strong>, so if you pay later and
           nobody else has taken the car, it is still yours.
         </span>
       </li>

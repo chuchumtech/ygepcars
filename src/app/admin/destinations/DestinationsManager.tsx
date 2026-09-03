@@ -74,16 +74,16 @@ function DestinationTable({
 }) {
   return (
     <section>
-      <h2 className="mb-3 text-sm font-semibold uppercase tracking-wider text-muted">
+      <h2 className="mb-3 text-sm font-semibold uppercase tracking-wider text-ink-soft">
         {title}
       </h2>
 
       {rows.length === 0 ? (
-        <p className="card-pad text-sm text-muted">{emptyMessage}</p>
+        <p className="card-pad text-sm text-ink-soft">{emptyMessage}</p>
       ) : (
         <div className="card overflow-x-auto">
           <table className="w-full min-w-[38rem]">
-            <thead className="border-b border-[var(--color-line)] bg-navy-50">
+            <thead className="border-b border-line/70 bg-parchment">
               <tr>
                 <th className="th">Destination</th>
                 <th className="th text-right">Flat toll</th>
@@ -91,19 +91,19 @@ function DestinationTable({
                 <th className="th" />
               </tr>
             </thead>
-            <tbody className="divide-y divide-[var(--color-line)]">
+            <tbody className="divide-y divide-line/70">
               {rows.map((destination) => (
-                <tr key={destination.id} className="transition hover:bg-navy-50">
+                <tr key={destination.id} className="transition hover:bg-parchment">
                   <td className="td">
-                    <p className="font-medium text-navy-800">{destination.name}</p>
+                    <p className="font-medium text-ink">{destination.name}</p>
                     {destination.description ? (
-                      <p className="text-xs text-muted">{destination.description}</p>
+                      <p className="text-xs text-ink-soft">{destination.description}</p>
                     ) : null}
                   </td>
                   <td className="td text-right text-base font-bold tabular-nums text-gold-500">
                     {formatMoney(destination.toll_cents)}
                   </td>
-                  <td className="td text-right tabular-nums text-muted">
+                  <td className="td text-right tabular-nums text-ink-soft">
                     {usage[destination.id] ?? 0}
                   </td>
                   <td className="td">

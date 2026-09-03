@@ -147,7 +147,7 @@ export function CalendarBoard({
           </button>
         </div>
 
-        <h2 className="ml-1 text-lg font-bold text-slate-500">{heading}</h2>
+        <h2 className="ml-1 text-lg font-bold text-ink">{heading}</h2>
 
         <div className="ml-auto flex flex-wrap items-center gap-2">
           <input
@@ -186,7 +186,7 @@ export function CalendarBoard({
             ))}
           </select>
 
-          <div className="flex rounded-lg border border-[var(--color-line)] bg-white p-0.5">
+          <div className="flex rounded-lg border border-line/70 bg-white p-0.5">
             {CALENDAR_VIEWS.map((option) => (
               <button
                 key={option.value}
@@ -195,7 +195,7 @@ export function CalendarBoard({
                 className={`rounded-md px-2.5 py-1.5 text-[13px] font-semibold transition ${
                   view === option.value
                     ? "bg-slate-500 text-white"
-                    : "text-slate-600 hover:bg-slate-50"
+                    : "text-ink hover:bg-parchment"
                 }`}
               >
                 {option.label}
@@ -205,7 +205,7 @@ export function CalendarBoard({
         </div>
       </div>
 
-      <div className="no-print flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted">
+      <div className="no-print flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-ink-soft">
         {data.vehicles.map((vehicle, index) => (
           <span key={vehicle.id} className="flex items-center gap-1.5">
             <span className={`h-2.5 w-2.5 rounded-full ${carColor(index).dot}`} aria-hidden />
@@ -217,7 +217,7 @@ export function CalendarBoard({
           Pending request
         </span>
         <span className="flex items-center gap-1.5">
-          <span className="h-2.5 w-4 rounded border border-navy-400 bg-navy-100" aria-hidden />
+          <span className="h-2.5 w-4 rounded border border-navy-400 bg-parchment-deep" aria-hidden />
           Approved
         </span>
         <span className="ml-auto">{events.length} shown</span>
@@ -240,7 +240,7 @@ export function CalendarBoard({
         dayColumns.length > 0 ? (
           <TimeGrid columns={dayColumns} events={events} onSelectEvent={openEvent} />
         ) : (
-          <p className="card-pad text-sm text-muted">No cars to show.</p>
+          <p className="card-pad text-sm text-ink-soft">No cars to show.</p>
         )
       ) : null}
 
@@ -249,7 +249,7 @@ export function CalendarBoard({
       ) : null}
 
       {view === "day" ? (
-        <p className="no-print text-xs text-muted">
+        <p className="no-print text-xs text-ink-soft">
           Showing {formatDayLong(`${anchor}T12:00:00Z`)}. Use{" "}
           <button
             type="button"

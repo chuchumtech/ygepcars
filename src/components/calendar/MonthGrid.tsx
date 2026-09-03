@@ -46,11 +46,11 @@ export function MonthGrid({
 
   return (
     <div className="card overflow-hidden">
-      <div className="grid grid-cols-7 border-b border-[var(--color-line)] bg-navy-50">
+      <div className="grid grid-cols-7 border-b border-line/70 bg-parchment">
         {WEEKDAYS.map((day) => (
           <div
             key={day}
-            className="px-2 py-2 text-center text-[11px] font-semibold uppercase tracking-wider text-muted"
+            className="px-2 py-2 text-center text-[11px] font-semibold uppercase tracking-wider text-ink-soft"
           >
             <span className="hidden sm:inline">{day}</span>
             <span className="sm:hidden">{day[0]}</span>
@@ -69,18 +69,18 @@ export function MonthGrid({
           return (
             <div
               key={day}
-              className={`min-h-24 border-r border-b border-[var(--color-line)] p-1 last:border-r-0 sm:min-h-28 ${
-                inMonth ? "bg-white" : "bg-navy-50/40"
+              className={`min-h-24 border-r border-b border-line/70 p-1 last:border-r-0 sm:min-h-28 ${
+                inMonth ? "bg-white" : "bg-parchment/40"
               }`}
             >
               <button
                 type="button"
                 onClick={() => onSelectDay(day)}
-                className={`mb-1 flex h-6 w-6 items-center justify-center rounded-full text-xs font-semibold transition hover:bg-navy-100 ${
+                className={`mb-1 flex h-6 w-6 items-center justify-center rounded-full text-xs font-semibold transition hover:bg-parchment-deep ${
                   isToday
                     ? "bg-slate-500 text-white hover:bg-slate-600"
                     : inMonth
-                      ? "text-navy-800"
+                      ? "text-ink"
                       : "text-navy-300"
                 }`}
                 aria-label={`Open ${day}`}
@@ -100,7 +100,7 @@ export function MonthGrid({
                   <button
                     type="button"
                     onClick={() => onSelectDay(day)}
-                    className="w-full rounded px-1.5 py-0.5 text-left text-[11px] font-semibold text-slate-600 hover:bg-slate-50"
+                    className="w-full rounded px-1.5 py-0.5 text-left text-[11px] font-semibold text-ink hover:bg-parchment"
                   >
                     +{overflow} more
                   </button>

@@ -46,10 +46,10 @@ export function AgendaList({
     <div className="space-y-5">
       {days.map((day) => (
         <section key={day} className="card overflow-hidden">
-          <h3 className="border-b border-[var(--color-line)] bg-navy-50 px-4 py-2 text-sm font-semibold text-slate-500">
+          <h3 className="border-b border-line/70 bg-parchment px-4 py-2 text-sm font-semibold text-ink">
             {formatDayLong(`${day}T12:00:00Z`)}
           </h3>
-          <ul className="divide-y divide-[var(--color-line)]">
+          <ul className="divide-y divide-line/70">
             {(byDay.get(day) ?? []).map((event, index) => {
               const color = carColor(event.vehicleIndex);
               return (
@@ -57,7 +57,7 @@ export function AgendaList({
                   <button
                     type="button"
                     onClick={() => onSelectEvent(event)}
-                    className="flex w-full items-center gap-3 px-4 py-3 text-left transition hover:bg-navy-50"
+                    className="flex w-full items-center gap-3 px-4 py-3 text-left transition hover:bg-parchment"
                   >
                     <span
                       className={`h-8 w-1 shrink-0 rounded-full ${
@@ -65,25 +65,25 @@ export function AgendaList({
                       }`}
                       aria-hidden
                     />
-                    <span className="w-32 shrink-0 text-xs tabular-nums text-muted">
+                    <span className="w-32 shrink-0 text-xs tabular-nums text-ink-soft">
                       {formatTime(event.startsAt)} – {formatTime(event.endsAt)}
                     </span>
                     <span className="min-w-0 flex-1">
-                      <span className="block truncate text-sm font-medium text-navy-800">
+                      <span className="block truncate text-sm font-medium text-ink">
                         {event.title}
                       </span>
                       {event.subtitle ? (
-                        <span className="block truncate text-xs text-muted">
+                        <span className="block truncate text-xs text-ink-soft">
                           {event.subtitle}
                         </span>
                       ) : null}
                     </span>
                     {event.status ? (
-                      <span className="chip shrink-0 bg-navy-100 text-navy-700 capitalize">
+                      <span className="chip shrink-0 bg-parchment-deep text-ink capitalize">
                         {event.status}
                       </span>
                     ) : (
-                      <span className="chip shrink-0 bg-navy-100 text-muted">
+                      <span className="chip shrink-0 bg-parchment-deep text-ink-soft">
                         Out of service
                       </span>
                     )}

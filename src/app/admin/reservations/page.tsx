@@ -117,7 +117,7 @@ function FilterGroup({
 }) {
   return (
     <div>
-      <p className="mb-1.5 text-[11px] font-semibold uppercase tracking-wider text-muted">
+      <p className="mb-1.5 text-[11px] font-semibold uppercase tracking-wider text-ink-soft">
         {label}
       </p>
       <div className="flex flex-wrap gap-1">
@@ -129,7 +129,7 @@ function FilterGroup({
             className={`chip border transition ${
               current === option.value
                 ? "border-slate-500 bg-slate-500 text-white"
-                : "border-[var(--color-line)] bg-white text-slate-600 hover:bg-slate-50"
+                : "border-line/70 bg-white text-ink hover:bg-parchment"
             }`}
           >
             {option.label}

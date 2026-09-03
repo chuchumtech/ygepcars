@@ -32,7 +32,7 @@ export function CarsManager({
     <div className="space-y-8">
       <section>
         <div className="mb-3 flex items-center justify-between gap-3">
-          <h2 className="text-sm font-semibold uppercase tracking-wider text-muted">
+          <h2 className="text-sm font-semibold uppercase tracking-wider text-ink-soft">
             The fleet
           </h2>
           <button type="button" className="btn-primary btn-sm" onClick={() => setEditing("new")}>
@@ -45,7 +45,7 @@ export function CarsManager({
             <article key={vehicle.id} className="card overflow-hidden">
               <div className="flex gap-4 p-4">
                 {vehicle.image_url ? (
-                  <div className="relative h-20 w-28 shrink-0 overflow-hidden rounded-lg bg-navy-100">
+                  <div className="relative h-20 w-28 shrink-0 overflow-hidden rounded-lg bg-parchment-deep">
                     <Image
                       src={vehicle.image_url}
                       alt=""
@@ -62,36 +62,36 @@ export function CarsManager({
                       className={`h-2.5 w-2.5 shrink-0 rounded-full ${carColor(index).dot}`}
                       aria-hidden
                     />
-                    <h3 className="truncate font-bold text-slate-500">{vehicle.name}</h3>
+                    <h3 className="truncate font-bold text-ink">{vehicle.name}</h3>
                     {!vehicle.is_active ? (
-                      <span className="chip bg-navy-100 text-muted">Hidden</span>
+                      <span className="chip bg-parchment-deep text-ink-soft">Hidden</span>
                     ) : null}
                   </div>
 
-                  <p className="mt-0.5 truncate text-sm text-muted">
+                  <p className="mt-0.5 truncate text-sm text-ink-soft">
                     {[vehicle.color, vehicle.license_plate, vehicle.seats ? `${vehicle.seats} seats` : null]
                       .filter(Boolean)
                       .join(" · ") || "No details yet"}
                   </p>
 
                   <p className="mt-2 text-sm">
-                    <span className="font-bold text-navy-800">
+                    <span className="font-bold text-ink">
                       {formatMoney(vehicle.hourly_rate_cents)}
                     </span>
-                    <span className="text-muted">/hr</span>
+                    <span className="text-ink-soft">/hr</span>
                     {vehicle.daily_cap_cents ? (
-                      <span className="text-muted">
+                      <span className="text-ink-soft">
                         {" "}
                         · {formatMoney(vehicle.daily_cap_cents)} daily cap
                       </span>
                     ) : (
-                      <span className="text-muted"> · no daily cap</span>
+                      <span className="text-ink-soft"> · no daily cap</span>
                     )}
                   </p>
                 </div>
               </div>
 
-              <div className="flex gap-2 border-t border-[var(--color-line)] bg-navy-50/50 px-4 py-2.5">
+              <div className="flex gap-2 border-t border-line/70 bg-parchment/50 px-4 py-2.5">
                 <button
                   type="button"
                   className="btn-secondary btn-sm"
@@ -115,7 +115,7 @@ export function CarsManager({
           ))}
 
           {vehicles.length === 0 ? (
-            <p className="card-pad text-sm text-muted">
+            <p className="card-pad text-sm text-ink-soft">
               No cars yet. Add the first one so students can book.
             </p>
           ) : null}
@@ -124,7 +124,7 @@ export function CarsManager({
 
       <section>
         <div className="mb-3 flex items-center justify-between gap-3">
-          <h2 className="text-sm font-semibold uppercase tracking-wider text-muted">
+          <h2 className="text-sm font-semibold uppercase tracking-wider text-ink-soft">
             Out of service
           </h2>
           <button
@@ -137,22 +137,22 @@ export function CarsManager({
         </div>
 
         {blackouts.length === 0 ? (
-          <p className="card-pad text-sm text-muted">
+          <p className="card-pad text-sm text-ink-soft">
             Nothing blocked off. Use this for oil changes, inspections, or when
             staff need a car.
           </p>
         ) : (
-          <div className="card divide-y divide-[var(--color-line)]">
+          <div className="card divide-y divide-line/70">
             {blackouts.map((blackout) => (
               <div
                 key={blackout.id}
                 className="flex flex-wrap items-center justify-between gap-3 px-4 py-3"
               >
                 <div>
-                  <p className="text-sm font-medium text-navy-800">
+                  <p className="text-sm font-medium text-ink">
                     {blackout.vehicle?.name ?? "Car"} — {blackout.reason || "Out of service"}
                   </p>
-                  <p className="text-xs text-muted">
+                  <p className="text-xs text-ink-soft">
                     {formatDateTime(blackout.starts_at)} to {formatDateTime(blackout.ends_at)}
                   </p>
                 </div>

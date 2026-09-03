@@ -15,7 +15,7 @@ export function eventStyles(event: CalEvent) {
   if (event.kind === "blackout") {
     return {
       className:
-        "border border-dashed border-navy-400 bg-[repeating-linear-gradient(45deg,#eef1f7_0_6px,#dfe4ee_6px_12px)] text-navy-700",
+        "border border-dashed border-navy-400 bg-[repeating-linear-gradient(45deg,#eef1f7_0_6px,#dfe4ee_6px_12px)] text-ink",
       dot: "bg-navy-400",
     };
   }
@@ -39,12 +39,12 @@ export function eventStyles(event: CalEvent) {
       };
     case "completed":
       return {
-        className: `border border-navy-200 bg-navy-50 text-navy-700`,
+        className: `border border-navy-200 bg-parchment text-ink`,
         dot: color.dot,
       };
     default:
       return {
-        className: "border border-navy-200 bg-white text-muted line-through decoration-1",
+        className: "border border-navy-200 bg-white text-ink-soft line-through decoration-1",
         dot: "bg-navy-300",
       };
   }

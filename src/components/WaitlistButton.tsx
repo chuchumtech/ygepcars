@@ -38,7 +38,7 @@ export function WaitlistButton({
       </button>
 
       {waitingCount > 0 ? (
-        <p className="mt-1.5 text-xs text-muted">
+        <p className="mt-1.5 text-xs text-ink-soft">
           {waitingCount} {waitingCount === 1 ? "student is" : "students are"} already
           waiting on this window.
         </p>
@@ -113,7 +113,7 @@ export function WaitlistButton({
             />
             <span>
               Nearby times would also work
-              <span className="block text-xs text-muted">
+              <span className="block text-xs text-ink-soft">
                 Gives the office room to fit you in somewhere close by.
               </span>
             </span>
