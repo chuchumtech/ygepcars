@@ -21,6 +21,7 @@ export function NewReservationButton({
   students: Pick<Profile, "id" | "full_name" | "email" | "status">[];
 }) {
   const [open, setOpen] = useState(false);
+  const [initialStatus, setInitialStatus] = useState("approved");
   const [state, action] = useActionState<ActionResult, FormData>(
     createReservationAction,
     {},
@@ -158,15 +159,27 @@ export function NewReservationButton({
             <textarea className="input min-h-20 resize-y" name="admin_notes" rows={2} />
           </Field>
 
-          <label className="flex items-center gap-2 text-sm">
-            <input
-              type="checkbox"
-              name="approve_now"
-              defaultChecked
-              className="h-4 w-4 accent-slate-500"
-            />
-            Approve it right away
-          </label>
+          <Field
+            label="Create it as"
+            hint="A hold blocks the car without confirming it or charging anything."
+          >
+            <select
+              className="input"
+              name="initial_status"
+              defaultValue="approved"
+              onChange={(e) => setInitialStatus(e.target.value)}
+            >
+              <option value="approved">Approved — confirmed booking</option>
+              <option value="hold">On hold — car blocked, not confirmed</option>
+              <option value="pending">Pending — decide later</option>
+            </select>
+          </Field>
+
+          {initialStatus === "hold" ? (
+            <Field label="Revisit the hold by (optional)">
+              <input className="input" type="date" name="hold_expires_at" />
+            </Field>
+          ) : null}
         </form>
       </Modal>
     </>

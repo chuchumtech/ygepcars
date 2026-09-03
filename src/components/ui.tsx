@@ -11,10 +11,12 @@ const RESERVATION_STATUS_STYLE: Record<
   { label: string; className: string }
 > = {
   pending: { label: "Pending", className: "bg-amber-100 text-amber-800" },
+  hold: { label: "On hold", className: "bg-gold-100 text-gold-600" },
   approved: { label: "Approved", className: "bg-emerald-100 text-emerald-800" },
-  completed: { label: "Completed", className: "bg-navy-100 text-navy-700" },
+  completed: { label: "Completed", className: "bg-slate-100 text-slate-600" },
   declined: { label: "Declined", className: "bg-red-100 text-red-700" },
-  cancelled: { label: "Cancelled", className: "bg-navy-100 text-muted" },
+  cancelled: { label: "Cancelled", className: "bg-slate-100 text-muted" },
+  released: { label: "Released", className: "bg-slate-100 text-muted" },
 };
 
 export function StatusBadge({ status }: { status: ReservationStatus }) {

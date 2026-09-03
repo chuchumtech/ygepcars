@@ -29,7 +29,7 @@ export default async function AdminCalendarPage({
   const now = new Date();
   const weekOut = new Date(now.getTime() + 7 * 86_400_000);
 
-  const [pendingCount, outNowCount, weekCount, balances] = await Promise.all([
+  const [pendingCount, outNowCount, weekCount, balances, holds] = await Promise.all([
     supabase
       .from("cars_reservations")
       .select("id", { count: "exact", head: true })
@@ -47,7 +47,16 @@ export default async function AdminCalendarPage({
       .gte("starts_at", now.toISOString())
       .lte("starts_at", weekOut.toISOString()),
     supabase.from("cars_student_balances").select("balance_cents"),
+    supabase
+      .from("cars_reservations")
+      .select("id, hold_expires_at", { count: "exact" })
+      .eq("status", "hold"),
   ]);
+
+  const holdRows = (holds.data ?? []) as { hold_expires_at: string | null }[];
+  const lapsedHolds = holdRows.filter(
+    (row) => row.hold_expires_at !== null && new Date(row.hold_expires_at) < now,
+  ).length;
 
   const owed = ((balances.data ?? []) as Pick<StudentBalance, "balance_cents">[])
     .filter((row) => row.balance_cents > 0)
@@ -74,7 +83,7 @@ export default async function AdminCalendarPage({
         </div>
       </div>
 
-      <div className="no-print grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="no-print grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
         <StatTile
           label="Waiting on you"
           value={String(pendingCount.count ?? 0)}
@@ -91,6 +100,16 @@ export default async function AdminCalendarPage({
           label="Next 7 days"
           value={String(weekCount.count ?? 0)}
           hint="Approved pickups coming up"
+        />
+        <StatTile
+          label="On hold"
+          value={String(holds.count ?? 0)}
+          hint={
+            lapsedHolds > 0
+              ? `${lapsedHolds} past the date you set`
+              : "Blocking a car, not confirmed"
+          }
+          tone={lapsedHolds > 0 ? "warn" : "default"}
         />
         <StatTile
           label="Outstanding"

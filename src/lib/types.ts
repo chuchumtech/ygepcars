@@ -2,10 +2,12 @@ export type Role = "student" | "admin";
 export type ProfileStatus = "pending" | "active" | "locked";
 export type ReservationStatus =
   | "pending"
+  | "hold"
   | "approved"
   | "declined"
   | "cancelled"
-  | "completed";
+  | "completed"
+  | "released";
 export type PaymentMethod =
   | "cash"
   | "check"
@@ -87,6 +89,9 @@ export type Reservation = {
   student_notes: string;
   admin_notes: string;
   decline_reason: string;
+  hold_expires_at: string | null;
+  released_at: string | null;
+  release_reason: string;
   requested_at: string;
   decided_at: string | null;
   decided_by: string | null;
@@ -165,6 +170,7 @@ export type WaitlistEntry = {
   flexible: boolean;
   student_notes: string;
   admin_notes: string;
+  position: number;
   offered_at: string | null;
   offered_by: string | null;
   offer_expires_at: string | null;

@@ -26,6 +26,12 @@ export function eventStyles(event: CalEvent) {
         className: `border-2 border-dashed ${color.border} ${color.soft} ${color.text}`,
         dot: color.dot,
       };
+    case "hold":
+      // Solid gold edge: the car is genuinely spoken for, but not confirmed.
+      return {
+        className: `border-2 border-gold-400 bg-gold-50 text-gold-600`,
+        dot: "bg-gold-500",
+      };
     case "approved":
       return {
         className: `border ${color.border} ${color.soft} ${color.text} shadow-xs`,

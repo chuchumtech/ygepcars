@@ -37,6 +37,7 @@ supabase/migrations/0001_cars_schema.sql   tables, constraints, guard triggers
 supabase/migrations/0002_cars_rls.sql      row level security, availability functions
 supabase/migrations/0003_cars_seed.sql     the two cars, a starter toll sheet, settings
 supabase/migrations/0004_cars_waitlist_and_email.sql   waitlist and email log
+supabase/migrations/0005_cars_holds_and_ordering.sql   holds, releases, queue order
 ```
 
 The seed only inserts when a table is still empty, so re-running is safe.
@@ -131,14 +132,35 @@ Sending never blocks a booking. If Resend is down or misconfigured the student's
 request still goes through and the failure is recorded in `cars_email_log`,
 visible in the portal.
 
+## Holds and releases
+
+Beyond approving and declining, the office can **put a car on hold**: it blocks
+the car exactly like a confirmed booking, so nobody else can take the window,
+but nothing is confirmed and nothing is charged — a hold stays out of the
+student's balance. An optional "revisit by" date is a reminder only; a lapsed
+hold keeps blocking the car until somebody acts on it, so a forgotten hold never
+quietly hands the car to someone else. The calendar dashboard counts holds and
+flags any that are past their date.
+
+**Release** frees the car in one click from a hold or a confirmed booking, with
+an optional reason, and links straight to the waitlist for that window. The
+record stays on the student's history as released rather than vanishing.
+
+A new reservation the office creates can start as approved, on hold, or pending.
+
 ## Waitlist
 
 When a student's window is already taken they can put their name down instead of
 hitting a dead end. They see **how many people are waiting** on that window and
-nothing else — no names, no positions. The office sees the full queue in order,
-oldest first, and decides who actually gets the car; "Book them in" turns an
-entry into an approved reservation priced from current rates, with the
-double-booking constraint still having the final say.
+nothing else — no names, no positions.
+
+The office sees the full queue and controls it: arrows move an entry up, down or
+straight to the top, and "Book them in" works on **any** entry regardless of
+position — the order is a note to the office, never a rule it is bound by.
+Booking someone in turns their entry into an approved reservation priced from
+current rates, with the double-booking constraint still having the final say.
+Reordering renumbers the queue in a single statement, so it is never half
+applied, and a student cannot reorder anything.
 
 ## Printing
 

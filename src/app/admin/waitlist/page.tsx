@@ -16,13 +16,21 @@ export default async function WaitlistPage() {
       .select(
         "*, vehicle:cars_vehicles(id, name, color), student:cars_profiles!cars_waitlist_user_id_fkey(id, full_name, email, phone)",
       )
+      .order("position")
       .order("created_at"),
     supabase.from("cars_vehicles").select("*").order("sort_order"),
     supabase.from("cars_destinations").select("*").order("sort_order"),
   ]);
 
   const all = (entries.data ?? []) as WaitlistEntryWithRefs[];
-  const open = all.filter((entry) => ["waiting", "offered"].includes(entry.status));
+  const open = all
+    .filter((entry) => ["waiting", "offered"].includes(entry.status))
+    .sort((a, b) => {
+      // position 0 means the office has never placed this one, so it sorts last.
+      const pa = a.position === 0 ? Number.MAX_SAFE_INTEGER : a.position;
+      const pb = b.position === 0 ? Number.MAX_SAFE_INTEGER : b.position;
+      return pa - pb || a.created_at.localeCompare(b.created_at);
+    });
   const closed = all.filter((entry) => !open.includes(entry));
 
   const flexible = open.filter((entry) => entry.flexible).length;
@@ -32,7 +40,7 @@ export default async function WaitlistPage() {
     <div className="space-y-5">
       <PageHeader
         title="Waitlist"
-        description="Students whose window was already taken. Order is oldest first — the office decides who actually gets a car."
+        description="Students whose window was already taken. Drag the order with the arrows, or just book in whoever you want — you are never forced to take the top of the list."
       />
 
       <div className="grid gap-3 sm:grid-cols-3">

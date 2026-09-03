@@ -6,7 +6,6 @@ import { localToInstant } from "@/lib/dates";
 import { parseMoneyToCents, quote } from "@/lib/pricing";
 import type { Reservation, Vehicle } from "@/lib/types";
 import {
-  checkbox,
   friendlyDbError,
   revalidateAdmin,
   text,
@@ -47,7 +46,11 @@ export async function decideReservationAction(
   const id = text(formData, "reservation_id");
   const decision = text(formData, "decision");
 
-  if (!["approved", "declined", "completed", "cancelled", "pending"].includes(decision)) {
+  if (
+    !["approved", "declined", "completed", "cancelled", "pending", "hold", "released"].includes(
+      decision,
+    )
+  ) {
     return { error: "Unknown decision." };
   }
 
@@ -66,6 +69,16 @@ export async function decideReservationAction(
   if (decision === "pending") {
     patch.decided_at = null;
     patch.decided_by = null;
+  }
+  if (decision === "hold") {
+    const until = text(formData, "hold_expires_at");
+    patch.hold_expires_at = until ? new Date(`${until}T23:59:00`).toISOString() : null;
+    patch.released_at = null;
+    patch.release_reason = "";
+  }
+  if (decision === "released") {
+    patch.released_at = new Date().toISOString();
+    patch.release_reason = text(formData, "release_reason");
   }
 
   const { error } = await supabase.from("cars_reservations").update(patch).eq("id", id);
@@ -232,6 +245,17 @@ export async function createReservationAction(
     tollCents,
   });
 
+  const requested = text(formData, "initial_status");
+  const initialStatus = (["pending", "hold", "approved"].includes(requested)
+    ? requested
+    : "approved") as "pending" | "hold" | "approved";
+
+  const holdUntilRaw = text(formData, "hold_expires_at");
+  const holdUntil =
+    initialStatus === "hold" && holdUntilRaw
+      ? new Date(`${holdUntilRaw}T23:59:00`).toISOString()
+      : null;
+
   const { data: inserted, error } = await supabase
     .from("cars_reservations")
     .insert({
@@ -239,7 +263,7 @@ export async function createReservationAction(
       vehicle_id: vehicle.id,
       starts_at: startsAt.toISOString(),
       ends_at: endsAt.toISOString(),
-      status: checkbox(formData, "approve_now") ? "approved" : "pending",
+      status: initialStatus,
       destination_id: destinationId || null,
       destination_label: destinationLabel,
       purpose: text(formData, "purpose"),
@@ -250,8 +274,9 @@ export async function createReservationAction(
       toll_cents: computed.tollCents,
       total_cents: computed.totalCents,
       admin_notes: text(formData, "admin_notes"),
-      decided_at: checkbox(formData, "approve_now") ? new Date().toISOString() : null,
-      decided_by: checkbox(formData, "approve_now") ? admin.userId : null,
+      hold_expires_at: holdUntil,
+      decided_at: initialStatus === "approved" ? new Date().toISOString() : null,
+      decided_by: initialStatus === "approved" ? admin.userId : null,
     })
     .select("id")
     .single();

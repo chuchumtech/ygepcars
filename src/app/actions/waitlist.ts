@@ -239,6 +239,27 @@ export async function convertWaitlistAction(
   return { success: "Booked, and the student can see it now." };
 }
 
+/**
+ * Moves an entry to a 1-based position in the open queue. The database function
+ * renumbers everything in one statement, so the office never sees half-applied
+ * ordering and out-of-range targets are clamped rather than rejected.
+ */
+export async function moveWaitlistAction(formData: FormData) {
+  await requireAdmin();
+  const supabase = await createClient();
+
+  const id = text(formData, "waitlist_id");
+  const target = Number(text(formData, "target"));
+  if (!id || !Number.isFinite(target)) return;
+
+  await supabase.rpc("cars_waitlist_move", {
+    p_id: id,
+    p_target: Math.max(1, Math.round(target)),
+  });
+
+  revalidatePath("/admin", "layout");
+}
+
 export async function deleteWaitlistAction(formData: FormData) {
   await requireAdmin();
   const supabase = await createClient();

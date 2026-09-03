@@ -5,6 +5,7 @@ import { useActionState, useState } from "react";
 import {
   convertWaitlistAction,
   deleteWaitlistAction,
+  moveWaitlistAction,
   setWaitlistStatusAction,
 } from "@/app/actions/waitlist";
 import type { ActionResult } from "@/app/actions/shared";
@@ -39,9 +40,17 @@ export function WaitlistManager({
   return (
     <div className="space-y-6">
       <section>
-        <h2 className="mb-3 text-sm font-semibold uppercase tracking-wider text-muted">
-          Open ({open.length})
-        </h2>
+        <div className="mb-3 flex flex-wrap items-baseline justify-between gap-2">
+          <h2 className="text-sm font-semibold uppercase tracking-wider text-muted">
+            Open ({open.length})
+          </h2>
+          {open.length > 1 ? (
+            <p className="text-xs text-muted">
+              Arrows reorder the queue. Students never see the order — only how
+              many are waiting.
+            </p>
+          ) : null}
+        </div>
         {open.length === 0 ? (
           <EmptyState
             title="Nobody is waiting"
@@ -54,6 +63,7 @@ export function WaitlistManager({
                 <WaitlistRow
                   entry={entry}
                   position={index + 1}
+                  total={open.length}
                   vehicles={vehicles}
                   onOpen={() => setSelected(entry)}
                 />
@@ -113,11 +123,13 @@ export function WaitlistManager({
 function WaitlistRow({
   entry,
   position,
+  total,
   vehicles,
   onOpen,
 }: {
   entry: WaitlistEntryWithRefs;
   position: number;
+  total: number;
   vehicles: Vehicle[];
   onOpen: () => void;
 }) {
@@ -129,9 +141,39 @@ function WaitlistRow({
 
   return (
     <div className="flex flex-wrap items-start gap-4 p-4">
-      <span className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-navy-100 text-xs font-bold text-navy-700">
-        {position}
-      </span>
+      <div className="flex shrink-0 flex-col items-center gap-0.5">
+        <ReorderButton
+          waitlistId={entry.id}
+          target={position - 1}
+          disabled={position === 1}
+          label="Move up"
+        >
+          <svg width="12" height="12" viewBox="0 0 12 12" aria-hidden>
+            <path d="M6 3l4 5H2z" fill="currentColor" />
+          </svg>
+        </ReorderButton>
+
+        <span className="flex h-7 w-7 items-center justify-center rounded-full bg-slate-100 text-xs font-bold text-slate-600">
+          {position}
+        </span>
+
+        <ReorderButton
+          waitlistId={entry.id}
+          target={position + 1}
+          disabled={position === total}
+          label="Move down"
+        >
+          <svg width="12" height="12" viewBox="0 0 12 12" aria-hidden>
+            <path d="M6 9L2 4h8z" fill="currentColor" />
+          </svg>
+        </ReorderButton>
+
+        {position > 2 ? (
+          <ReorderButton waitlistId={entry.id} target={1} label="Move to the top" textOnly>
+            top
+          </ReorderButton>
+        ) : null}
+      </div>
 
       <div className="min-w-0 flex-1">
         <div className="flex flex-wrap items-center gap-2">
@@ -211,6 +253,42 @@ function WaitlistRow({
         </form>
       </div>
     </div>
+  );
+}
+
+function ReorderButton({
+  waitlistId,
+  target,
+  disabled = false,
+  label,
+  textOnly = false,
+  children,
+}: {
+  waitlistId: string;
+  target: number;
+  disabled?: boolean;
+  label: string;
+  textOnly?: boolean;
+  children: React.ReactNode;
+}) {
+  return (
+    <form action={moveWaitlistAction}>
+      <input type="hidden" name="waitlist_id" value={waitlistId} />
+      <input type="hidden" name="target" value={target} />
+      <button
+        type="submit"
+        disabled={disabled}
+        aria-label={label}
+        title={label}
+        className={
+          textOnly
+            ? "rounded px-1 text-[10px] font-bold uppercase tracking-wide text-muted transition hover:text-gold-500"
+            : "rounded p-0.5 text-slate-300 transition hover:bg-slate-100 hover:text-slate-600 disabled:pointer-events-none disabled:opacity-25"
+        }
+      >
+        {children}
+      </button>
+    </form>
   );
 }
 

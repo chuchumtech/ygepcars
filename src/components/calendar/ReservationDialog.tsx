@@ -26,10 +26,12 @@ import type { AdminReservation } from "./types";
 
 const STATUSES = [
   { value: "pending", label: "Pending" },
+  { value: "hold", label: "On hold" },
   { value: "approved", label: "Approved" },
   { value: "completed", label: "Completed" },
   { value: "declined", label: "Declined" },
   { value: "cancelled", label: "Cancelled" },
+  { value: "released", label: "Released" },
 ];
 
 function money(cents: number | null | undefined): string {
@@ -166,10 +168,56 @@ function ReadView({
   decideAction: (formData: FormData) => void;
 }) {
   const [declining, setDeclining] = useState(false);
+  const [holding, setHolding] = useState(false);
+  const [releasing, setReleasing] = useState(false);
+
+  const occupiesCar = ["hold", "approved", "completed"].includes(reservation.status);
 
   return (
     <div className="space-y-5">
+      {reservation.status === "hold" ? (
+        <Alert tone="info" title="This car is on hold">
+          {reservation.hold_expires_at
+            ? `Meant to be revisited by ${formatDateTime(reservation.hold_expires_at)}. It keeps blocking the car until you approve or release it, so a forgotten hold never quietly hands the car to somebody else.`
+            : "Nobody else can book this car until you approve or release it."}
+        </Alert>
+      ) : null}
+
+      {reservation.status === "released" && reservation.release_reason ? (
+        <Alert tone="info" title="Released">
+          {reservation.release_reason}
+        </Alert>
+      ) : null}
+
       <div className="flex flex-wrap gap-2">
+        {reservation.status !== "hold" && reservation.status !== "completed" ? (
+          <button
+            type="button"
+            className="btn-secondary btn-sm"
+            onClick={() => {
+              setHolding((value) => !value);
+              setReleasing(false);
+              setDeclining(false);
+            }}
+          >
+            Put on hold
+          </button>
+        ) : null}
+
+        {occupiesCar ? (
+          <button
+            type="button"
+            className="btn-secondary btn-sm"
+            onClick={() => {
+              setReleasing((value) => !value);
+              setHolding(false);
+              setDeclining(false);
+            }}
+          >
+            Release the car
+          </button>
+        ) : null}
+
         {reservation.status !== "approved" ? (
           <form action={decideAction}>
             <input type="hidden" name="reservation_id" value={reservation.id} />
@@ -219,6 +267,53 @@ function ReadView({
           </Link>
         ) : null}
       </div>
+
+      {holding ? (
+        <form action={decideAction} className="card-pad space-y-3 bg-gold-50/60">
+          <input type="hidden" name="reservation_id" value={reservation.id} />
+          <input type="hidden" name="decision" value="hold" />
+          <p className="text-sm text-slate-600">
+            The car is blocked for this student while it is held, exactly as if it
+            were booked. Nothing is charged until you approve it.
+          </p>
+          <Field
+            label="Revisit by (optional)"
+            hint="Just a reminder for you — a lapsed hold keeps the car blocked until you act on it."
+          >
+            <input className="input" type="date" name="hold_expires_at" />
+          </Field>
+          <SubmitButton className="btn-primary btn-sm" pendingLabel="Holding...">
+            Hold this car
+          </SubmitButton>
+        </form>
+      ) : null}
+
+      {releasing ? (
+        <form action={decideAction} className="card-pad space-y-3 bg-slate-50">
+          <input type="hidden" name="reservation_id" value={reservation.id} />
+          <input type="hidden" name="decision" value="released" />
+          <p className="text-sm text-slate-600">
+            Frees the car straight away so somebody else can take this window. The
+            record stays on the student&apos;s history, and nothing is charged.
+          </p>
+          <Field label="Why is it being released? (optional)">
+            <input
+              className="input"
+              name="release_reason"
+              placeholder="Student changed plans, giving it to someone on the waitlist"
+              autoFocus
+            />
+          </Field>
+          <div className="flex flex-wrap gap-2">
+            <SubmitButton className="btn-primary btn-sm" pendingLabel="Releasing...">
+              Release the car
+            </SubmitButton>
+            <Link href="/admin/waitlist" className="btn-secondary btn-sm">
+              See who is waiting
+            </Link>
+          </div>
+        </form>
+      ) : null}
 
       {declining ? (
         <form action={decideAction} className="card-pad space-y-3 bg-red-50/50">

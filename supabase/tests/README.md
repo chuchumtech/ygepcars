@@ -12,6 +12,11 @@ things that matter most and are easiest to get wrong:
   who booked what; they cannot promote themselves to admin, change a rate, or
   approve their own request; the office sees everything; an anonymous visitor
   sees the fleet and the toll sheet and nothing else.
+* **`93_holds_and_ordering.sql`** — a hold blocks the car and cannot be booked
+  over; releasing it frees the car for somebody else immediately; a held car is
+  not money owed; reordering the queue produces the expected order, clamps an
+  out-of-range target instead of erroring, and leaves positions unique and
+  contiguous; a student can neither reorder the queue nor place a hold.
 * **`92_waitlist.sql`** — the waiting count is honest and drops when somebody
   cancels; a student cannot stack the same window twice or promote their own
   entry; students see only their own row while still getting the true total
@@ -32,9 +37,11 @@ for f in supabase/tests/00_supabase_stub.sql \
          supabase/migrations/0002_cars_rls.sql \
          supabase/migrations/0003_cars_seed.sql \
          supabase/migrations/0004_cars_waitlist_and_email.sql \
+         supabase/migrations/0005_cars_holds_and_ordering.sql \
          supabase/tests/90_behaviour.sql \
          supabase/tests/91_rls.sql \
-         supabase/tests/92_waitlist.sql; do
+         supabase/tests/92_waitlist.sql \
+         supabase/tests/93_holds_and_ordering.sql; do
   psql -d carscheck -v ON_ERROR_STOP=1 -q -f "$f"
 done
 ```
@@ -42,5 +49,8 @@ done
 Every check either prints `PASS` or an expected row count. A `raise exception`
 means a guard stopped doing its job.
 
-Do not point these at the real project — `91_rls.sql` and `92_waitlist.sql`
-grant table privileges that a live database should not receive.
+Each file brings its own people, so they can be run in any order or on their own.
+
+Do not point these at the real project — `91_rls.sql`, `92_waitlist.sql` and
+`93_holds_and_ordering.sql` grant table privileges that a live database should
+not receive.
