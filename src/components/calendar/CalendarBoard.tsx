@@ -147,7 +147,7 @@ export function CalendarBoard({
           </button>
         </div>
 
-        <h2 className="ml-1 text-lg font-bold text-navy-800">{heading}</h2>
+        <h2 className="ml-1 text-lg font-bold text-slate-500">{heading}</h2>
 
         <div className="ml-auto flex flex-wrap items-center gap-2">
           <input
@@ -194,8 +194,8 @@ export function CalendarBoard({
                 onClick={() => navigate({ view: option.value })}
                 className={`rounded-md px-2.5 py-1.5 text-[13px] font-semibold transition ${
                   view === option.value
-                    ? "bg-navy-700 text-white"
-                    : "text-navy-600 hover:bg-navy-50"
+                    ? "bg-slate-500 text-white"
+                    : "text-slate-600 hover:bg-slate-50"
                 }`}
               >
                 {option.label}

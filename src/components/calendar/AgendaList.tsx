@@ -46,7 +46,7 @@ export function AgendaList({
     <div className="space-y-5">
       {days.map((day) => (
         <section key={day} className="card overflow-hidden">
-          <h3 className="border-b border-[var(--color-line)] bg-navy-50 px-4 py-2 text-sm font-semibold text-navy-800">
+          <h3 className="border-b border-[var(--color-line)] bg-navy-50 px-4 py-2 text-sm font-semibold text-slate-500">
             {formatDayLong(`${day}T12:00:00Z`)}
           </h3>
           <ul className="divide-y divide-[var(--color-line)]">

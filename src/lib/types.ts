@@ -144,3 +144,49 @@ export type BusyWindow = {
   ends_at: string;
   kind: "booked" | "requested" | "maintenance";
 };
+
+export type WaitlistStatus =
+  | "waiting"
+  | "offered"
+  | "converted"
+  | "expired"
+  | "cancelled";
+
+export type WaitlistEntry = {
+  id: string;
+  user_id: string;
+  vehicle_id: string | null;
+  starts_at: string;
+  ends_at: string;
+  status: WaitlistStatus;
+  destination_id: string | null;
+  destination_label: string;
+  purpose: string;
+  flexible: boolean;
+  student_notes: string;
+  admin_notes: string;
+  offered_at: string | null;
+  offered_by: string | null;
+  offer_expires_at: string | null;
+  converted_reservation_id: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
+export type WaitlistEntryWithRefs = WaitlistEntry & {
+  vehicle: Pick<Vehicle, "id" | "name" | "color"> | null;
+  student: Pick<Profile, "id" | "full_name" | "email" | "phone"> | null;
+};
+
+export type EmailLogEntry = {
+  id: string;
+  to_email: string;
+  subject: string;
+  kind: string;
+  entity_type: string;
+  entity_id: string | null;
+  status: "sent" | "failed" | "skipped";
+  provider_id: string;
+  error: string;
+  created_at: string;
+};

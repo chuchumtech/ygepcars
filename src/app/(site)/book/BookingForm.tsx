@@ -56,7 +56,7 @@ export function BookingForm({
       {state.error ? <Alert tone="error">{state.error}</Alert> : null}
 
       <section className="card-pad space-y-4">
-        <h2 className="text-base font-bold text-navy-800">Where are you going?</h2>
+        <h2 className="text-base font-bold text-slate-500">Where are you going?</h2>
         <p className="-mt-2 text-sm text-muted">
           Tolls are billed as one flat fee for the trip, based on the destination.
         </p>
@@ -77,7 +77,7 @@ export function BookingForm({
                 value={option.id}
                 checked={option.id === destinationId}
                 onChange={() => setDestinationId(option.id)}
-                className="h-4 w-4 shrink-0 accent-navy-700"
+                className="h-4 w-4 shrink-0 accent-slate-500"
                 required
               />
               <span className="min-w-0 flex-1">
@@ -115,7 +115,7 @@ export function BookingForm({
       </section>
 
       <section className="card-pad space-y-4">
-        <h2 className="text-base font-bold text-navy-800">A few details</h2>
+        <h2 className="text-base font-bold text-slate-500">A few details</h2>
 
         <Field label="Reason for the trip">
           <input
@@ -139,7 +139,7 @@ export function BookingForm({
       </section>
 
       <section className="card-pad">
-        <h2 className="text-base font-bold text-navy-800">Estimated total</h2>
+        <h2 className="text-base font-bold text-slate-500">Estimated total</h2>
 
         <dl className="mt-3 text-sm">
           <div className="flex justify-between border-b border-[var(--color-line)] py-2">

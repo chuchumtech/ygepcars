@@ -79,7 +79,7 @@ export default async function BookPage({
         <Link href="/" className="text-sm text-muted hover:text-navy-700">
           &larr; Back to search
         </Link>
-        <h1 className="mt-2 text-2xl font-bold tracking-tight text-navy-800">
+        <h1 className="mt-2 text-2xl font-bold tracking-tight text-slate-500">
           Request a reservation
         </h1>
         <p className="mt-1 text-sm text-muted">
@@ -116,7 +116,7 @@ export default async function BookPage({
               </div>
             ) : null}
             <div className="p-4">
-              <h2 className="text-base font-bold text-navy-800">{vehicle.name}</h2>
+              <h2 className="text-base font-bold text-slate-500">{vehicle.name}</h2>
               <p className="mt-0.5 text-sm text-muted">
                 {[vehicle.color, vehicle.seats ? `${vehicle.seats} seats` : null]
                   .filter(Boolean)

@@ -44,7 +44,7 @@ export default async function HomePage({
 
       <section>
         <div className="max-w-2xl">
-          <h1 className="text-3xl font-bold tracking-tight text-navy-800 sm:text-4xl">
+          <h1 className="text-3xl font-bold tracking-tight text-slate-500 sm:text-4xl">
             Reserve a yeshiva car
           </h1>
           <p className="mt-3 text-[15px] leading-relaxed text-muted">
@@ -77,7 +77,7 @@ export default async function HomePage({
       </section>
 
       <section>
-        <h2 className="text-lg font-bold text-navy-800">The cars</h2>
+        <h2 className="text-lg font-bold text-slate-500">The cars</h2>
         <div className="mt-4 grid gap-4 sm:grid-cols-2">
           {cars.map((car) => (
             <article key={car.id} className="card overflow-hidden">
@@ -93,7 +93,7 @@ export default async function HomePage({
                 </div>
               ) : null}
               <div className="p-5">
-                <h3 className="text-base font-bold text-navy-800">{car.name}</h3>
+                <h3 className="text-base font-bold text-slate-500">{car.name}</h3>
                 <p className="mt-0.5 text-sm text-muted">
                   {[car.color, car.seats ? `${car.seats} seats` : null]
                     .filter(Boolean)
@@ -123,7 +123,7 @@ export default async function HomePage({
 
       {tollExamples.length > 0 ? (
         <section>
-          <h2 className="text-lg font-bold text-navy-800">Tolls</h2>
+          <h2 className="text-lg font-bold text-slate-500">Tolls</h2>
           <p className="mt-1 max-w-2xl text-sm text-muted">
             Tolls are charged as one flat fee based on where you are heading, so
             you know the number up front. You pick your destination when you make

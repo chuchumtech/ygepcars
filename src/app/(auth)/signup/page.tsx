@@ -7,7 +7,7 @@ export const metadata: Metadata = { title: "Create an account" };
 export default function SignupPage() {
   return (
     <div className="card-pad">
-      <h1 className="text-xl font-bold text-navy-800">Create your account</h1>
+      <h1 className="text-xl font-bold text-slate-500">Create your account</h1>
       <p className="mt-1 text-sm text-muted">
         The office reviews new accounts before you can request a car. This usually
         takes a day or less.

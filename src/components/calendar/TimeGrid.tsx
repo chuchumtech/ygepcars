@@ -59,7 +59,7 @@ export function TimeGrid({
                   column.highlight ?? column.date === today ? "bg-navy-50" : ""
                 }`}
               >
-                <p className="text-xs font-semibold text-navy-800">{column.heading}</p>
+                <p className="text-xs font-semibold text-slate-500">{column.heading}</p>
                 {column.subheading ? (
                   <p className="text-[11px] text-muted">{column.subheading}</p>
                 ) : null}

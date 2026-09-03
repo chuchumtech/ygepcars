@@ -53,7 +53,7 @@ export function Modal({
         <div className="flex max-h-[85vh] flex-col">
           <div className="flex items-start justify-between gap-4 border-b border-[var(--color-line)] px-5 py-4">
             <div className="min-w-0">
-              <h2 className="truncate text-lg font-bold text-navy-800">{title}</h2>
+              <h2 className="truncate text-lg font-bold text-slate-500">{title}</h2>
               {subtitle ? (
                 <div className="mt-0.5 text-sm text-muted">{subtitle}</div>
               ) : null}

@@ -15,7 +15,7 @@ export default async function PendingPage() {
 
   return (
     <div className="card-pad">
-      <h1 className="text-xl font-bold text-navy-800">
+      <h1 className="text-xl font-bold text-slate-500">
         {locked ? "Your account is on hold" : "Thanks for registering"}
       </h1>
 

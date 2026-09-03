@@ -62,7 +62,7 @@ export function CarsManager({
                       className={`h-2.5 w-2.5 shrink-0 rounded-full ${carColor(index).dot}`}
                       aria-hidden
                     />
-                    <h3 className="truncate font-bold text-navy-800">{vehicle.name}</h3>
+                    <h3 className="truncate font-bold text-slate-500">{vehicle.name}</h3>
                     {!vehicle.is_active ? (
                       <span className="chip bg-navy-100 text-muted">Hidden</span>
                     ) : null}
@@ -319,7 +319,7 @@ function VehicleDialog({
               type="checkbox"
               name="is_active"
               defaultChecked={vehicle?.is_active ?? true}
-              className="h-4 w-4 accent-navy-700"
+              className="h-4 w-4 accent-slate-500"
             />
             Students can book this car
           </label>

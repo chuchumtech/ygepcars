@@ -7,8 +7,9 @@ Two halves:
 - **Student site** — search by date and time, see which car is free, pick a
   destination, get an itemised estimate, and send a request to the office.
 - **Office portal** (`/admin`) — a calendar of everything, a queue of pending
-  requests, a CRM for students with balances and payment history, and full
-  control over cars, destinations, tolls and lockouts.
+  requests, a waitlist, a CRM for students with balances and payment history,
+  printable run sheets, and full control over cars, destinations, tolls and
+  lockouts.
 
 No money moves through the site. Students see an estimate; the office records
 what was actually paid.
@@ -35,6 +36,7 @@ Run them in order, either through the Supabase SQL editor or the CLI:
 supabase/migrations/0001_cars_schema.sql   tables, constraints, guard triggers
 supabase/migrations/0002_cars_rls.sql      row level security, availability functions
 supabase/migrations/0003_cars_seed.sql     the two cars, a starter toll sheet, settings
+supabase/migrations/0004_cars_waitlist_and_email.sql   waitlist and email log
 ```
 
 The seed only inserts when a table is still empty, so re-running is safe.
@@ -50,6 +52,10 @@ Copy `.env.example` to `.env.local` and fill in the four values from
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Publishable / anon key |
 | `SUPABASE_SERVICE_ROLE_KEY` | Service role key — **server only, never commit** |
 | `NEXT_PUBLIC_SITE_URL` | Public URL of this app |
+
+For email notifications, also set `RESEND_API_KEY`, `EMAIL_FROM` (on a domain
+verified in Resend) and `OFFICE_NOTIFICATION_EMAILS`. All three are optional —
+without them the app runs normally and simply does not send.
 
 ### 3. Run it
 
@@ -108,6 +114,40 @@ Enforced by row level security, so it holds even if a page forgets to filter:
   posted.
 - Admins see everything.
 
+## Email notifications
+
+Notifications go **to the office only**; students are never emailed, they check
+the site. Sent through [Resend](https://resend.com) when the office receives:
+
+- a new reservation request,
+- a cancellation or withdrawal,
+- a new account registration,
+- a new waitlist entry.
+
+Each kind can be switched off in the portal under Settings, which is also where
+extra recipients are added on top of `OFFICE_NOTIFICATION_EMAILS`.
+
+Sending never blocks a booking. If Resend is down or misconfigured the student's
+request still goes through and the failure is recorded in `cars_email_log`,
+visible in the portal.
+
+## Waitlist
+
+When a student's window is already taken they can put their name down instead of
+hitting a dead end. They see **how many people are waiting** on that window and
+nothing else — no names, no positions. The office sees the full queue in order,
+oldest first, and decides who actually gets the car; "Book them in" turns an
+entry into an approved reservation priced from current rates, with the
+double-booking constraint still having the final say.
+
+## Printing
+
+`/admin/print` produces a run sheet for a day or a date range: pickup and return
+times, student and phone, car, destination, total, and a blank column to initial
+when keys go out. Confirmed rentals only by default, or everything including
+pending. Print styles drop all navigation, so it comes out as a document rather
+than a screenshot of an app.
+
 ## Times
 
 Everything runs on `America/New_York` (`ORG_TIMEZONE` in `src/lib/dates.ts`).
@@ -139,6 +179,7 @@ src/app/actions/     server actions, one file per area
 src/components/      shared UI
 src/components/calendar/  the calendar: month, week, day, agenda, detail dialog
 src/lib/             pricing, dates, calendar maths, Supabase clients, auth
+src/lib/email/       Resend client, templates, notification dispatch
 supabase/migrations/ schema
 supabase/tests/      schema tests
 ```

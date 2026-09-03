@@ -219,7 +219,7 @@ function DestinationDialog({
               type="checkbox"
               name="is_active"
               defaultChecked={destination?.is_active ?? true}
-              className="h-4 w-4 accent-navy-700"
+              className="h-4 w-4 accent-slate-500"
             />
             Offer this to students
           </label>

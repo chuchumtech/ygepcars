@@ -241,7 +241,7 @@ function ReadView({
 
       <div className="grid gap-5 sm:grid-cols-2">
         <div>
-          <h3 className="mb-1 text-sm font-semibold text-navy-800">Trip</h3>
+          <h3 className="mb-1 text-sm font-semibold text-slate-500">Trip</h3>
           <dl>
             <DetailRow label="Car">{reservation.vehicle?.name ?? "--"}</DetailRow>
             <DetailRow label="Out">{formatDateTime(reservation.starts_at)}</DetailRow>
@@ -253,7 +253,7 @@ function ReadView({
         </div>
 
         <div>
-          <h3 className="mb-1 text-sm font-semibold text-navy-800">Charges</h3>
+          <h3 className="mb-1 text-sm font-semibold text-slate-500">Charges</h3>
           <dl>
             <DetailRow label={`Time (${reservation.billable_hours} hrs)`}>
               {formatMoney(reservation.time_charge_cents)}
@@ -280,7 +280,7 @@ function ReadView({
       </div>
 
       <div>
-        <h3 className="mb-1 text-sm font-semibold text-navy-800">Student</h3>
+        <h3 className="mb-1 text-sm font-semibold text-slate-500">Student</h3>
         <dl>
           <DetailRow label="Name">{reservation.student?.full_name ?? "--"}</DetailRow>
           <DetailRow label="Phone">
@@ -307,7 +307,7 @@ function ReadView({
 
       {reservation.student_notes ? (
         <div>
-          <h3 className="mb-1 text-sm font-semibold text-navy-800">Note from the student</h3>
+          <h3 className="mb-1 text-sm font-semibold text-slate-500">Note from the student</h3>
           <p className="rounded-lg bg-navy-50 px-3 py-2 text-sm text-navy-800">
             {reservation.student_notes}
           </p>
@@ -316,7 +316,7 @@ function ReadView({
 
       {reservation.admin_notes ? (
         <div>
-          <h3 className="mb-1 text-sm font-semibold text-navy-800">Office notes</h3>
+          <h3 className="mb-1 text-sm font-semibold text-slate-500">Office notes</h3>
           <p className="rounded-lg bg-gold-50 px-3 py-2 text-sm text-navy-800">
             {reservation.admin_notes}
           </p>
@@ -471,7 +471,7 @@ function EditForm({
       </section>
 
       <section className="space-y-4">
-        <h3 className="text-sm font-semibold text-navy-800">Destination and tolls</h3>
+        <h3 className="text-sm font-semibold text-slate-500">Destination and tolls</h3>
         <div className="grid gap-4 sm:grid-cols-2">
           <Field label="Preset destination" hint="Changing this does not overwrite the toll below.">
             <select
@@ -520,7 +520,7 @@ function EditForm({
       </section>
 
       <section className="space-y-4">
-        <h3 className="text-sm font-semibold text-navy-800">Pricing</h3>
+        <h3 className="text-sm font-semibold text-slate-500">Pricing</h3>
         <div className="grid gap-4 sm:grid-cols-2">
           <Field label="Hourly rate">
             <input

@@ -3,6 +3,7 @@
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { createAdminClient, createClient } from "@/lib/supabase/server";
+import { notifyNewAccount } from "@/lib/email/notify";
 
 export type AuthFormState = { error?: string; notice?: string };
 
@@ -68,6 +69,8 @@ export async function signUpAction(
   if (profileError) {
     return { error: `Account created, but the profile failed to save: ${profileError.message}` };
   }
+
+  await notifyNewAccount({ userId: data.user.id, name: fullName, email, phone });
 
   redirect("/pending");
 }

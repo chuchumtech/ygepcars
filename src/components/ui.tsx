@@ -52,7 +52,7 @@ export function PageHeader({
   return (
     <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight text-navy-800">{title}</h1>
+        <h1 className="text-2xl font-bold tracking-tight text-slate-500">{title}</h1>
         {description ? (
           <p className="mt-1 max-w-2xl text-sm text-muted">{description}</p>
         ) : null}
@@ -73,7 +73,7 @@ export function EmptyState({
 }) {
   return (
     <div className="card flex flex-col items-center justify-center px-6 py-14 text-center">
-      <p className="text-base font-semibold text-navy-800">{title}</p>
+      <p className="text-base font-semibold text-slate-500">{title}</p>
       {description ? (
         <p className="mt-1.5 max-w-md text-sm text-muted">{description}</p>
       ) : null}
@@ -96,7 +96,7 @@ export function StatTile({
   href?: string;
 }) {
   const toneClass = {
-    default: "text-navy-800",
+    default: "text-slate-500",
     warn: "text-amber-700",
     good: "text-emerald-700",
     bad: "text-red-700",
@@ -154,7 +154,7 @@ export function Alert({
   children?: ReactNode;
 }) {
   const styles = {
-    info: "border-navy-200 bg-navy-50 text-navy-800",
+    info: "border-slate-200 bg-slate-50 text-slate-700",
     success: "border-emerald-200 bg-emerald-50 text-emerald-900",
     warn: "border-amber-200 bg-amber-50 text-amber-900",
     error: "border-red-200 bg-red-50 text-red-800",

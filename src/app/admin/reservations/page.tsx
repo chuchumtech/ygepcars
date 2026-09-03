@@ -128,8 +128,8 @@ function FilterGroup({
             scroll={false}
             className={`chip border transition ${
               current === option.value
-                ? "border-navy-700 bg-navy-700 text-white"
-                : "border-[var(--color-line)] bg-white text-navy-700 hover:bg-navy-50"
+                ? "border-slate-500 bg-slate-500 text-white"
+                : "border-[var(--color-line)] bg-white text-slate-600 hover:bg-slate-50"
             }`}
           >
             {option.label}

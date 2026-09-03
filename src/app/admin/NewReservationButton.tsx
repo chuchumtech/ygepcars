@@ -163,7 +163,7 @@ export function NewReservationButton({
               type="checkbox"
               name="approve_now"
               defaultChecked
-              className="h-4 w-4 accent-navy-700"
+              className="h-4 w-4 accent-slate-500"
             />
             Approve it right away
           </label>

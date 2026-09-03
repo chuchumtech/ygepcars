@@ -4,10 +4,11 @@ import type { Metadata } from "next";
 import { createClient } from "@/lib/supabase/server";
 import { requireActiveStudent } from "@/lib/auth";
 import { cancelReservationAction } from "@/app/actions/reservations";
+import { leaveWaitlistAction } from "@/app/actions/waitlist";
 import { Alert, DetailRow, EmptyState, PageHeader, StatusBadge } from "@/components/ui";
 import { describeDuration, formatDateTime, formatRange, hoursBetween } from "@/lib/dates";
 import { formatMoney } from "@/lib/pricing";
-import type { Reservation, Vehicle } from "@/lib/types";
+import type { Reservation, Vehicle, WaitlistEntryWithRefs } from "@/lib/types";
 
 export const metadata: Metadata = { title: "My reservations" };
 
@@ -16,7 +17,7 @@ type Row = Reservation & { vehicle: Pick<Vehicle, "id" | "name" | "image_url" | 
 export default async function ReservationsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ requested?: string }>;
+  searchParams: Promise<{ requested?: string; waitlisted?: string }>;
 }) {
   const [params, viewer, supabase] = await Promise.all([
     searchParams,
@@ -24,13 +25,22 @@ export default async function ReservationsPage({
     createClient(),
   ]);
 
-  const { data } = await supabase
-    .from("cars_reservations")
-    .select("*, vehicle:cars_vehicles(id, name, image_url, color)")
-    .eq("user_id", viewer.userId)
-    .order("starts_at", { ascending: false });
+  const [{ data }, { data: waitlistRows }] = await Promise.all([
+    supabase
+      .from("cars_reservations")
+      .select("*, vehicle:cars_vehicles(id, name, image_url, color)")
+      .eq("user_id", viewer.userId)
+      .order("starts_at", { ascending: false }),
+    supabase
+      .from("cars_waitlist")
+      .select("*, vehicle:cars_vehicles(id, name, color)")
+      .eq("user_id", viewer.userId)
+      .in("status", ["waiting", "offered"])
+      .order("starts_at"),
+  ]);
 
   const all = (data ?? []) as Row[];
+  const waitlist = (waitlistRows ?? []) as WaitlistEntryWithRefs[];
   // Server Component: this renders once per request, so reading the clock here
   // is exactly what we want.
   // eslint-disable-next-line react-hooks/purity
@@ -58,6 +68,53 @@ export default async function ReservationsPage({
           The office has it. You will hear back once it is approved — check here for
           the status.
         </Alert>
+      ) : null}
+
+      {params.waitlisted ? (
+        <Alert tone="success" title="You are on the waitlist">
+          If that window frees up, the office will be in touch. This is not a
+          booking yet.
+        </Alert>
+      ) : null}
+
+      {waitlist.length > 0 ? (
+        <section>
+          <h2 className="mb-3 text-sm font-semibold uppercase tracking-wider text-muted">
+            On the waitlist
+          </h2>
+          <div className="card divide-y divide-[var(--color-line)]">
+            {waitlist.map((entry) => (
+              <div
+                key={entry.id}
+                className="flex flex-wrap items-center justify-between gap-3 p-4"
+              >
+                <div className="min-w-0">
+                  <p className="font-semibold text-navy-800">
+                    {entry.vehicle?.name ?? "Whichever car frees up"}
+                  </p>
+                  <p className="text-sm text-muted">
+                    {formatRange(entry.starts_at, entry.ends_at)}
+                  </p>
+                  <p className="text-xs text-muted">
+                    {entry.destination_label || "Destination not set"}
+                    {entry.flexible ? " · nearby times work" : ""}
+                  </p>
+                </div>
+                <div className="flex items-center gap-3">
+                  <span className="chip bg-amber-100 text-amber-800">
+                    {entry.status === "offered" ? "Offered to you" : "Waiting"}
+                  </span>
+                  <form action={leaveWaitlistAction}>
+                    <input type="hidden" name="waitlist_id" value={entry.id} />
+                    <button type="submit" className="btn-ghost btn-sm">
+                      Take me off
+                    </button>
+                  </form>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
       ) : null}
 
       <section>
@@ -126,7 +183,7 @@ function ReservationCard({
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
             <div className="flex flex-wrap items-center gap-2">
-              <h3 className="text-base font-bold text-navy-800">
+              <h3 className="text-base font-bold text-slate-500">
                 {r.vehicle?.name ?? "Car"}
               </h3>
               <StatusBadge status={r.status} />

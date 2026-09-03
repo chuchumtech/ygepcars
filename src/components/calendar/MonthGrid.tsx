@@ -78,7 +78,7 @@ export function MonthGrid({
                 onClick={() => onSelectDay(day)}
                 className={`mb-1 flex h-6 w-6 items-center justify-center rounded-full text-xs font-semibold transition hover:bg-navy-100 ${
                   isToday
-                    ? "bg-navy-700 text-white hover:bg-navy-800"
+                    ? "bg-slate-500 text-white hover:bg-slate-600"
                     : inMonth
                       ? "text-navy-800"
                       : "text-navy-300"
@@ -100,7 +100,7 @@ export function MonthGrid({
                   <button
                     type="button"
                     onClick={() => onSelectDay(day)}
-                    className="w-full rounded px-1.5 py-0.5 text-left text-[11px] font-semibold text-navy-600 hover:bg-navy-50"
+                    className="w-full rounded px-1.5 py-0.5 text-left text-[11px] font-semibold text-slate-600 hover:bg-slate-50"
                   >
                     +{overflow} more
                   </button>

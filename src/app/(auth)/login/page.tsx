@@ -13,7 +13,7 @@ export default async function LoginPage({
 
   return (
     <div className="card-pad">
-      <h1 className="text-xl font-bold text-navy-800">Sign in</h1>
+      <h1 className="text-xl font-bold text-slate-500">Sign in</h1>
       <p className="mt-1 text-sm text-muted">
         Use the email and password you registered with.
       </p>

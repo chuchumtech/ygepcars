@@ -4,11 +4,12 @@ import type { Metadata } from "next";
 import { createClient } from "@/lib/supabase/server";
 import { getViewer } from "@/lib/auth";
 import { SearchForm } from "@/components/SearchForm";
+import { WaitlistButton } from "@/components/WaitlistButton";
 import { Alert, EmptyState } from "@/components/ui";
 import { parseSearchWindow } from "@/lib/search-params";
 import { describeDuration, formatRange, hoursBetween } from "@/lib/dates";
 import { formatMoney, quoteForVehicle } from "@/lib/pricing";
-import type { AvailabilityRow, Vehicle } from "@/lib/types";
+import type { AvailabilityRow, Destination, Vehicle } from "@/lib/types";
 
 export const metadata: Metadata = { title: "Available cars" };
 
@@ -39,13 +40,31 @@ export default async function SearchPage({
   const { window: win } = parsed;
   const [supabase, viewer] = await Promise.all([createClient(), getViewer()]);
 
-  const [{ data: vehicleRows }, { data: availabilityRows }] = await Promise.all([
+  const [
+    { data: vehicleRows },
+    { data: availabilityRows },
+    { data: destinationRows },
+    { data: waitingTotal },
+  ] = await Promise.all([
     supabase.from("cars_vehicles").select("*").order("sort_order"),
     supabase.rpc("cars_availability", {
       p_start: win.startsAt.toISOString(),
       p_end: win.endsAt.toISOString(),
     }),
+    supabase
+      .from("cars_destinations")
+      .select("*")
+      .eq("is_active", true)
+      .order("sort_order"),
+    supabase.rpc("cars_waitlist_count", {
+      p_start: win.startsAt.toISOString(),
+      p_end: win.endsAt.toISOString(),
+      p_vehicle: null,
+    }),
   ]);
+
+  const destinations = (destinationRows ?? []) as Destination[];
+  const waitingCount = typeof waitingTotal === "number" ? waitingTotal : 0;
 
   const vehicles = (vehicleRows ?? []) as Vehicle[];
   const availability = new Map(
@@ -81,10 +100,12 @@ export default async function SearchPage({
       />
 
       <div>
-        <h1 className="text-xl font-bold text-navy-800">
-          {freeCount === 0
-            ? "Nothing free for that window"
-            : `${freeCount} car${freeCount === 1 ? "" : "s"} available`}
+        <h1 className="text-xl font-bold text-slate-500">
+          {results.length === 0
+            ? "No cars in the system yet"
+            : freeCount === 0
+              ? "Nothing free for that window"
+              : `${freeCount} car${freeCount === 1 ? "" : "s"} available`}
         </h1>
         <p className="mt-1 text-sm text-muted">
           {formatRange(win.startsAt, win.endsAt)} · {describeDuration(hours)}
@@ -123,7 +144,7 @@ export default async function SearchPage({
               <div className="flex flex-1 flex-col gap-4 p-5 sm:flex-row sm:items-center">
                 <div className="min-w-0 flex-1">
                   <div className="flex flex-wrap items-center gap-2">
-                    <h2 className="text-base font-bold text-navy-800">{vehicle.name}</h2>
+                    <h2 className="text-base font-bold text-slate-500">{vehicle.name}</h2>
                     {available ? (
                       <span className="chip bg-emerald-100 text-emerald-800">Available</span>
                     ) : (
@@ -180,9 +201,32 @@ export default async function SearchPage({
                       </div>
                     </>
                   ) : (
-                    <Link href="/" className="btn-secondary">
-                      Try other times
-                    </Link>
+                    <div className="space-y-2">
+                      {canBook ? (
+                        <WaitlistButton
+                          vehicle={vehicle}
+                          destinations={destinations}
+                          window={{
+                            startDate: win.startDate,
+                            startTime: win.startTime,
+                            endDate: win.endDate,
+                            endTime: win.endTime,
+                          }}
+                          startsAtIso={win.startsAt.toISOString()}
+                          endsAtIso={win.endsAt.toISOString()}
+                          waitingCount={waitingCount}
+                        />
+                      ) : waitingCount > 0 ? (
+                        <p className="text-xs text-muted">
+                          {waitingCount}{" "}
+                          {waitingCount === 1 ? "student is" : "students are"} waiting
+                          on this window.
+                        </p>
+                      ) : null}
+                      <Link href="/" className="btn-ghost btn-sm w-full sm:w-auto">
+                        Try other times
+                      </Link>
+                    </div>
                   )}
                 </div>
               </div>

@@ -6,6 +6,7 @@ import { createClient } from "@/lib/supabase/server";
 import { getViewer, requireActiveStudent } from "@/lib/auth";
 import { parseSearchWindow } from "@/lib/search-params";
 import { quoteForVehicle } from "@/lib/pricing";
+import { notifyCancellation, notifyNewRequest } from "@/lib/email/notify";
 import type { Destination, Vehicle } from "@/lib/types";
 
 export type ActionState = { error?: string; success?: string };
@@ -94,7 +95,9 @@ export async function requestReservationAction(
     ? `${destination.name} (${destinationNote})`
     : destination.name;
 
-  const { error } = await supabase.from("cars_reservations").insert({
+  const { data: created, error } = await supabase
+    .from("cars_reservations")
+    .insert({
     user_id: viewer.userId,
     vehicle_id: vehicle.id,
     starts_at: startsAt.toISOString(),
@@ -110,7 +113,9 @@ export async function requestReservationAction(
     toll_cents: quote.tollCents,
     total_cents: quote.totalCents,
     student_notes: text(formData, "student_notes"),
-  });
+    })
+    .select("id, reference")
+    .single();
 
   if (error) {
     if (error.code === "23P01") {
@@ -121,6 +126,24 @@ export async function requestReservationAction(
     }
     return { error: error.message };
   }
+
+  // The office hears about it, but a mail failure must never cost the student
+  // their request -- sendOfficeEmail swallows its own errors.
+  await notifyNewRequest({
+    reservationId: created?.id ?? "",
+    reference: created?.reference ?? "",
+    studentName: viewer.profile.full_name,
+    studentEmail: viewer.profile.email,
+    studentPhone: viewer.profile.phone,
+    vehicleName: vehicle.name,
+    startsAt: startsAt.toISOString(),
+    endsAt: endsAt.toISOString(),
+    destinationLabel: label,
+    purpose: text(formData, "purpose"),
+    totalCents: quote.totalCents,
+    tollCents: quote.tollCents,
+    studentNotes: text(formData, "student_notes"),
+  });
 
   revalidatePath("/reservations");
   revalidatePath("/admin");
@@ -135,12 +158,40 @@ export async function cancelReservationAction(formData: FormData) {
   const id = text(formData, "reservation_id");
   const supabase = await createClient();
 
-  await supabase
+  const { data: before } = await supabase
+    .from("cars_reservations")
+    .select("*, vehicle:cars_vehicles(name)")
+    .eq("id", id)
+    .eq("user_id", viewer.userId)
+    .maybeSingle();
+
+  const { data: cancelled } = await supabase
     .from("cars_reservations")
     .update({ status: "cancelled", cancelled_at: new Date().toISOString() })
     .eq("id", id)
     .eq("user_id", viewer.userId)
-    .in("status", ["pending", "approved"]);
+    .in("status", ["pending", "approved"])
+    .select("id")
+    .maybeSingle();
+
+  if (cancelled && before) {
+    await notifyCancellation({
+      reservationId: id,
+      wasApproved: before.status === "approved",
+      reference: before.reference,
+      studentName: viewer.profile?.full_name ?? "",
+      studentEmail: viewer.profile?.email ?? "",
+      studentPhone: viewer.profile?.phone ?? "",
+      vehicleName: before.vehicle?.name ?? "Car",
+      startsAt: before.starts_at,
+      endsAt: before.ends_at,
+      destinationLabel: before.destination_label,
+      purpose: before.purpose,
+      totalCents: before.total_cents,
+      tollCents: before.toll_cents,
+      studentNotes: before.student_notes,
+    });
+  }
 
   revalidatePath("/reservations");
   revalidatePath("/admin");

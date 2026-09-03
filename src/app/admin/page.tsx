@@ -57,16 +57,21 @@ export default async function AdminCalendarPage({
     <div className="space-y-6">
       <div className="no-print flex flex-wrap items-end justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-navy-800">Calendar</h1>
+          <h1 className="text-2xl font-bold tracking-tight text-slate-500">Calendar</h1>
           <p className="mt-1 text-sm text-muted">
             Every reservation, request and blocked-off day for both cars.
           </p>
         </div>
-        <NewReservationButton
-          vehicles={data.vehicles}
-          destinations={data.destinations}
-          students={data.students}
-        />
+        <div className="flex flex-wrap gap-2">
+          <Link href={`/admin/print?from=${anchor}&to=${anchor}`} className="btn-secondary">
+            Print run sheet
+          </Link>
+          <NewReservationButton
+            vehicles={data.vehicles}
+            destinations={data.destinations}
+            students={data.students}
+          />
+        </div>
       </div>
 
       <div className="no-print grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
