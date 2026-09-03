@@ -5,6 +5,11 @@ import { useEffect, useRef, type ReactNode } from "react";
 /**
  * Dialog built on <dialog> so focus trapping, Esc-to-close and the top layer
  * come from the platform rather than from us re-implementing them.
+ *
+ * `m-auto` is load-bearing: the browser centres a modal dialog by pinning all
+ * four insets and letting `margin: auto` do the rest, and Tailwind's preflight
+ * sets `margin: 0` on every element, which drops the dialog into the top-left
+ * corner. Putting the margin back is what centres it.
  */
 export function Modal({
   open,
@@ -50,7 +55,7 @@ export function Modal({
         // Clicking the backdrop -- the dialog element itself -- dismisses.
         if (event.target === ref.current) onClose();
       }}
-      className={`w-[calc(100vw-1.5rem)] ${maxWidth} rounded-2xl border border-line/70 bg-surface p-0 shadow-lift backdrop:bg-ink/40 backdrop:backdrop-blur-[2px]`}
+      className={`m-auto w-[calc(100vw-1.5rem)] ${maxWidth} rounded-2xl border border-line/70 bg-surface p-0 shadow-lift backdrop:bg-ink/40 backdrop:backdrop-blur-[2px]`}
     >
       {open ? (
         <div className="flex max-h-[88dvh] flex-col">

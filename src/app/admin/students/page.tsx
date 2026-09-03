@@ -128,6 +128,7 @@ export default async function StudentsPage({
               <th className="th text-right">Charged</th>
               <th className="th text-right">Paid</th>
               <th className="th text-right">Balance</th>
+              <th className="th"><span className="sr-only">Open</span></th>
             </tr>
           </thead>
           <tbody className="divide-y divide-line/70">
@@ -174,12 +175,20 @@ export default async function StudentsPage({
                   >
                     {formatMoney(owed)}
                   </td>
+                  <td className="td text-right">
+                    <Link
+                      href={`/admin/students/${person.id}`}
+                      className="btn-secondary btn-sm whitespace-nowrap"
+                    >
+                      Open
+                    </Link>
+                  </td>
                 </tr>
               );
             })}
             {people.length === 0 ? (
               <tr>
-                <td className="td text-ink-soft" colSpan={7}>
+                <td className="td text-ink-soft" colSpan={8}>
                   Nobody matches that.
                 </td>
               </tr>

@@ -37,3 +37,7 @@ venv/
 env/
 *.db
 *.sqlite3
+
+# Next.js auto-generates these for AI agents
+AGENTS.md
+CLAUDE.md
