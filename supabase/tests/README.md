@@ -52,6 +52,16 @@ things that matter most and are easiest to get wrong:
   because the date picker needs it, but a student cannot add one, and their
   update and delete change nothing rather than clearing the list.
 
+* **`99_billing.sql`** — the reason this file exists: marking a reservation
+  paid used to stamp the timestamp the hold rule reads and record no money, so
+  the student still owed every cent. It checks that a payment is what moves a
+  balance and what marks the reservation paid, that removing it unmarks it,
+  that a described line item and a discount both land on the total without
+  anyone typing a minus sign, that a negative line item is refused, that a
+  charge can belong to the account rather than to any rental, that overpaying
+  and a credit note both leave a credit rather than a nonsense negative owing,
+  and that a student can read all of it and write none of it.
+
 `0012_cars_photo_storage.sql` creates a Storage bucket, which plain Postgres
 has no schema for; it notices that and skips itself, so the list below still
 runs end to end.
@@ -79,6 +89,7 @@ for f in supabase/tests/00_supabase_stub.sql \
          supabase/migrations/0010_cars_off_shabbosim.sql \
          supabase/migrations/0011_cars_off_shabbosim_edges.sql \
          supabase/migrations/0012_cars_photo_storage.sql \
+         supabase/migrations/0013_cars_billing.sql \
          supabase/tests/90_behaviour.sql \
          supabase/tests/91_rls.sql \
          supabase/tests/92_waitlist.sql \
@@ -87,7 +98,8 @@ for f in supabase/tests/00_supabase_stub.sql \
          supabase/tests/95_availability_performance.sql \
          supabase/tests/96_student_details.sql \
          supabase/tests/97_returns_and_incidents.sql \
-         supabase/tests/98_off_shabbosim.sql; do
+         supabase/tests/98_off_shabbosim.sql \
+         supabase/tests/99_billing.sql; do
   psql -d carscheck -v ON_ERROR_STOP=1 -q -f "$f"
 done
 ```

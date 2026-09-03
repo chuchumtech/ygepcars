@@ -2,8 +2,7 @@
 
 import { createClient, createAdminClient } from "@/lib/supabase/server";
 import { requireAdmin } from "@/lib/auth";
-import { parseMoneyToCents } from "@/lib/pricing";
-import type { PaymentMethod, ProfileStatus } from "@/lib/types";
+import type { ProfileStatus } from "@/lib/types";
 import {
   friendlyDbError,
   optionalText,
@@ -234,41 +233,6 @@ export async function inviteStudentAction(
 /* Payments                                                                   */
 /* -------------------------------------------------------------------------- */
 
-export async function recordPaymentAction(
-  _prev: ActionResult,
-  formData: FormData,
-): Promise<ActionResult> {
-  const admin = await requireAdmin();
-  const supabase = await createClient();
-
-  const userId = text(formData, "student_id");
-  const amountCents = parseMoneyToCents(text(formData, "amount"));
-
-  if (!userId) return { error: "Missing student." };
-  if (amountCents === null || amountCents === 0) {
-    return { error: "Enter an amount, e.g. 45 or 45.50." };
-  }
-
-  const { error } = await supabase.from("cars_payments").insert({
-    user_id: userId,
-    reservation_id: optionalText(formData, "reservation_id"),
-    amount_cents: amountCents,
-    method: (text(formData, "method") || "cash") as PaymentMethod,
-    reference: text(formData, "reference"),
-    note: text(formData, "note"),
-    paid_on: text(formData, "paid_on") || new Date().toISOString().slice(0, 10),
-    recorded_by: admin.userId,
-  });
-
-  if (error) return { error: friendlyDbError(error) };
-
-  revalidateAdmin();
-  return { success: "Payment recorded." };
-}
-
-export async function deletePaymentAction(formData: FormData) {
-  await requireAdmin();
-  const supabase = await createClient();
-  await supabase.from("cars_payments").delete().eq("id", text(formData, "payment_id"));
-  revalidateAdmin();
-}
+/* Payments and account charges live in @/app/actions/billing now, so that the
+   one place money is recorded is the one place that knows what recording it
+   does to a balance and to the car's availability. */

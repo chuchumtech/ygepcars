@@ -2,8 +2,10 @@ import "server-only";
 import { createClient } from "@/lib/supabase/server";
 import type { CalendarData } from "@/components/calendar/types";
 
+// One string literal on purpose: supabase-js parses it at the type level, and
+// a concatenated expression degrades every row to an error type.
 export const RESERVATION_SELECT =
-  "*, vehicle:cars_vehicles(id, name, color, image_url), student:cars_profiles!cars_reservations_user_id_fkey(id, full_name, email, phone)";
+  "*, vehicle:cars_vehicles(id, name, color, image_url), student:cars_profiles!cars_reservations_user_id_fkey(id, full_name, email, phone, payment_method), items:cars_reservation_items(*), payments:cars_payments(*)";
 
 /** Everything the calendar needs for one window, in a single round trip each. */
 export async function loadCalendarData(

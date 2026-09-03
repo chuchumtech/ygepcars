@@ -178,3 +178,51 @@ export function DetailRow({ label, children }: { label: string; children: ReactN
     </div>
   );
 }
+
+/**
+ * A section the office can put away. Built on <details> so the open state is
+ * the browser's business, it survives without JavaScript, and Ctrl-F finds
+ * text inside a closed one in browsers that support it.
+ */
+export function Collapsible({
+  title,
+  hint,
+  defaultOpen = false,
+  children,
+}: {
+  title: string;
+  hint?: ReactNode;
+  defaultOpen?: boolean;
+  children: ReactNode;
+}) {
+  return (
+    <details
+      open={defaultOpen}
+      className="group rounded-xl border border-line/70 bg-surface open:bg-parchment/30"
+    >
+      <summary className="tap flex cursor-pointer list-none items-center gap-2 px-4 py-3 text-sm font-bold text-ink marker:content-none">
+        <svg
+          width="14"
+          height="14"
+          viewBox="0 0 16 16"
+          fill="none"
+          aria-hidden
+          className="shrink-0 text-ink-soft transition group-open:rotate-90"
+        >
+          <path
+            d="M6 3l5 5-5 5"
+            stroke="currentColor"
+            strokeWidth="1.75"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </svg>
+        <span className="flex-1">{title}</span>
+        {hint ? (
+          <span className="text-xs font-semibold text-ink-soft group-open:hidden">{hint}</span>
+        ) : null}
+      </summary>
+      <div className="border-t border-line/70 px-4 py-4">{children}</div>
+    </details>
+  );
+}

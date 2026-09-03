@@ -7,6 +7,7 @@ import { Statement } from "@/components/statement/Statement";
 import { PrintButton } from "@/components/PrintButton";
 import { loadSettings } from "@/lib/settings";
 import type {
+  AccountCharge,
   Incident,
   Payment,
   Profile,
@@ -38,14 +39,15 @@ export default async function AdminStatementPage({
   const profile = profileRow as Profile | null;
   if (!profile) notFound();
 
-  const [reservations, incidents, payments, balance] = await Promise.all([
+  const [reservations, incidents, charges, payments, balance] = await Promise.all([
     supabase
       .from("cars_reservations")
-      .select("*, vehicle:cars_vehicles(id, name)")
+      .select("*, vehicle:cars_vehicles(id, name), items:cars_reservation_items(*)")
       .eq("user_id", id)
       .in("status", ["approved", "completed"])
       .order("starts_at"),
     supabase.from("cars_incidents").select("*").eq("user_id", id).order("occurred_on"),
+    supabase.from("cars_charges").select("*").eq("user_id", id).order("charged_on"),
     supabase.from("cars_payments").select("*").eq("user_id", id).order("paid_on"),
     supabase.from("cars_student_balances").select("*").eq("user_id", id).maybeSingle(),
   ]);
@@ -65,6 +67,7 @@ export default async function AdminStatementPage({
           balance={(balance.data ?? null) as StudentBalance | null}
           reservations={(reservations.data ?? []) as RentalRow[]}
           incidents={(incidents.data ?? []) as Incident[]}
+          charges={(charges.data ?? []) as AccountCharge[]}
           payments={(payments.data ?? []) as Payment[]}
           orgName={settings.orgName}
           forPrint

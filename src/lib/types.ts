@@ -150,6 +150,48 @@ export type Payment = {
   created_at: string;
 };
 
+/** How the office says it received the money. */
+export const PAYMENT_METHODS: { value: PaymentMethod; label: string }[] = [
+  { value: "zelle", label: "Zelle" },
+  { value: "cash", label: "Cash" },
+  { value: "check", label: "Check" },
+  { value: "venmo", label: "Venmo" },
+  { value: "card", label: "Card" },
+  { value: "credit", label: "Account credit" },
+  { value: "other", label: "Other" },
+];
+
+export function paymentMethodLabel(method: string): string {
+  return PAYMENT_METHODS.find((m) => m.value === method)?.label ?? method;
+}
+
+/** An extra charge or a discount on one rental, with the office's own wording. */
+export type ReservationItem = {
+  id: string;
+  reservation_id: string;
+  kind: "charge" | "discount";
+  description: string;
+  /** Always positive. `kind` decides which way it pulls. */
+  amount_cents: number;
+  /** What it contributes to the total: negative for a discount. */
+  signed_cents: number;
+  created_by: string | null;
+  created_at: string;
+};
+
+/** Money owed that belongs to the account, not to a rental. Negative = credit. */
+export type AccountCharge = {
+  id: string;
+  user_id: string;
+  charged_on: string;
+  description: string;
+  amount_cents: number;
+  note: string;
+  created_by: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
 export type IncidentKind =
   | "damage"
   | "accident"
@@ -194,9 +236,14 @@ export type StudentBalance = {
   user_id: string;
   rental_cents: number;
   incident_cents: number;
+  /** Charges the office added to the account rather than to a rental. */
+  account_charge_cents: number;
   charged_cents: number;
   paid_cents: number;
+  /** Positive means owed. Negative means paid ahead. */
   balance_cents: number;
+  /** What they are ahead by, or zero. The positive half of balance_cents. */
+  credit_cents: number;
   reservation_count: number;
 };
 

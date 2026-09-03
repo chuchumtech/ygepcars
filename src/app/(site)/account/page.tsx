@@ -54,7 +54,13 @@ export default async function AccountOverviewPage() {
           label={owed < 0 ? "In credit" : "You owe"}
           value={formatMoney(Math.abs(owed))}
           tone={owed > 0 ? "bad" : owed < 0 ? "good" : "good"}
-          hint={owed > 0 ? "Settle up with the office" : "All settled"}
+          hint={
+            owed > 0
+              ? "Settle up with the office"
+              : owed < 0
+                ? "Comes off your next rental"
+                : "All settled"
+          }
           href="/account/statement"
         />
         <StatTile

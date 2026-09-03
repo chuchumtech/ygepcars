@@ -232,10 +232,44 @@ person is asked for 5/8, not full. Nobody buys fuel for somebody else's trip.
 and, where somebody is responsible, against them. A charge lands on that
 student's balance alongside their rentals and appears on their statement.
 
+## Money
+
+Nothing is charged online. The office records what it receives, and the
+database does the arithmetic.
+
+**A payment is the only thing that moves a balance.** It asks how much, when,
+and how it came in, and naming a rental is optional -- money usually turns up
+for "whatever I owe" rather than for one trip. Naming one does one extra thing:
+a trigger marks that reservation paid, which is what keeps its car out of the
+pool under the payment rule.
+
+There used to be a "mark as paid" button that stamped
+`cars_reservations.payment_received_at` and recorded no money at all, so a
+reservation could sit there looking settled while the student still owed every
+cent of it. That button is gone.
+
+**Paying more than is owed is allowed.** The balance goes negative and the
+student is in credit, which comes off their next rental. The office can also
+hand out a credit deliberately, without pretending money arrived, and can put a
+charge on an account that belongs to no rental at all -- a share of a repair, a
+fee, anything that needs to be on somebody's statement.
+
+**Extras on a rental are line items**, each carrying the wording the office
+typed, because that wording is what the student reads: "adjustment $25" tells
+them nothing, "car wash after the trip $25" tells them everything. A discount
+is a separate button rather than a negative number, so nobody has to think
+about signs and a discount cannot be entered as a charge.
+
+Nothing in the app computes a total any more. `cars_reservations.total_cents`
+is maintained by a trigger from its parts, and the line items roll up into
+`adjustment_cents` through another, so availability, balances, statements and
+the emails all keep reading one column. It used to be recomputed by hand in
+four different places, which is three chances too many to get it wrong.
+
 ## Statements
 
-Rentals, incidents and payments merge into one dated ledger with a running
-balance, so a student sees not just what they owe but what it is for. The office
+Rentals, incidents, account charges and payments merge into one dated ledger
+with a running balance, so a student sees not just what they owe but what it is for. The office
 opens the same statement from a student's record and prints it.
 
 ## Emails
@@ -310,6 +344,26 @@ so a replaced photo is not fighting a CDN cache that still holds the old bytes;
 the previous file is deleted once the new one is up. A photo the office did not
 upload — an old `/public` path, or a link elsewhere — is left alone when the
 row changes.
+
+## The reservation dialog
+
+Opening a reservation used to lay out a dozen buttons and every field the row
+carries, so the two things the office does every time -- decide it, and take
+the money -- were lost among ten they do once a month.
+
+It now opens on the money (total, paid, owing), then the reason for the trip,
+then the six facts anybody actually reads. One contextual primary action, Add
+payment beside it, and every other action behind the menu. The primary is
+whatever comes next: Approve while it is pending, held or released, then Car
+went out, then Check the car back in.
+
+Everything else is collapsed: the charge breakdown with the line-item editor,
+the payments against this rental, the going-out and coming-back, and the notes.
+Each opens only when somebody wants it.
+
+The menu is positioned against the viewport rather than its button, because the
+dialog body scrolls and an absolutely positioned panel had its last two items
+-- the destructive ones -- cut off below the fold.
 
 ## The date picker
 

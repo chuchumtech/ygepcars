@@ -93,12 +93,43 @@ export function formatDateTime(value: Date | string): string {
   }).format(d);
 }
 
+/** YYYY-MM-DD with nothing after it: a calendar date, not an instant. */
+const DATE_ONLY = /^\d{4}-\d{2}-\d{2}$/;
+
+/**
+ * A plain date column -- paid_on, occurred_on, charged_on -- is a day, not a
+ * moment. `new Date("2026-08-28")` reads it as UTC midnight, which is the
+ * evening of the 27th here, so formatting it through the org timezone moved
+ * every one of them back a day. Those are formatted from their own digits and
+ * never touch a timezone.
+ */
 export function formatDate(value: Date | string): string {
+  if (typeof value === "string" && DATE_ONLY.test(value)) {
+    const [y, m, d] = value.split("-").map(Number);
+    return new Intl.DateTimeFormat("en-US", {
+      timeZone: "UTC",
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    }).format(new Date(Date.UTC(y, m - 1, d)));
+  }
+
   const d = typeof value === "string" ? new Date(value) : value;
   return fmt({ month: "short", day: "numeric", year: "numeric" }).format(d);
 }
 
 export function formatDayLong(value: Date | string): string {
+  if (typeof value === "string" && DATE_ONLY.test(value)) {
+    const [y, m, d] = value.split("-").map(Number);
+    return new Intl.DateTimeFormat("en-US", {
+      timeZone: "UTC",
+      weekday: "long",
+      month: "long",
+      day: "numeric",
+      year: "numeric",
+    }).format(new Date(Date.UTC(y, m - 1, d)));
+  }
+
   const d = typeof value === "string" ? new Date(value) : value;
   return fmt({ weekday: "long", month: "long", day: "numeric", year: "numeric" }).format(d);
 }

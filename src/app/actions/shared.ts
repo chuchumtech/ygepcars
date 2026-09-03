@@ -1,5 +1,6 @@
 import "server-only";
 import { revalidatePath } from "next/cache";
+import type { createClient } from "@/lib/supabase/server";
 
 export type ActionResult = { error?: string; success?: string };
 
@@ -42,4 +43,25 @@ export function friendlyDbError(error: { code?: string; message: string }): stri
     return "Something this record points at no longer exists. Refresh and try again.";
   }
   return error.message;
+}
+
+/** One line in the office's audit trail. Never allowed to fail a write. */
+export async function logActivity(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  actor: { userId: string; name: string },
+  entry: {
+    entityType: string;
+    entityId: string | null;
+    action: string;
+    detail?: Record<string, unknown>;
+  },
+) {
+  await supabase.from("cars_activity").insert({
+    actor_id: actor.userId,
+    actor_name: actor.name,
+    entity_type: entry.entityType,
+    entity_id: entry.entityId,
+    action: entry.action,
+    detail: entry.detail ?? {},
+  });
 }

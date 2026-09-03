@@ -1,5 +1,12 @@
 import { quote, parseMoneyToCents, formatMoney } from "@/lib/pricing";
-import { localToInstant, instantToLocalParts, hoursBetween, describeDuration } from "@/lib/dates";
+import {
+  localToInstant,
+  instantToLocalParts,
+  hoursBetween,
+  describeDuration,
+  formatDate,
+  formatDayLong,
+} from "@/lib/dates";
 import { splitIntoDaySegments, shiftMonths, startOfWeek, viewBounds } from "@/lib/calendar";
 import { checkBookingRules, holdEndsAt, hoursLabel, DEFAULT_RULES } from "@/lib/booking-rules";
 import { assessReturn, describeLateness, fuelLabel, DEFAULT_RETURN_RULES } from "@/lib/returns";
@@ -178,6 +185,18 @@ check("gauge wording: unknown", fuelLabel(null), "--");
 check("lateness wording under an hour", describeLateness(40), "40 min late");
 check("lateness wording over an hour", describeLateness(95), "1h 35m late");
 check("lateness wording when on time", describeLateness(0), "On time");
+
+// A plain date column is a day, not an instant. Reading "2026-08-28" as UTC
+// midnight and formatting it in America/New_York moved every payment, charge
+// and incident date back a day on the statement.
+check("a plain date is not shifted by the timezone",
+  formatDate("2026-08-28"), "Aug 28, 2026");
+check("the first of a month survives it",
+  formatDate("2026-01-01"), "Jan 1, 2026");
+check("a plain date reads long without shifting either",
+  formatDayLong("2026-08-28"), "Friday, August 28, 2026");
+check("an instant is still shown in the org timezone",
+  formatDate("2026-08-29T02:00:00Z"), "Aug 28, 2026");
 
 console.log(failures === 0 ? "\nAll checks passed." : `\n${failures} FAILED`);
 process.exit(failures === 0 ? 0 : 1);

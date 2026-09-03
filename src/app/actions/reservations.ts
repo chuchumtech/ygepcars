@@ -119,7 +119,6 @@ export async function requestReservationAction(
     billable_hours: quote.billableHours,
     time_charge_cents: quote.timeChargeCents,
     toll_cents: quote.tollCents,
-    total_cents: quote.totalCents,
     student_notes: text(formData, "student_notes"),
     })
     .select("id, reference")
@@ -308,7 +307,6 @@ export async function updateMyReservationAction(
       billable_hours: quoted.billableHours,
       time_charge_cents: quoted.timeChargeCents,
       toll_cents: quoted.tollCents,
-      total_cents: quoted.totalCents,
     })
     .eq("id", id)
     .eq("user_id", viewer.userId)

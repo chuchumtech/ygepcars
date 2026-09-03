@@ -1,15 +1,24 @@
 import type {
   Blackout,
   Destination,
+  Payment,
   Profile,
   Reservation,
+  ReservationItem,
   Vehicle,
   WaitlistEntryWithRefs,
 } from "@/lib/types";
 
 export type AdminReservation = Reservation & {
   vehicle: Pick<Vehicle, "id" | "name" | "color" | "image_url"> | null;
-  student: Pick<Profile, "id" | "full_name" | "email" | "phone"> | null;
+  student: Pick<
+    Profile,
+    "id" | "full_name" | "email" | "phone" | "payment_method"
+  > | null;
+  /** Extras and discounts, each with the office's own description. */
+  items: ReservationItem[];
+  /** Money recorded against this rental specifically. */
+  payments: Payment[];
 };
 
 export type CalendarData = {

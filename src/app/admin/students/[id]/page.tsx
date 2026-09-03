@@ -6,11 +6,18 @@ import { RESERVATION_SELECT } from "@/lib/admin-queries";
 import { ReservationTable } from "@/components/calendar/ReservationTable";
 import { PageHeader, ProfileBadge, StatTile } from "@/components/ui";
 import { StudentControls } from "./StudentControls";
-import { PaymentsPanel } from "./PaymentsPanel";
+import { BillingPanel } from "./BillingPanel";
 import { formatMoney } from "@/lib/pricing";
 import { formatDate } from "@/lib/dates";
 import type { AdminReservation } from "@/components/calendar/types";
-import type { Destination, Payment, Profile, StudentBalance, Vehicle } from "@/lib/types";
+import type {
+  AccountCharge,
+  Destination,
+  Payment,
+  Profile,
+  StudentBalance,
+  Vehicle,
+} from "@/lib/types";
 
 export const metadata: Metadata = { title: "Student" };
 
@@ -31,29 +38,41 @@ export default async function StudentDetailPage({
   const profile = profileRow as Profile | null;
   if (!profile) notFound();
 
-  const [reservationsResult, paymentsResult, balanceResult, vehicles, destinations] =
-    await Promise.all([
-      supabase
-        .from("cars_reservations")
-        .select(RESERVATION_SELECT)
-        .eq("user_id", id)
-        .order("starts_at", { ascending: false }),
-      supabase
-        .from("cars_payments")
-        .select("*")
-        .eq("user_id", id)
-        .order("paid_on", { ascending: false }),
-      supabase
-        .from("cars_student_balances")
-        .select("*")
-        .eq("user_id", id)
-        .maybeSingle(),
-      supabase.from("cars_vehicles").select("*").order("sort_order"),
-      supabase.from("cars_destinations").select("*").order("sort_order"),
-    ]);
+  const [
+    reservationsResult,
+    paymentsResult,
+    chargesResult,
+    balanceResult,
+    vehicles,
+    destinations,
+  ] = await Promise.all([
+    supabase
+      .from("cars_reservations")
+      .select(RESERVATION_SELECT)
+      .eq("user_id", id)
+      .order("starts_at", { ascending: false }),
+    supabase
+      .from("cars_payments")
+      .select("*")
+      .eq("user_id", id)
+      .order("paid_on", { ascending: false }),
+    supabase
+      .from("cars_charges")
+      .select("*")
+      .eq("user_id", id)
+      .order("charged_on", { ascending: false }),
+    supabase
+      .from("cars_student_balances")
+      .select("*")
+      .eq("user_id", id)
+      .maybeSingle(),
+    supabase.from("cars_vehicles").select("*").order("sort_order"),
+    supabase.from("cars_destinations").select("*").order("sort_order"),
+  ]);
 
   const reservations = (reservationsResult.data ?? []) as AdminReservation[];
   const payments = (paymentsResult.data ?? []) as Payment[];
+  const charges = (chargesResult.data ?? []) as AccountCharge[];
   const balance = (balanceResult.data ?? null) as StudentBalance | null;
 
   // Server Component: this renders once per request, so reading the clock here
@@ -141,11 +160,14 @@ export default async function StudentDetailPage({
         />
       </section>
 
-      <PaymentsPanel
+      <BillingPanel
         studentId={profile.id}
+        prefer={profile.payment_method}
         payments={payments}
+        charges={charges}
         reservations={reservations}
         balanceCents={owed}
+        creditCents={balance?.credit_cents ?? 0}
       />
 
       <section>

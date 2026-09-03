@@ -10,30 +10,11 @@ import { notifyStudentApproved, notifyStudentDeclined } from "@/lib/email/notify
 import type { Reservation, Vehicle } from "@/lib/types";
 import {
   friendlyDbError,
+  logActivity,
   revalidateAdmin,
   text,
   type ActionResult,
 } from "@/app/actions/shared";
-
-async function logActivity(
-  supabase: Awaited<ReturnType<typeof createClient>>,
-  actor: { userId: string; name: string },
-  entry: {
-    entityType: string;
-    entityId: string | null;
-    action: string;
-    detail?: Record<string, unknown>;
-  },
-) {
-  await supabase.from("cars_activity").insert({
-    actor_id: actor.userId,
-    actor_name: actor.name,
-    entity_type: entry.entityType,
-    entity_id: entry.entityId,
-    action: entry.action,
-    detail: entry.detail ?? {},
-  });
-}
 
 /* -------------------------------------------------------------------------- */
 /* Approve / decline / complete                                               */
@@ -58,8 +39,6 @@ export async function decideReservationAction(
       "pending",
       "hold",
       "released",
-      "mark_paid",
-      "mark_unpaid",
     ].includes(decision)
   ) {
     return { error: "Unknown decision." };
@@ -88,25 +67,12 @@ export async function decideReservationAction(
     patch.released_at = null;
     patch.release_reason = "";
   }
-  if (decision === "mark_paid") {
-    patch.status = (text(formData, "current_status") || "pending") as Reservation["status"];
-    patch.payment_received_at = new Date().toISOString();
-    patch.decided_at = undefined;
-    patch.decided_by = undefined;
-  }
-  if (decision === "mark_unpaid") {
-    patch.status = (text(formData, "current_status") || "pending") as Reservation["status"];
-    patch.payment_received_at = null;
-    patch.decided_at = undefined;
-    patch.decided_by = undefined;
-  }
   if (decision === "released") {
     patch.released_at = new Date().toISOString();
     patch.release_reason = text(formData, "release_reason");
   }
 
-  // undefined means "leave it alone"; the payment toggles use that so they do
-  // not stamp themselves over who actually decided the reservation.
+  // undefined means "leave it alone".
   const cleaned = Object.fromEntries(
     Object.entries(patch).filter(([, value]) => value !== undefined),
   );
@@ -155,14 +121,7 @@ export async function decideReservationAction(
   });
 
   revalidateAdmin();
-  return {
-    success:
-      decision === "mark_paid"
-        ? "Marked as paid — the car is held again."
-        : decision === "mark_unpaid"
-          ? "Marked as unpaid."
-          : `Reservation marked ${decision}.`,
-  };
+  return { success: `Reservation marked ${decision}.` };
 }
 
 /* -------------------------------------------------------------------------- */
@@ -170,9 +129,13 @@ export async function decideReservationAction(
 /* -------------------------------------------------------------------------- */
 
 /**
- * The office's edit form. Times, car, destination, tolls and a manual
- * adjustment are all changeable here; the time charge is recomputed from
- * whatever rate the reservation is carrying so the arithmetic always adds up.
+ * The office's edit form: times, car, destination, rate and tolls. The time
+ * charge is recomputed from whatever rate the reservation is carrying.
+ *
+ * Extras and discounts are not here -- they are line items with their own
+ * descriptions, added and removed one at a time, and the database rolls them
+ * into adjustment_cents and the total. Nothing in the app computes a total any
+ * more, which is why total_cents is not written below.
  */
 export async function updateReservationAction(
   _prev: ActionResult,
@@ -207,7 +170,6 @@ export async function updateReservationAction(
   const rawCap = text(formData, "daily_cap");
   const dailyCapCents = rawCap === "" ? null : parseMoneyToCents(rawCap);
   const tollCents = parseMoneyToCents(text(formData, "toll")) ?? 0;
-  const adjustmentCents = parseMoneyToCents(text(formData, "adjustment")) ?? 0;
 
   if (hourlyRateCents < 0 || tollCents < 0) {
     return { error: "Rates and tolls cannot be negative." };
@@ -220,7 +182,6 @@ export async function updateReservationAction(
     dailyCapCents,
     minimumHours: Number(vehicle.minimum_hours) || 1,
     tollCents,
-    adjustmentCents,
   });
 
   const destinationId = text(formData, "destination_id");
@@ -240,9 +201,6 @@ export async function updateReservationAction(
       billable_hours: recomputed.billableHours,
       time_charge_cents: recomputed.timeChargeCents,
       toll_cents: recomputed.tollCents,
-      adjustment_cents: recomputed.adjustmentCents,
-      adjustment_reason: text(formData, "adjustment_reason"),
-      total_cents: recomputed.totalCents,
       admin_notes: text(formData, "admin_notes"),
       decline_reason: text(formData, "decline_reason"),
     })
@@ -254,7 +212,7 @@ export async function updateReservationAction(
     entityType: "reservation",
     entityId: id,
     action: "edited",
-    detail: { total_cents: recomputed.totalCents },
+    detail: { time_charge_cents: recomputed.timeChargeCents, toll_cents: tollCents },
   });
 
   revalidateAdmin();
@@ -343,7 +301,6 @@ export async function createReservationAction(
       billable_hours: computed.billableHours,
       time_charge_cents: computed.timeChargeCents,
       toll_cents: computed.tollCents,
-      total_cents: computed.totalCents,
       admin_notes: text(formData, "admin_notes"),
       hold_expires_at: holdUntil,
       decided_at: initialStatus === "approved" ? new Date().toISOString() : null,
@@ -417,13 +374,6 @@ export async function checkInReservationAction(
   const lateFeeCents = parseMoneyToCents(text(formData, "late_fee")) ?? assessment.lateFeeCents;
   const fuelFeeCents = parseMoneyToCents(text(formData, "fuel_fee")) ?? assessment.fuelFeeCents;
 
-  const total =
-    reservation.time_charge_cents +
-    reservation.toll_cents +
-    reservation.adjustment_cents +
-    lateFeeCents +
-    fuelFeeCents;
-
   const { error } = await supabase
     .from("cars_reservations")
     .update({
@@ -433,7 +383,6 @@ export async function checkInReservationAction(
       late_minutes: assessment.lateMinutes,
       late_fee_cents: lateFeeCents,
       fuel_fee_cents: fuelFeeCents,
-      total_cents: total,
       return_notes: text(formData, "return_notes"),
     })
     .eq("id", id);

@@ -218,7 +218,6 @@ export async function convertWaitlistAction(
       billable_hours: quote.billableHours,
       time_charge_cents: quote.timeChargeCents,
       toll_cents: quote.tollCents,
-      total_cents: quote.totalCents,
       student_notes: entry.student_notes,
       admin_notes: `From the waitlist. ${entry.admin_notes}`.trim(),
       decided_at: new Date().toISOString(),

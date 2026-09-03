@@ -4,7 +4,14 @@ import { requireActiveStudent } from "@/lib/auth";
 import { Statement } from "@/components/statement/Statement";
 import { PrintButton } from "@/components/PrintButton";
 import { loadSettings } from "@/lib/settings";
-import type { Incident, Payment, Reservation, StudentBalance, Vehicle } from "@/lib/types";
+import type {
+  AccountCharge,
+  Incident,
+  Payment,
+  Reservation,
+  StudentBalance,
+  Vehicle,
+} from "@/lib/types";
 
 export const metadata: Metadata = { title: "Statement" };
 export const dynamic = "force-dynamic";
@@ -18,10 +25,10 @@ export default async function StatementPage() {
     loadSettings(),
   ]);
 
-  const [reservations, incidents, payments, balance] = await Promise.all([
+  const [reservations, incidents, charges, payments, balance] = await Promise.all([
     supabase
       .from("cars_reservations")
-      .select("*, vehicle:cars_vehicles(id, name)")
+      .select("*, vehicle:cars_vehicles(id, name), items:cars_reservation_items(*)")
       .eq("user_id", viewer.userId)
       .in("status", ["approved", "completed"])
       .order("starts_at"),
@@ -30,6 +37,11 @@ export default async function StatementPage() {
       .select("*")
       .eq("user_id", viewer.userId)
       .order("occurred_on"),
+    supabase
+      .from("cars_charges")
+      .select("*")
+      .eq("user_id", viewer.userId)
+      .order("charged_on"),
     supabase
       .from("cars_payments")
       .select("*")
@@ -54,6 +66,7 @@ export default async function StatementPage() {
           balance={(balance.data ?? null) as StudentBalance | null}
           reservations={(reservations.data ?? []) as RentalRow[]}
           incidents={(incidents.data ?? []) as Incident[]}
+          charges={(charges.data ?? []) as AccountCharge[]}
           payments={(payments.data ?? []) as Payment[]}
           orgName={settings.orgName}
           forPrint
