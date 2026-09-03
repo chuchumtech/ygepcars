@@ -290,6 +290,27 @@ Timestamps are stored as `timestamptz`; `src/lib/dates.ts` is the only place
 wall-clock time and instants convert, and it handles the daylight-saving
 changeovers.
 
+## Car photos
+
+The office uploads a car's photo from `/admin/cars` — open the car, choose a
+file, save. It goes to a Supabase Storage bucket (`cars-photos`) and the row's
+`image_url` points at it, so changing a picture is not a code change and not a
+deploy.
+
+The bucket is public, because these are pictures of two cars on a page anybody
+can see before signing in. It has no insert, update or delete policy on
+purpose: writes go through the service-role client in `src/lib/car-photos.ts`,
+which is only reachable from `saveVehicleAction` behind `requireAdmin()`, so an
+anon or student token cannot put anything in it. Uploads are checked for type
+(JPEG, PNG, WebP, AVIF — the bucket enforces the same list) and capped at 5 MB
+in the app, in the bucket, and by the server action's body limit.
+
+Each upload gets a fresh timestamped name rather than overwriting a fixed one,
+so a replaced photo is not fighting a CDN cache that still holds the old bytes;
+the previous file is deleted once the new one is up. A photo the office did not
+upload — an old `/public` path, or a link elsewhere — is left alone when the
+row changes.
+
 ## The date picker
 
 Dates are picked on one calendar, not two: choose the pickup day, choose the
@@ -349,7 +370,7 @@ src/app/admin/       office portal
 src/app/actions/     server actions, one file per area
 src/components/      shared UI
 src/components/calendar/  the calendar: month, week, day, agenda, detail dialog
-src/lib/             pricing, dates, calendar maths, Hebrew dates, Supabase clients, auth
+src/lib/             pricing, dates, calendar maths, Hebrew dates, car photos, Supabase clients, auth
 src/lib/email/       Resend client, templates, notification dispatch
 supabase/migrations/ schema
 supabase/tests/      schema tests

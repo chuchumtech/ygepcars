@@ -52,6 +52,10 @@ things that matter most and are easiest to get wrong:
   because the date picker needs it, but a student cannot add one, and their
   update and delete change nothing rather than clearing the list.
 
+`0012_cars_photo_storage.sql` creates a Storage bucket, which plain Postgres
+has no schema for; it notices that and skips itself, so the list below still
+runs end to end.
+
 `00_supabase_stub.sql` stands in for the pieces of Supabase the schema leans on
 (`auth.users`, `auth.uid()`, the `anon` and `authenticated` roles) so the
 migrations can run on plain Postgres.
@@ -74,6 +78,7 @@ for f in supabase/tests/00_supabase_stub.sql \
          supabase/migrations/0009_cars_returns_and_incidents.sql \
          supabase/migrations/0010_cars_off_shabbosim.sql \
          supabase/migrations/0011_cars_off_shabbosim_edges.sql \
+         supabase/migrations/0012_cars_photo_storage.sql \
          supabase/tests/90_behaviour.sql \
          supabase/tests/91_rls.sql \
          supabase/tests/92_waitlist.sql \

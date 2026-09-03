@@ -294,8 +294,49 @@ function VehicleDialog({
           </Field>
         </div>
 
-        <Field label="Photo path" hint="A file under /public, e.g. /cars/subaru_legacy_blue.jpg">
-          <input className="input" name="image_url" defaultValue={vehicle?.image_url ?? ""} />
+        <Field
+          label="Photo"
+          hint="Kept in the database, not in the code — upload one here and it is live straight away."
+        >
+          <input type="hidden" name="current_image_url" value={vehicle?.image_url ?? ""} />
+          <div className="flex flex-wrap items-start gap-4">
+            {vehicle?.image_url ? (
+              <Image
+                src={vehicle.image_url}
+                alt=""
+                width={160}
+                height={100}
+                className="h-[6.25rem] w-40 shrink-0 rounded-xl object-cover ring-1 ring-line"
+              />
+            ) : (
+              <div className="flex h-[6.25rem] w-40 shrink-0 items-center justify-center rounded-xl bg-parchment-deep text-xs font-semibold text-ink-soft">
+                No photo yet
+              </div>
+            )}
+
+            <div className="min-w-0 flex-1 space-y-2">
+              <input
+                type="file"
+                name="photo"
+                accept="image/jpeg,image/png,image/webp,image/avif"
+                className="block w-full cursor-pointer rounded-xl border border-line bg-surface p-2 text-sm text-ink-soft file:mr-3 file:rounded-lg file:border-0 file:bg-brand file:px-3 file:py-1.5 file:text-sm file:font-bold file:text-white"
+              />
+              <p className="text-xs text-ink-soft">
+                JPEG, PNG or WebP, up to 5 MB. Replacing a photo deletes the old file
+                once the new one is up.
+              </p>
+              {vehicle?.image_url ? (
+                <label className="flex items-center gap-2 text-sm font-semibold text-ink">
+                  <input
+                    type="checkbox"
+                    name="remove_photo"
+                    className="h-4 w-4 accent-brand"
+                  />
+                  Remove the photo and leave the car without one
+                </label>
+              ) : null}
+            </div>
+          </div>
         </Field>
 
         <Field label="Notes" hint="Only the office sees this.">

@@ -1,7 +1,8 @@
 "use server";
 
-import { createClient } from "@/lib/supabase/server";
+import { createAdminClient, createClient } from "@/lib/supabase/server";
 import { requireAdmin } from "@/lib/auth";
+import { deleteCarPhoto, uploadCarPhoto } from "@/lib/car-photos";
 import { parseMoneyToCents } from "@/lib/pricing";
 import {
   checkbox,
@@ -45,6 +46,13 @@ export async function saveVehicleAction(
 
   const yearRaw = text(formData, "year");
 
+  // The photo is handled after the row exists, since a brand new car has no id
+  // to file it under yet. Until then keep whatever it had.
+  const photo = formData.get("photo");
+  const newPhoto = photo instanceof File && photo.size > 0 ? photo : null;
+  const dropPhoto = checkbox(formData, "remove_photo");
+  const existing = text(formData, "current_image_url");
+
   const record = {
     name,
     year: yearRaw ? integer(formData, "year") : null,
@@ -53,7 +61,7 @@ export async function saveVehicleAction(
     color: text(formData, "color"),
     license_plate: text(formData, "license_plate"),
     seats: text(formData, "seats") ? integer(formData, "seats") : null,
-    image_url: text(formData, "image_url"),
+    image_url: dropPhoto && !newPhoto ? "" : existing,
     hourly_rate_cents: hourlyRateCents,
     daily_cap_cents: dailyCapCents,
     minimum_hours: minimumHours,
@@ -62,14 +70,41 @@ export async function saveVehicleAction(
     sort_order: integer(formData, "sort_order"),
   };
 
-  const { error } = id
-    ? await supabase.from("cars_vehicles").update(record).eq("id", id)
-    : await supabase.from("cars_vehicles").insert(record);
+  const saved = id
+    ? await supabase.from("cars_vehicles").update(record).eq("id", id).select("id").single()
+    : await supabase.from("cars_vehicles").insert(record).select("id").single();
 
-  if (error) return { error: friendlyDbError(error) };
+  if (saved.error) return { error: friendlyDbError(saved.error) };
+
+  const vehicleId = (saved.data as { id: string }).id;
+  const admin = createAdminClient();
+
+  if (newPhoto) {
+    const uploaded = await uploadCarPhoto(admin, vehicleId, newPhoto);
+    if ("error" in uploaded) {
+      // The car itself is saved; only the photo failed, so say which.
+      revalidateAdmin();
+      return { error: uploaded.error };
+    }
+
+    await supabase
+      .from("cars_vehicles")
+      .update({ image_url: uploaded.url })
+      .eq("id", vehicleId);
+
+    if (existing) await deleteCarPhoto(admin, existing);
+  } else if (dropPhoto && existing) {
+    await deleteCarPhoto(admin, existing);
+  }
 
   revalidateAdmin();
-  return { success: id ? "Car updated." : "Car added." };
+  return {
+    success: id
+      ? newPhoto
+        ? "Car updated, new photo is live."
+        : "Car updated."
+      : "Car added.",
+  };
 }
 
 export async function toggleVehicleAction(formData: FormData) {
