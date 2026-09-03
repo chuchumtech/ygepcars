@@ -172,6 +172,21 @@ Recording a payment against a reservation marks it paid automatically; removing
 that payment marks it unpaid again. The office can also toggle paid by hand from
 the reservation dialog.
 
+**There is no cron job, and there does not need to be.** Nothing sweeps the
+table looking for lapsed holds. The rule is evaluated every time availability is
+read: a pending reservation counts as holding its car only while
+`requested_at > cars_unpaid_hold_cutoff()`, or once payment has landed. That
+means there is no window where a car is wrongly held between sweeps, nothing to
+fail overnight, and changing the hold window in Settings takes effect on the
+next page load rather than the next sweep.
+
+The trade is that reading has to stay cheap, which took an index and one piece
+of care: the cutoff is a zero-argument stable function, so Postgres evaluates it
+once per query instead of once per reservation, and a partial GiST index covers
+every status that can block a car. Measured over 2,600 reservations, that took a
+single availability check from ~2,600 ms on a sequential scan to ~2 ms on an
+index scan. `supabase/tests/95_availability_performance.sql` guards both.
+
 ## Holds and releases
 
 Beyond approving and declining, the office can **put a car on hold**: it blocks

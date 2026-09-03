@@ -12,6 +12,11 @@ things that matter most and are easiest to get wrong:
   who booked what; they cannot promote themselves to admin, change a rate, or
   approve their own request; the office sees everything; an anonymous visitor
   sees the fleet and the toll sheet and nothing else.
+* **`95_availability_performance.sql`** — the unpaid-hold rule is evaluated on
+  read rather than by a scheduled sweep, so this checks reading stays cheap:
+  that the blocking predicate uses the range index rather than scanning, and
+  that the hold cutoff is evaluated once per query rather than per row. It
+  prints timings against the figures measured when the index was added.
 * **`94_booking_rules.sql`** — the three rules hold at their defaults and a junk
   setting falls back rather than erroring; a short rental, a last-minute one and
   a reasonless one are all refused for a student and all allowed for the office;
@@ -47,11 +52,13 @@ for f in supabase/tests/00_supabase_stub.sql \
          supabase/migrations/0004_cars_waitlist_and_email.sql \
          supabase/migrations/0005_cars_holds_and_ordering.sql \
          supabase/migrations/0006_cars_booking_rules.sql \
+         supabase/migrations/0007_cars_availability_performance.sql \
          supabase/tests/90_behaviour.sql \
          supabase/tests/91_rls.sql \
          supabase/tests/92_waitlist.sql \
          supabase/tests/93_holds_and_ordering.sql \
-         supabase/tests/94_booking_rules.sql; do
+         supabase/tests/94_booking_rules.sql \
+         supabase/tests/95_availability_performance.sql; do
   psql -d carscheck -v ON_ERROR_STOP=1 -q -f "$f"
 done
 ```
