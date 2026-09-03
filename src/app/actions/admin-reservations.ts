@@ -4,6 +4,9 @@ import { createClient } from "@/lib/supabase/server";
 import { requireAdmin } from "@/lib/auth";
 import { localToInstant } from "@/lib/dates";
 import { parseMoneyToCents, quote } from "@/lib/pricing";
+import { assessReturn } from "@/lib/returns";
+import { loadReturnRules } from "@/lib/settings";
+import { notifyStudentApproved, notifyStudentDeclined } from "@/lib/email/notify";
 import type { Reservation, Vehicle } from "@/lib/types";
 import {
   friendlyDbError,
@@ -110,6 +113,40 @@ export async function decideReservationAction(
 
   const { error } = await supabase.from("cars_reservations").update(cleaned).eq("id", id);
   if (error) return { error: friendlyDbError(error) };
+
+  // Tell the student, if the office has student mail switched on. Never lets a
+  // mail problem turn a successful decision into an error.
+  if (decision === "approved" || decision === "declined") {
+    const { data: row } = await supabase
+      .from("cars_reservations")
+      .select("*, vehicle:cars_vehicles(name), student:cars_profiles!cars_reservations_user_id_fkey(full_name, email)")
+      .eq("id", id)
+      .maybeSingle();
+
+    if (row?.student?.email) {
+      const shared = {
+        reservationId: id,
+        to: row.student.email as string,
+        studentName: (row.student.full_name as string) ?? "",
+        vehicleName: (row.vehicle?.name as string) ?? "Car",
+        startsAt: row.starts_at as string,
+        endsAt: row.ends_at as string,
+      };
+      if (decision === "approved") {
+        await notifyStudentApproved({
+          ...shared,
+          destinationLabel: (row.destination_label as string) ?? "",
+          totalCents: (row.total_cents as number) ?? 0,
+          reference: (row.reference as string) ?? "",
+        });
+      } else {
+        await notifyStudentDeclined({
+          ...shared,
+          declineReason: (row.decline_reason as string) ?? "",
+        });
+      }
+    }
+  }
 
   await logActivity(supabase, { userId: admin.userId, name: admin.profile.full_name }, {
     entityType: "reservation",
@@ -325,6 +362,136 @@ export async function createReservationAction(
 
   revalidateAdmin();
   return { success: "Reservation created." };
+}
+
+/* -------------------------------------------------------------------------- */
+/* Check the car back in                                                      */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * Records a return: when it actually came back and where the fuel gauge sat.
+ *
+ * Late and fuel fees are worked out here rather than typed in, and both land on
+ * the reservation total so they flow through to the student's balance. The
+ * car's fuel level is updated to whatever came back, which becomes the level
+ * the next renter has to match.
+ */
+export async function checkInReservationAction(
+  _prev: ActionResult,
+  formData: FormData,
+): Promise<ActionResult> {
+  const admin = await requireAdmin();
+  const supabase = await createClient();
+
+  const id = text(formData, "reservation_id");
+  const { data: reservation } = await supabase
+    .from("cars_reservations")
+    .select("*")
+    .eq("id", id)
+    .maybeSingle();
+
+  if (!reservation) return { error: "That reservation is gone." };
+
+  const returnedRaw = text(formData, "returned_at");
+  const returnedAt = returnedRaw ? new Date(returnedRaw) : new Date();
+  if (Number.isNaN(returnedAt.getTime())) {
+    return { error: "Check the return time." };
+  }
+
+  const fuelInRaw = text(formData, "fuel_in");
+  const fuelIn = fuelInRaw === "" ? null : Number(fuelInRaw);
+  if (fuelIn !== null && (!Number.isInteger(fuelIn) || fuelIn < 0 || fuelIn > 8)) {
+    return { error: "Fuel has to be a gauge reading between empty and full." };
+  }
+
+  const rules = await loadReturnRules();
+  const assessment = assessReturn({
+    dueAt: new Date(reservation.ends_at),
+    returnedAt,
+    fuelOut: reservation.fuel_out,
+    fuelIn,
+    rules,
+  });
+
+  // The office can override either figure, e.g. to waive a fee.
+  const lateFeeCents = parseMoneyToCents(text(formData, "late_fee")) ?? assessment.lateFeeCents;
+  const fuelFeeCents = parseMoneyToCents(text(formData, "fuel_fee")) ?? assessment.fuelFeeCents;
+
+  const total =
+    reservation.time_charge_cents +
+    reservation.toll_cents +
+    reservation.adjustment_cents +
+    lateFeeCents +
+    fuelFeeCents;
+
+  const { error } = await supabase
+    .from("cars_reservations")
+    .update({
+      status: "completed",
+      returned_at: returnedAt.toISOString(),
+      fuel_in: fuelIn,
+      late_minutes: assessment.lateMinutes,
+      late_fee_cents: lateFeeCents,
+      fuel_fee_cents: fuelFeeCents,
+      total_cents: total,
+      return_notes: text(formData, "return_notes"),
+    })
+    .eq("id", id);
+
+  if (error) return { error: friendlyDbError(error) };
+
+  // Whatever it came back at is what the next student has to match.
+  if (fuelIn !== null) {
+    await supabase
+      .from("cars_vehicles")
+      .update({ fuel_level: fuelIn })
+      .eq("id", reservation.vehicle_id);
+  }
+
+  await logActivity(supabase, { userId: admin.userId, name: admin.profile.full_name }, {
+    entityType: "reservation",
+    entityId: id,
+    action: "checked in",
+    detail: { late_minutes: assessment.lateMinutes, fuel_in: fuelIn },
+  });
+
+  revalidateAdmin();
+  return {
+    success:
+      assessment.lateMinutes > 0 || fuelFeeCents > 0
+        ? "Checked in, with fees applied."
+        : "Checked in.",
+  };
+}
+
+/** Records the car going out, so the fuel level at pickup is on the record. */
+export async function checkOutReservationAction(formData: FormData) {
+  await requireAdmin();
+  const supabase = await createClient();
+
+  const id = text(formData, "reservation_id");
+  const { data: reservation } = await supabase
+    .from("cars_reservations")
+    .select("vehicle_id")
+    .eq("id", id)
+    .maybeSingle();
+  if (!reservation) return;
+
+  const { data: vehicle } = await supabase
+    .from("cars_vehicles")
+    .select("fuel_level")
+    .eq("id", reservation.vehicle_id)
+    .maybeSingle();
+
+  await supabase
+    .from("cars_reservations")
+    .update({
+      picked_up_at: new Date().toISOString(),
+      fuel_out: vehicle?.fuel_level ?? null,
+    })
+    .eq("id", id);
+
+  revalidateAdmin();
 }
 
 export async function deleteReservationAction(formData: FormData) {

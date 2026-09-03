@@ -73,9 +73,14 @@ export default async function StudentDetailPage({
   return (
     <div className="space-y-7">
       <div>
-        <Link href="/admin/students" className="text-sm text-ink-soft hover:text-ink">
-          &larr; All students
-        </Link>
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <Link href="/admin/students" className="text-sm text-ink-soft hover:text-ink">
+            &larr; All students
+          </Link>
+          <Link href={`/admin/students/${id}/statement`} className="btn-secondary btn-sm">
+            Statement
+          </Link>
+        </div>
         <PageHeader
           title={profile.full_name || "(no name)"}
           description={

@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { createClient } from "@/lib/supabase/server";
+import { createAdminClient, createClient } from "@/lib/supabase/server";
 import { getViewer, requireActiveStudent } from "@/lib/auth";
 import { parseSearchWindow } from "@/lib/search-params";
 import { quoteForVehicle } from "@/lib/pricing";
@@ -203,4 +203,125 @@ export async function cancelReservationAction(formData: FormData) {
 
   revalidatePath("/reservations");
   revalidatePath("/admin");
+}
+
+/**
+ * A student changing their own request before the office has decided on it.
+ *
+ * Written with the service role, because the guard trigger deliberately pins
+ * the pricing columns against student edits -- and the price has to move when
+ * the times do. Everything the client sent is treated as untrusted: ownership
+ * and status are re-read from the database, the rules are re-checked, the
+ * window is re-checked for clashes, and the quote is recomputed from the
+ * vehicle's own rates rather than anything posted.
+ */
+export async function updateMyReservationAction(
+  _prev: ActionState,
+  formData: FormData,
+): Promise<ActionState> {
+  const viewer = await requireActiveStudent();
+  const supabase = await createClient();
+
+  const id = text(formData, "reservation_id");
+  if (!id) return { error: "Missing reservation." };
+
+  const { data: existing } = await supabase
+    .from("cars_reservations")
+    .select("*")
+    .eq("id", id)
+    .maybeSingle();
+
+  if (!existing || existing.user_id !== viewer.userId) {
+    return { error: "That reservation is not yours." };
+  }
+  if (existing.status !== "pending") {
+    return {
+      error:
+        "The office has already decided on this one. Call them if it needs to change.",
+    };
+  }
+
+  const parsed = parseSearchWindow({
+    start_date: text(formData, "start_date"),
+    start_time: text(formData, "start_time"),
+    end_date: text(formData, "end_date"),
+    end_time: text(formData, "end_time"),
+  });
+  if ("error" in parsed) return { error: parsed.error };
+  const { startsAt, endsAt } = parsed.window;
+
+  const rules = await loadBookingRules();
+  const problems = checkBookingRules(startsAt, endsAt, rules, new Date());
+  if (problems.length > 0) return { error: problems.join(" ") };
+
+  const purpose = text(formData, "purpose");
+  if (!purpose) {
+    return { error: "Please keep a reason for the trip — the office decides on it." };
+  }
+
+  const { data: vehicleRow } = await supabase
+    .from("cars_vehicles")
+    .select("*")
+    .eq("id", existing.vehicle_id)
+    .maybeSingle();
+  const vehicle = vehicleRow as Vehicle | null;
+  if (!vehicle) return { error: "That car is no longer available." };
+
+  const destinationId = text(formData, "destination_id");
+  const { data: destinationRow } = await supabase
+    .from("cars_destinations")
+    .select("*")
+    .eq("id", destinationId)
+    .maybeSingle();
+  const destination = destinationRow as Destination | null;
+  if (!destination) return { error: "Please choose where you are heading." };
+
+  // Somebody else may have taken the window since the request went in.
+  const { data: clashes } = await supabase.rpc("cars_busy_windows", {
+    p_from: startsAt.toISOString(),
+    p_to: endsAt.toISOString(),
+  });
+  const blocked = ((clashes ?? []) as { vehicle_id: string }[]).some(
+    (row) => row.vehicle_id === vehicle.id,
+  );
+  const unchangedWindow =
+    existing.starts_at === startsAt.toISOString() &&
+    existing.ends_at === endsAt.toISOString();
+  if (blocked && !unchangedWindow) {
+    return { error: "That car is taken for those times now. Try a different window." };
+  }
+
+  const note = text(formData, "destination_note");
+  const label = note ? `${destination.name} (${note})` : destination.name;
+  const quoted = quoteForVehicle(vehicle, startsAt, endsAt, destination.toll_cents);
+
+  const service = createAdminClient();
+  const { error } = await service
+    .from("cars_reservations")
+    .update({
+      starts_at: startsAt.toISOString(),
+      ends_at: endsAt.toISOString(),
+      destination_id: destination.id,
+      destination_label: label,
+      purpose,
+      student_notes: text(formData, "student_notes"),
+      billable_hours: quoted.billableHours,
+      time_charge_cents: quoted.timeChargeCents,
+      toll_cents: quoted.tollCents,
+      total_cents: quoted.totalCents,
+    })
+    .eq("id", id)
+    .eq("user_id", viewer.userId)
+    .eq("status", "pending");
+
+  if (error) {
+    if (error.code === "23P01") {
+      return { error: "That car was just booked for those times. Try a different window." };
+    }
+    return { error: error.message };
+  }
+
+  revalidatePath("/account/reservations");
+  revalidatePath("/admin");
+  return { success: "Updated. The office sees the new details." };
 }

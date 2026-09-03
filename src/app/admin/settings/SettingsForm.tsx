@@ -15,6 +15,15 @@ function num(value: unknown, fallback: number): string {
   return typeof value === "number" ? String(value) : String(fallback);
 }
 
+function money(value: unknown, fallbackCents: number): string {
+  const cents = typeof value === "number" ? value : fallbackCents;
+  return (cents / 100).toFixed(2);
+}
+
+function bool(value: unknown, fallback: boolean): boolean {
+  return typeof value === "boolean" ? value : fallback;
+}
+
 export function SettingsForm({ values }: { values: Record<string, unknown> }) {
   const [state, action] = useActionState<ActionResult, FormData>(saveSettingsAction, {});
 
@@ -66,6 +75,86 @@ export function SettingsForm({ values }: { values: Record<string, unknown> }) {
           it is still theirs. Recording a payment against a reservation marks it
           paid automatically.
         </p>
+      </section>
+
+      <section className="rounded-xl border border-line bg-parchment-deep/50 p-4">
+        <h2 className="text-sm font-bold text-ink">Returns</h2>
+        <p className="mt-0.5 text-xs text-ink-soft">
+          A car keeps its fuel level between renters: whatever it comes back at is
+          the level the next student has to match, so nobody buys fuel for
+          somebody else&apos;s trip. Set a fee to zero to never charge it.
+        </p>
+
+        <div className="mt-4 grid gap-4 sm:grid-cols-3">
+          <Field label="Grace period" hint="Minutes before late counts.">
+            <input
+              className="input"
+              name="late_grace_minutes"
+              inputMode="numeric"
+              defaultValue={num(values.late_grace_minutes, 15)}
+            />
+          </Field>
+          <Field label="Late fee" hint="Per hour, rounded up.">
+            <input
+              className="input"
+              name="late_fee_per_hour"
+              inputMode="decimal"
+              defaultValue={money(values.late_fee_per_hour_cents, 1500)}
+            />
+          </Field>
+          <Field label="Fuel fee" hint="Per eighth of a tank short.">
+            <input
+              className="input"
+              name="fuel_fee_per_eighth"
+              inputMode="decimal"
+              defaultValue={money(values.fuel_fee_per_eighth_cents, 800)}
+            />
+          </Field>
+        </div>
+      </section>
+
+      <section className="rounded-xl border border-line bg-parchment-deep/50 p-4">
+        <h2 className="text-sm font-bold text-ink">Emails to students</h2>
+        <p className="mt-0.5 text-xs text-ink-soft">
+          Off by default. Nothing reaches a student unless the first switch is on.
+        </p>
+
+        <div className="mt-4 space-y-3">
+          <label className="flex items-start gap-3 text-sm">
+            <input
+              type="checkbox"
+              name="notify_students"
+              defaultChecked={bool(values.notify_students, false)}
+              className="mt-0.5 h-4 w-4 accent-brand"
+            />
+            <span>
+              <span className="font-semibold text-ink">Email students at all</span>
+              <span className="block text-xs text-ink-soft">
+                The master switch. Turn this off and the two below do nothing.
+              </span>
+            </span>
+          </label>
+
+          <label className="flex items-center gap-3 text-sm">
+            <input
+              type="checkbox"
+              name="notify_student_on_approved"
+              defaultChecked={bool(values.notify_student_on_approved, true)}
+              className="h-4 w-4 accent-brand"
+            />
+            <span className="text-ink">When you approve their request</span>
+          </label>
+
+          <label className="flex items-center gap-3 text-sm">
+            <input
+              type="checkbox"
+              name="notify_student_on_declined"
+              defaultChecked={bool(values.notify_student_on_declined, true)}
+              className="h-4 w-4 accent-brand"
+            />
+            <span className="text-ink">When you decline it</span>
+          </label>
+        </div>
       </section>
 
       <Field label="Organisation name">

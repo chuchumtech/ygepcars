@@ -152,8 +152,32 @@ export async function saveSettingsAction(
     return Math.min(Math.max(raw, 1), max);
   };
 
+  const feeRule = (key: string, fallback: number, max: number) => {
+    // Zero is a real answer here: it means "do not charge".
+    const raw = integer(formData, key, fallback);
+    return Math.min(Math.max(raw, 0), max);
+  };
+
   const updates: { key: string; value: unknown }[] = [
     { key: "min_rental_hours", value: rule("min_rental_hours", 4, 24 * 14) },
+    { key: "late_grace_minutes", value: feeRule("late_grace_minutes", 15, 24 * 60) },
+    {
+      key: "late_fee_per_hour_cents",
+      value: parseMoneyToCents(text(formData, "late_fee_per_hour")) ?? 1500,
+    },
+    {
+      key: "fuel_fee_per_eighth_cents",
+      value: parseMoneyToCents(text(formData, "fuel_fee_per_eighth")) ?? 800,
+    },
+    { key: "notify_students", value: checkbox(formData, "notify_students") },
+    {
+      key: "notify_student_on_approved",
+      value: checkbox(formData, "notify_student_on_approved"),
+    },
+    {
+      key: "notify_student_on_declined",
+      value: checkbox(formData, "notify_student_on_declined"),
+    },
     { key: "min_advance_hours", value: rule("min_advance_hours", 2, 24 * 30) },
     { key: "payment_hold_hours", value: rule("payment_hold_hours", 12, 24 * 30) },
     { key: "org_name", value: text(formData, "org_name") },

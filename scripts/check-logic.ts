@@ -2,6 +2,7 @@ import { quote, parseMoneyToCents, formatMoney } from "@/lib/pricing";
 import { localToInstant, instantToLocalParts, hoursBetween, describeDuration } from "@/lib/dates";
 import { splitIntoDaySegments, shiftMonths, startOfWeek, viewBounds } from "@/lib/calendar";
 import { checkBookingRules, holdEndsAt, hoursLabel, DEFAULT_RULES } from "@/lib/booking-rules";
+import { assessReturn, describeLateness, fuelLabel, DEFAULT_RETURN_RULES } from "@/lib/returns";
 
 let failures = 0;
 function check(label: string, actual: unknown, expected: unknown) {
@@ -134,6 +135,49 @@ check("hours wording: singular", hoursLabel(1), "1 hour");
 check("hours wording: plural", hoursLabel(4), "4 hours");
 check("hours wording: a whole day", hoursLabel(24), "1 day");
 check("hours wording: several days", hoursLabel(72), "3 days");
+
+// --- returns: lateness and fuel ------------------------------------------
+const rr = DEFAULT_RETURN_RULES;           // 15 min grace, $15/hr, $8 per eighth
+const due = new Date("2026-09-10T17:00:00Z");
+const back = (mins: number) => new Date(due.getTime() + mins * 60_000);
+
+check("on time costs nothing",
+  assessReturn({ dueAt: due, returnedAt: back(0), fuelOut: 8, fuelIn: 8, rules: rr }).lateFeeCents, 0);
+check("inside the grace period costs nothing",
+  assessReturn({ dueAt: due, returnedAt: back(14), fuelOut: 8, fuelIn: 8, rules: rr }).lateFeeCents, 0);
+check("a minute past grace bills the first hour",
+  assessReturn({ dueAt: due, returnedAt: back(16), fuelOut: 8, fuelIn: 8, rules: rr }).lateFeeCents, 1500);
+check("75 min late is one billable hour after grace",
+  assessReturn({ dueAt: due, returnedAt: back(75), fuelOut: 8, fuelIn: 8, rules: rr }).lateFeeCents, 1500);
+check("76 min late tips into a second hour",
+  assessReturn({ dueAt: due, returnedAt: back(76), fuelOut: 8, fuelIn: 8, rules: rr }).lateFeeCents, 3000);
+check("early is not negative",
+  assessReturn({ dueAt: due, returnedAt: back(-60), fuelOut: 8, fuelIn: 8, rules: rr }).lateMinutes, 0);
+
+check("returning at the level it went out is free",
+  assessReturn({ dueAt: due, returnedAt: due, fuelOut: 5, fuelIn: 5, rules: rr }).fuelFeeCents, 0);
+check("three eighths short costs 3 x $8",
+  assessReturn({ dueAt: due, returnedAt: due, fuelOut: 8, fuelIn: 5, rules: rr }).fuelFeeCents, 2400);
+check("bringing it back fuller is free, not a credit",
+  assessReturn({ dueAt: due, returnedAt: due, fuelOut: 4, fuelIn: 8, rules: rr }).fuelFeeCents, 0);
+check("the bar is where it went out, not full",
+  assessReturn({ dueAt: due, returnedAt: due, fuelOut: 5, fuelIn: 4, rules: rr }).fuelFeeCents, 800);
+check("no reading means no fuel charge",
+  assessReturn({ dueAt: due, returnedAt: due, fuelOut: null, fuelIn: null, rules: rr }).fuelFeeCents, 0);
+check("a zero fee rule never charges",
+  assessReturn({ dueAt: due, returnedAt: back(600), fuelOut: 8, fuelIn: 0,
+    rules: { lateGraceMinutes: 15, lateFeePerHourCents: 0, fuelFeePerEighthCents: 0 } }).lateFeeCents
+  + assessReturn({ dueAt: due, returnedAt: back(600), fuelOut: 8, fuelIn: 0,
+    rules: { lateGraceMinutes: 15, lateFeePerHourCents: 0, fuelFeePerEighthCents: 0 } }).fuelFeeCents, 0);
+
+check("gauge wording: full", fuelLabel(8), "Full");
+check("gauge wording: half", fuelLabel(4), "1/2");
+check("gauge wording: five eighths", fuelLabel(5), "5/8");
+check("gauge wording: empty", fuelLabel(0), "Empty");
+check("gauge wording: unknown", fuelLabel(null), "--");
+check("lateness wording under an hour", describeLateness(40), "40 min late");
+check("lateness wording over an hour", describeLateness(95), "1h 35m late");
+check("lateness wording when on time", describeLateness(0), "On time");
 
 console.log(failures === 0 ? "\nAll checks passed." : `\n${failures} FAILED`);
 process.exit(failures === 0 ? 0 : 1);

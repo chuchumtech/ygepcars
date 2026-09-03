@@ -60,6 +60,7 @@ export type Vehicle = {
   hourly_rate_cents: number;
   daily_cap_cents: number | null;
   minimum_hours: number;
+  fuel_level: number;
   is_active: boolean;
   notes: string;
   sort_order: number;
@@ -102,6 +103,14 @@ export type Reservation = {
   decline_reason: string;
   hold_expires_at: string | null;
   payment_received_at: string | null;
+  picked_up_at: string | null;
+  returned_at: string | null;
+  fuel_out: number | null;
+  fuel_in: number | null;
+  late_minutes: number;
+  late_fee_cents: number;
+  fuel_fee_cents: number;
+  return_notes: string;
   released_at: string | null;
   release_reason: string;
   requested_at: string;
@@ -141,8 +150,50 @@ export type Payment = {
   created_at: string;
 };
 
+export type IncidentKind =
+  | "damage"
+  | "accident"
+  | "ticket"
+  | "cleaning"
+  | "mechanical"
+  | "fuel"
+  | "other";
+
+export const INCIDENT_KINDS: { value: IncidentKind; label: string }[] = [
+  { value: "damage", label: "Damage" },
+  { value: "accident", label: "Accident" },
+  { value: "ticket", label: "Ticket or violation" },
+  { value: "cleaning", label: "Left dirty" },
+  { value: "mechanical", label: "Mechanical" },
+  { value: "fuel", label: "Fuel" },
+  { value: "other", label: "Other" },
+];
+
+export type Incident = {
+  id: string;
+  vehicle_id: string;
+  reservation_id: string | null;
+  user_id: string | null;
+  occurred_on: string;
+  kind: IncidentKind;
+  description: string;
+  charge_cents: number;
+  status: "open" | "resolved";
+  resolution: string;
+  reported_by: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
+export type IncidentWithRefs = Incident & {
+  vehicle: Pick<Vehicle, "id" | "name"> | null;
+  student: Pick<Profile, "id" | "full_name"> | null;
+};
+
 export type StudentBalance = {
   user_id: string;
+  rental_cents: number;
+  incident_cents: number;
   charged_cents: number;
   paid_cents: number;
   balance_cents: number;

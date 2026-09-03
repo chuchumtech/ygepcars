@@ -12,6 +12,11 @@ things that matter most and are easiest to get wrong:
   who booked what; they cannot promote themselves to admin, change a rate, or
   approve their own request; the office sees everything; an anonymous visitor
   sees the fleet and the toll sheet and nothing else.
+* **`97_returns_and_incidents.sql`** — a car keeps its fuel level between
+  renters, so the next student's target is what the last one left, not full;
+  impossible gauge readings are rejected; incident charges land on the right
+  student's balance and a payment reduces it; a student sees only incidents
+  charged to them and cannot write their own return, fuel reading or fees.
 * **`96_student_details.sql`** — an existing full name splits correctly (a
   middle name stays with the surname rather than being lost); setting either
   part rebuilds `full_name`; a new row gets one without anyone writing it; only
@@ -60,13 +65,15 @@ for f in supabase/tests/00_supabase_stub.sql \
          supabase/migrations/0006_cars_booking_rules.sql \
          supabase/migrations/0007_cars_availability_performance.sql \
          supabase/migrations/0008_cars_student_details.sql \
+         supabase/migrations/0009_cars_returns_and_incidents.sql \
          supabase/tests/90_behaviour.sql \
          supabase/tests/91_rls.sql \
          supabase/tests/92_waitlist.sql \
          supabase/tests/93_holds_and_ordering.sql \
          supabase/tests/94_booking_rules.sql \
          supabase/tests/95_availability_performance.sql \
-         supabase/tests/96_student_details.sql; do
+         supabase/tests/96_student_details.sql \
+         supabase/tests/97_returns_and_incidents.sql; do
   psql -d carscheck -v ON_ERROR_STOP=1 -q -f "$f"
 done
 ```

@@ -5,6 +5,8 @@ import {
   cancellationEmail,
   newAccountEmail,
   newRequestEmail,
+  studentApprovedEmail,
+  studentDeclinedEmail,
   waitlistEmail,
   type ReservationEmailInput,
 } from "./templates";
@@ -112,5 +114,82 @@ export async function notifyWaitlistJoin(input: {
     kind: "waitlist_join",
     entityType: "waitlist",
     entityId: input.waitlistId,
+  });
+}
+
+/* -------------------------------------------------------------------------- */
+/* To the student                                                             */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * Student mail is gated twice: a master switch the office can flip in one
+ * place, and a per-kind switch under it. Both default to the master being off,
+ * so nothing reaches a student until the office says so.
+ */
+async function studentMailAllowed(
+  kind: "notify_student_on_approved" | "notify_student_on_declined",
+): Promise<boolean> {
+  try {
+    const supabase = createAdminClient();
+    const { data } = await supabase
+      .from("cars_settings")
+      .select("key, value")
+      .in("key", ["notify_students", kind]);
+
+    const bag = new Map(
+      ((data ?? []) as { key: string; value: unknown }[]).map((r) => [r.key, r.value]),
+    );
+    if (bag.get("notify_students") !== true) return false;
+    return bag.get(kind) !== false;
+  } catch {
+    // If the switch cannot be read, stay quiet rather than mail a student by
+    // accident.
+    return false;
+  }
+}
+
+export async function notifyStudentApproved(input: {
+  reservationId: string;
+  to: string;
+  studentName: string;
+  vehicleName: string;
+  startsAt: string;
+  endsAt: string;
+  destinationLabel: string;
+  totalCents: number;
+  reference: string;
+}) {
+  if (!input.to) return;
+  if (!(await studentMailAllowed("notify_student_on_approved"))) return;
+
+  const mail = studentApprovedEmail(input);
+  await sendOfficeEmail({
+    to: [input.to],
+    ...mail,
+    kind: "student_approved",
+    entityType: "reservation",
+    entityId: input.reservationId,
+  });
+}
+
+export async function notifyStudentDeclined(input: {
+  reservationId: string;
+  to: string;
+  studentName: string;
+  vehicleName: string;
+  startsAt: string;
+  endsAt: string;
+  declineReason: string;
+}) {
+  if (!input.to) return;
+  if (!(await studentMailAllowed("notify_student_on_declined"))) return;
+
+  const mail = studentDeclinedEmail(input);
+  await sendOfficeEmail({
+    to: [input.to],
+    ...mail,
+    kind: "student_declined",
+    entityType: "reservation",
+    entityId: input.reservationId,
   });
 }

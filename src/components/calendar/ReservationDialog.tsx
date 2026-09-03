@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { useActionState, useMemo, useState } from "react";
 import {
+  checkInReservationAction,
+  checkOutReservationAction,
   decideReservationAction,
   deleteReservationAction,
   updateReservationAction,
@@ -21,6 +23,7 @@ import {
   localToInstant,
 } from "@/lib/dates";
 import { formatMoney, parseMoneyToCents, quote } from "@/lib/pricing";
+import { FUEL_OPTIONS, describeLateness, fuelLabel } from "@/lib/returns";
 import type { Destination, Vehicle } from "@/lib/types";
 import type { AdminReservation } from "./types";
 
@@ -170,6 +173,11 @@ function ReadView({
   const [declining, setDeclining] = useState(false);
   const [holding, setHolding] = useState(false);
   const [releasing, setReleasing] = useState(false);
+  const [checkingIn, setCheckingIn] = useState(false);
+  const [checkInState, checkInAction] = useActionState<ActionResult, FormData>(
+    checkInReservationAction,
+    {},
+  );
 
   const occupiesCar = ["hold", "approved", "completed"].includes(reservation.status);
 
@@ -243,14 +251,28 @@ function ReadView({
           </form>
         ) : null}
 
-        {reservation.status === "approved" ? (
-          <form action={decideAction}>
+        {reservation.status === "approved" && !reservation.picked_up_at ? (
+          <form action={checkOutReservationAction}>
             <input type="hidden" name="reservation_id" value={reservation.id} />
-            <input type="hidden" name="decision" value="completed" />
-            <SubmitButton className="btn-secondary btn-sm" pendingLabel="Closing...">
-              Mark returned
+            <SubmitButton className="btn-secondary btn-sm" pendingLabel="...">
+              Car went out
             </SubmitButton>
           </form>
+        ) : null}
+
+        {reservation.status === "approved" ? (
+          <button
+            type="button"
+            className="btn-primary btn-sm"
+            onClick={() => {
+              setCheckingIn((value) => !value);
+              setReleasing(false);
+              setHolding(false);
+              setDeclining(false);
+            }}
+          >
+            Check the car back in
+          </button>
         ) : null}
 
         {reservation.status !== "declined" ? (
@@ -295,6 +317,65 @@ function ReadView({
           </Link>
         ) : null}
       </div>
+
+      {checkingIn ? (
+        <form action={checkInAction} className="card-pad space-y-4 bg-brand-light/40">
+          <input type="hidden" name="reservation_id" value={reservation.id} />
+
+          {checkInState.error ? <Alert tone="error">{checkInState.error}</Alert> : null}
+          {checkInState.success ? (
+            <Alert tone="success">{checkInState.success}</Alert>
+          ) : null}
+
+          <p className="text-sm text-ink-soft">
+            It went out at{" "}
+            <strong className="text-ink">{fuelLabel(reservation.fuel_out)}</strong>, so
+            that is the level to bring it back to. Late and fuel fees are worked out
+            from what you enter and added to the total — clear either box to waive it.
+          </p>
+
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <Field label="Came back at" hint="Leave as now if it just arrived.">
+              <input
+                className="input"
+                type="datetime-local"
+                name="returned_at"
+                defaultValue={`${instantToLocalParts(new Date()).date}T${instantToLocalParts(new Date()).time}`}
+              />
+            </Field>
+
+            <Field label="Fuel gauge now">
+              <select
+                className="input"
+                name="fuel_in"
+                defaultValue={String(reservation.fuel_out ?? 8)}
+              >
+                {FUEL_OPTIONS.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+            </Field>
+
+            <Field label="Late fee" hint="Blank to use the rule.">
+              <input className="input" name="late_fee" inputMode="decimal" />
+            </Field>
+
+            <Field label="Fuel fee" hint="Blank to use the rule.">
+              <input className="input" name="fuel_fee" inputMode="decimal" />
+            </Field>
+          </div>
+
+          <Field label="Anything to note about the return?">
+            <input className="input" name="return_notes" />
+          </Field>
+
+          <SubmitButton className="btn-primary btn-sm" pendingLabel="Checking in...">
+            Check it in
+          </SubmitButton>
+        </form>
+      ) : null}
 
       {holding ? (
         <form action={decideAction} className="card-pad space-y-3 bg-gold-50/60">
@@ -404,6 +485,29 @@ function ReadView({
                 {formatMoney(reservation.total_cents)}
               </span>
             </DetailRow>
+            {reservation.returned_at ? (
+              <>
+                <DetailRow label="Came back">
+                  {formatDateTime(reservation.returned_at)}
+                  {reservation.late_minutes > 0
+                    ? ` · ${describeLateness(reservation.late_minutes)}`
+                    : ""}
+                </DetailRow>
+                <DetailRow label="Fuel out / in">
+                  {fuelLabel(reservation.fuel_out)} → {fuelLabel(reservation.fuel_in)}
+                </DetailRow>
+              </>
+            ) : null}
+            {reservation.late_fee_cents > 0 ? (
+              <DetailRow label="Late fee">
+                {formatMoney(reservation.late_fee_cents)}
+              </DetailRow>
+            ) : null}
+            {reservation.fuel_fee_cents > 0 ? (
+              <DetailRow label="Fuel fee">
+                {formatMoney(reservation.fuel_fee_cents)}
+              </DetailRow>
+            ) : null}
             <DetailRow label="Rate used">
               {formatMoney(reservation.hourly_rate_cents)}/hr
               {reservation.daily_cap_cents

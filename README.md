@@ -215,6 +215,36 @@ every status that can block a car. Measured over 2,600 reservations, that took a
 single availability check from ~2,600 ms on a sequential scan to ~2 ms on an
 index scan. `supabase/tests/95_availability_performance.sql` guards both.
 
+## Returns: fuel, lateness and incidents
+
+When a car comes back the office records the time and the fuel gauge. Two fees
+follow, both computed rather than typed, both overridable, and both rolled into
+the reservation total so they reach the student's balance:
+
+- **Late**, per hour rounded up, after a grace period.
+- **Fuel**, per eighth of a tank short of the level it went out at.
+
+**The car keeps its fuel level between renters.** Whatever it comes back at
+becomes what the next student has to match — bring it back at 5/8 and the next
+person is asked for 5/8, not full. Nobody buys fuel for somebody else's trip.
+
+**Incidents** — damage, a ticket, a car left dirty — are logged against the car
+and, where somebody is responsible, against them. A charge lands on that
+student's balance alongside their rentals and appears on their statement.
+
+## Statements
+
+Rentals, incidents and payments merge into one dated ledger with a running
+balance, so a student sees not just what they owe but what it is for. The office
+opens the same statement from a student's record and prints it.
+
+## Emails
+
+Office notifications are on. **Student email is off until the office turns it
+on** — one master switch in Settings, with per-kind switches under it, and
+nothing reaches a student while the master is off. When on, students are told
+when a request is approved or declined. Deliberately minimal.
+
 ## Holds and releases
 
 Beyond approving and declining, the office can **put a car on hold**: it blocks

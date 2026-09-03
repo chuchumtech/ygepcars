@@ -7,7 +7,9 @@ export type EmailKind =
   | "new_request"
   | "cancellation"
   | "new_account"
-  | "waitlist_join";
+  | "waitlist_join"
+  | "student_approved"
+  | "student_declined";
 
 type SendArgs = {
   to: string[];
@@ -67,6 +69,9 @@ async function record(entry: {
  * This never throws. A student filing a request must not see an error because
  * the office's mail provider is having a bad day, so every failure is swallowed
  * and written to cars_email_log instead.
+ *
+ * Used for mail to the office and to students alike -- the only difference is
+ * who is in `to`, and which setting gated the call.
  */
 export async function sendOfficeEmail(args: SendArgs): Promise<boolean> {
   const apiKey = process.env.RESEND_API_KEY;

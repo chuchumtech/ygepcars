@@ -221,3 +221,93 @@ export function waitlistEmail(input: {
     text: plain(heading, intro, rows, href),
   };
 }
+
+/* -------------------------------------------------------------------------- */
+/* To the student                                                             */
+/*                                                                            */
+/* Deliberately short. These exist to answer one question -- did I get the car */
+/* -- without the student having to open the site to find out.                */
+/* -------------------------------------------------------------------------- */
+
+function studentShell(options: {
+  heading: string;
+  intro: string;
+  rows: Row[];
+  ctaHref: string;
+  ctaLabel: string;
+  footnote?: string;
+}): string {
+  return shell(options).replace(
+    "Car rental &mdash; office notification",
+    "Car rental",
+  );
+}
+
+export function studentApprovedEmail(input: {
+  studentName: string;
+  vehicleName: string;
+  startsAt: string;
+  endsAt: string;
+  destinationLabel: string;
+  totalCents: number;
+  reference: string;
+}) {
+  const heading = "Your car is confirmed";
+  const intro = `The office approved your request for the ${input.vehicleName}.`;
+  const href = `${siteUrl()}/account/reservations`;
+
+  const rows: Row[] = [
+    { label: "Car", value: input.vehicleName },
+    { label: "Pick up", value: formatDateTime(input.startsAt) },
+    { label: "Return by", value: formatDateTime(input.endsAt) },
+    { label: "Heading to", value: input.destinationLabel || "not given" },
+    { label: "Estimated total", value: formatMoney(input.totalCents), strong: true },
+    { label: "Reference", value: input.reference },
+  ];
+
+  return {
+    subject: `Confirmed: ${input.vehicleName}, ${formatRange(input.startsAt, input.endsAt)}`,
+    html: studentShell({
+      heading,
+      intro,
+      rows,
+      ctaHref: href,
+      ctaLabel: "See my reservations",
+      footnote:
+        "Settle up with the office as usual. Bring the car back with at least as much fuel as it went out with.",
+    }),
+    text: plain(heading, intro, rows, href),
+  };
+}
+
+export function studentDeclinedEmail(input: {
+  studentName: string;
+  vehicleName: string;
+  startsAt: string;
+  endsAt: string;
+  declineReason: string;
+}) {
+  const heading = "Your request was not approved";
+  const intro = input.declineReason
+    ? `The office could not approve the ${input.vehicleName} for those times.`
+    : `The office could not approve the ${input.vehicleName} for those times. Speak to them if you need it.`;
+  const href = `${siteUrl()}/`;
+
+  const rows: Row[] = [
+    { label: "Car", value: input.vehicleName },
+    { label: "You asked for", value: formatRange(input.startsAt, input.endsAt) },
+    ...(input.declineReason ? [{ label: "Reason", value: input.declineReason }] : []),
+  ];
+
+  return {
+    subject: `Not approved: ${input.vehicleName}`,
+    html: studentShell({
+      heading,
+      intro,
+      rows,
+      ctaHref: href,
+      ctaLabel: "Try other times",
+    }),
+    text: plain(heading, intro, rows, href),
+  };
+}

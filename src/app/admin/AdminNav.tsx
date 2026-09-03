@@ -8,6 +8,7 @@ const LINKS = [
   { href: "/admin/requests", label: "Requests", badge: "requests" as const },
   { href: "/admin/reservations", label: "All reservations" },
   { href: "/admin/waitlist", label: "Waitlist", badge: "waitlist" as const },
+  { href: "/admin/incidents", label: "Incidents" },
   { href: "/admin/students", label: "Students", badge: "accounts" as const },
   { href: "/admin/cars", label: "Cars" },
   { href: "/admin/destinations", label: "Destinations & tolls" },
