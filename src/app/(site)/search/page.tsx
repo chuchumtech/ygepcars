@@ -30,7 +30,7 @@ export default async function SearchPage({
 
   if ("error" in parsed) {
     return (
-      <div className="space-y-6">
+      <div className="space-y-6 py-8">
         <SearchForm />
         <Alert tone="warn">{parsed.error}</Alert>
       </div>
@@ -89,7 +89,7 @@ export default async function SearchPage({
   const freeCount = results.filter((r) => r.state?.is_available).length;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 py-8">
       <SearchForm
         initial={{
           startDate: win.startDate,

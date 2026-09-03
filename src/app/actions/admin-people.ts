@@ -89,15 +89,22 @@ export async function updateStudentAction(
   const supabase = await createClient();
 
   const id = text(formData, "student_id");
-  const fullName = text(formData, "full_name");
-  if (!fullName) return { error: "A name is required." };
+  const firstName = text(formData, "first_name");
+  const lastName = text(formData, "last_name");
+  const email = text(formData, "email").toLowerCase();
+  const paymentMethod = text(formData, "payment_method") || "cash";
+
+  if (!firstName || !lastName) return { error: "First and last name are both required." };
+  if (!["zelle", "cash"].includes(paymentMethod)) return { error: "Choose Zelle or cash." };
 
   const { error } = await supabase
     .from("cars_profiles")
     .update({
-      full_name: fullName,
+      first_name: firstName,
+      last_name: lastName,
       phone: text(formData, "phone"),
-      email: text(formData, "email"),
+      email,
+      payment_method: paymentMethod,
       address: text(formData, "address"),
       emergency_contact: text(formData, "emergency_contact"),
       license_number: text(formData, "license_number"),
@@ -108,8 +115,58 @@ export async function updateStudentAction(
 
   if (error) return { error: friendlyDbError(error) };
 
+  // The profile email is what the office reads; the auth email is what the
+  // student signs in with. Keeping them apart would be a support ticket
+  // waiting to happen, so move both together.
+  if (email) {
+    const service = createAdminClient();
+    const { error: authError } = await service.auth.admin.updateUserById(id, { email });
+    if (authError) {
+      return {
+        error: `Details saved, but the sign-in email could not be changed: ${authError.message}`,
+      };
+    }
+  }
+
   revalidateAdmin();
   return { success: "Student updated." };
+}
+
+/**
+ * Sets a new password for a student who has locked themselves out.
+ *
+ * The office reads the new password off the screen and tells the student; there
+ * is no email round trip, which is how they already hand out accounts.
+ */
+export async function resetStudentPasswordAction(
+  _prev: ActionResult,
+  formData: FormData,
+): Promise<ActionResult> {
+  const admin = await requireAdmin();
+
+  const id = text(formData, "student_id");
+  const password = String(formData.get("new_password") ?? "");
+
+  if (!id) return { error: "Missing student." };
+  if (password.length < 8) {
+    return { error: "Set a password of at least 8 characters." };
+  }
+
+  const service = createAdminClient();
+  const { error } = await service.auth.admin.updateUserById(id, { password });
+  if (error) return { error: error.message };
+
+  const supabase = await createClient();
+  await supabase.from("cars_activity").insert({
+    actor_id: admin.userId,
+    actor_name: admin.profile.full_name,
+    entity_type: "student",
+    entity_id: id,
+    action: "password reset",
+  });
+
+  revalidateAdmin();
+  return { success: "Password changed. Give it to the student and ask them to change it." };
 }
 
 /**
@@ -123,12 +180,17 @@ export async function inviteStudentAction(
 ): Promise<ActionResult> {
   const admin = await requireAdmin();
 
-  const fullName = text(formData, "full_name");
+  const firstName = text(formData, "first_name");
+  const lastName = text(formData, "last_name");
   const email = text(formData, "email").toLowerCase();
   const phone = text(formData, "phone");
+  const paymentMethod = text(formData, "payment_method") || "cash";
   const password = String(formData.get("password") ?? "");
+  const fullName = `${firstName} ${lastName}`.trim();
 
-  if (!fullName || !email) return { error: "Name and email are required." };
+  if (!firstName || !lastName || !email) {
+    return { error: "First name, last name and email are all required." };
+  }
   if (password.length < 8) {
     return { error: "Set a starting password of at least 8 characters." };
   }
@@ -138,7 +200,7 @@ export async function inviteStudentAction(
     email,
     password,
     email_confirm: true,
-    user_metadata: { full_name: fullName, phone },
+    user_metadata: { full_name: fullName, first_name: firstName, last_name: lastName, phone },
   });
 
   if (error) return { error: error.message };
@@ -147,9 +209,12 @@ export async function inviteStudentAction(
   const { error: profileError } = await service.from("cars_profiles").upsert(
     {
       id: data.user.id,
+      first_name: firstName,
+      last_name: lastName,
       full_name: fullName,
       email,
       phone,
+      payment_method: paymentMethod,
       role: "student",
       status: "active",
       approved_at: new Date().toISOString(),

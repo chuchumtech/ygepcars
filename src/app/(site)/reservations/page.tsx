@@ -55,7 +55,7 @@ export default async function ReservationsPage({
   const past = all.filter((r) => !upcoming.includes(r));
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 py-8">
       <PageHeader
         title="My reservations"
         description="Everything you have requested, and what the office decided."

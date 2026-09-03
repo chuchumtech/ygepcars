@@ -17,9 +17,20 @@ export type PaymentMethod =
   | "credit"
   | "other";
 
+export type PaymentPreference = "zelle" | "cash";
+
+export const PAYMENT_PREFERENCES: { value: PaymentPreference; label: string }[] = [
+  { value: "zelle", label: "Zelle" },
+  { value: "cash", label: "Cash" },
+];
+
 export type Profile = {
   id: string;
+  first_name: string;
+  last_name: string;
+  /** Derived from first_name + last_name by a database trigger. */
   full_name: string;
+  payment_method: PaymentPreference;
   email: string;
   phone: string;
   role: Role;

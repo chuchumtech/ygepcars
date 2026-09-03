@@ -2,6 +2,7 @@
 
 import { useActionState, useState } from "react";
 import {
+  resetStudentPasswordAction,
   setStudentRoleAction,
   setStudentStatusAction,
   updateStudentAction,
@@ -9,11 +10,12 @@ import {
 import type { ActionResult } from "@/app/actions/shared";
 import { SubmitButton } from "@/components/SubmitButton";
 import { Alert, Field } from "@/components/ui";
-import type { Profile } from "@/lib/types";
+import { PAYMENT_PREFERENCES, type Profile } from "@/lib/types";
 
 export function StudentControls({ profile }: { profile: Profile }) {
   const [editing, setEditing] = useState(false);
   const [lockingOut, setLockingOut] = useState(false);
+  const [resetting, setResetting] = useState(false);
 
   const [statusState, statusAction] = useActionState<ActionResult, FormData>(
     setStudentStatusAction,
@@ -25,6 +27,10 @@ export function StudentControls({ profile }: { profile: Profile }) {
   );
   const [detailState, detailAction] = useActionState<ActionResult, FormData>(
     updateStudentAction,
+    {},
+  );
+  const [passwordState, passwordAction] = useActionState<ActionResult, FormData>(
+    resetStudentPasswordAction,
     {},
   );
 
@@ -65,6 +71,17 @@ export function StudentControls({ profile }: { profile: Profile }) {
               {profile.role === "admin" ? "Remove office access" : "Make office admin"}
             </SubmitButton>
           </form>
+
+          <button
+            type="button"
+            className="btn-secondary btn-sm"
+            onClick={() => {
+              setResetting((value) => !value);
+              setLockingOut(false);
+            }}
+          >
+            Reset password
+          </button>
 
           <button
             type="button"
@@ -118,6 +135,38 @@ export function StudentControls({ profile }: { profile: Profile }) {
         </form>
       ) : null}
 
+      {resetting ? (
+        <form action={passwordAction} className="rounded-xl bg-parchment-deep p-4">
+          <input type="hidden" name="student_id" value={profile.id} />
+
+          {passwordState.error ? <Alert tone="error">{passwordState.error}</Alert> : null}
+          {passwordState.success ? (
+            <Alert tone="success">{passwordState.success}</Alert>
+          ) : null}
+
+          <div className="mt-3 grid gap-4 sm:grid-cols-[1fr_auto] sm:items-end">
+            <Field
+              label="New password"
+              hint="At least 8 characters. Read it out to the student and ask them to change it."
+            >
+              <input className="input" name="new_password" minLength={8} required autoFocus />
+            </Field>
+            <div className="flex gap-2 pb-0.5">
+              <SubmitButton className="btn-primary btn-sm" pendingLabel="Changing...">
+                Set password
+              </SubmitButton>
+              <button
+                type="button"
+                className="btn-secondary btn-sm"
+                onClick={() => setResetting(false)}
+              >
+                Never mind
+              </button>
+            </div>
+          </div>
+        </form>
+      ) : null}
+
       {editing ? (
         <form action={detailAction} className="space-y-4 border-t border-line/70 pt-4">
           <input type="hidden" name="student_id" value={profile.id} />
@@ -125,15 +174,31 @@ export function StudentControls({ profile }: { profile: Profile }) {
           {detailState.error ? <Alert tone="error">{detailState.error}</Alert> : null}
           {detailState.success ? <Alert tone="success">{detailState.success}</Alert> : null}
 
-          <div className="grid gap-4 sm:grid-cols-2">
-            <Field label="Full name">
-              <input className="input" name="full_name" defaultValue={profile.full_name} required />
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            <Field label="First name">
+              <input className="input" name="first_name" defaultValue={profile.first_name} required />
+            </Field>
+            <Field label="Last name">
+              <input className="input" name="last_name" defaultValue={profile.last_name} required />
             </Field>
             <Field label="Phone">
               <input className="input" name="phone" defaultValue={profile.phone} />
             </Field>
-            <Field label="Email" hint="This does not change their sign-in email.">
-              <input className="input" name="email" defaultValue={profile.email} />
+            <Field label="Email" hint="Changes their sign-in email too.">
+              <input className="input" type="email" name="email" defaultValue={profile.email} />
+            </Field>
+            <Field label="How they pay">
+              <select
+                className="input"
+                name="payment_method"
+                defaultValue={profile.payment_method}
+              >
+                {PAYMENT_PREFERENCES.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
             </Field>
             <Field label="Emergency contact">
               <input
@@ -157,11 +222,10 @@ export function StudentControls({ profile }: { profile: Profile }) {
                 defaultValue={profile.license_expires_on ?? ""}
               />
             </Field>
+            <Field label="Address" className="sm:col-span-2 lg:col-span-1">
+              <input className="input" name="address" defaultValue={profile.address} />
+            </Field>
           </div>
-
-          <Field label="Address">
-            <input className="input" name="address" defaultValue={profile.address} />
-          </Field>
 
           <Field label="Office notes" hint="Only staff see this.">
             <textarea
@@ -175,8 +239,11 @@ export function StudentControls({ profile }: { profile: Profile }) {
           <SubmitButton pendingLabel="Saving...">Save details</SubmitButton>
         </form>
       ) : (
-        <dl className="grid gap-x-8 gap-y-2 text-sm sm:grid-cols-2">
+        <dl className="grid gap-x-8 gap-y-2 text-sm sm:grid-cols-2 lg:grid-cols-3">
           <Row label="Phone">{profile.phone || "--"}</Row>
+          <Row label="Pays by">
+            {profile.payment_method === "zelle" ? "Zelle" : "Cash"}
+          </Row>
           <Row label="Emergency contact">{profile.emergency_contact || "--"}</Row>
           <Row label="Address">{profile.address || "--"}</Row>
           <Row label="License">
@@ -184,7 +251,7 @@ export function StudentControls({ profile }: { profile: Profile }) {
             {profile.license_expires_on ? ` (exp ${profile.license_expires_on})` : ""}
           </Row>
           {profile.notes ? (
-            <div className="sm:col-span-2">
+            <div className="sm:col-span-2 lg:col-span-3">
               <dt className="text-ink-soft">Office notes</dt>
               <dd className="mt-1 whitespace-pre-wrap rounded-lg bg-gold-50 px-3 py-2 text-ink">
                 {profile.notes}

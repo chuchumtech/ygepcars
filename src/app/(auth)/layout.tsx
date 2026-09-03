@@ -17,7 +17,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
           Car Rental
         </span>
       </Link>
-      <div className="w-full max-w-md">{children}</div>
+      <div className="w-full max-w-xl">{children}</div>
       <p className="mt-8 text-center text-xs text-ink-soft">
         Yeshiva Gedolah Meor Yitzchok of Elkins Park
       </p>

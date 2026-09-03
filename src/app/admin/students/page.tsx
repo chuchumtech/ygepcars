@@ -123,6 +123,7 @@ export default async function StudentsPage({
             <tr>
               <th className="th">Student</th>
               <th className="th">Status</th>
+              <th className="th">Pays by</th>
               <th className="th text-right">Rentals</th>
               <th className="th text-right">Charged</th>
               <th className="th text-right">Paid</th>
@@ -154,6 +155,9 @@ export default async function StudentsPage({
                   <td className="td">
                     <ProfileBadge status={person.status} />
                   </td>
+                  <td className="td text-ink-soft">
+                    {person.payment_method === "zelle" ? "Zelle" : "Cash"}
+                  </td>
                   <td className="td text-right tabular-nums">
                     {balance?.reservation_count ?? 0}
                   </td>
@@ -175,7 +179,7 @@ export default async function StudentsPage({
             })}
             {people.length === 0 ? (
               <tr>
-                <td className="td text-ink-soft" colSpan={6}>
+                <td className="td text-ink-soft" colSpan={7}>
                   Nobody matches that.
                 </td>
               </tr>

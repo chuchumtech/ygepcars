@@ -12,7 +12,7 @@ export default async function LoginPage({
   const params = await searchParams;
 
   return (
-    <div className="card-pad">
+    <div className="card-pad mx-auto max-w-md">
       <h1 className="text-xl font-bold text-ink">Sign in</h1>
       <p className="mt-1 text-sm text-ink-soft">
         Use the email and password you registered with.

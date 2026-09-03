@@ -528,7 +528,7 @@ function EditForm({
     <form id={id} action={action} className="space-y-5">
       <input type="hidden" name="reservation_id" value={reservation.id} />
 
-      <section className="grid gap-4 sm:grid-cols-2">
+      <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <Field label="Car">
           <select
             className="input"
@@ -607,8 +607,8 @@ function EditForm({
 
       <section className="space-y-4">
         <h3 className="text-sm font-semibold text-ink">Destination and tolls</h3>
-        <div className="grid gap-4 sm:grid-cols-2">
-          <Field label="Preset destination" hint="Changing this does not overwrite the toll below.">
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <Field label="Preset destination" hint="Changing this does not overwrite the toll below." className="lg:col-span-2">
             <select
               className="input"
               name="destination_id"
@@ -641,22 +641,24 @@ function EditForm({
           </Field>
         </div>
 
-        <Field label="Destination as shown to the student">
-          <input
-            className="input"
-            name="destination_label"
-            defaultValue={reservation.destination_label}
-          />
-        </Field>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <Field label="Destination as shown to the student">
+            <input
+              className="input"
+              name="destination_label"
+              defaultValue={reservation.destination_label}
+            />
+          </Field>
 
-        <Field label="Reason for the trip">
-          <input className="input" name="purpose" defaultValue={reservation.purpose} />
-        </Field>
+          <Field label="Reason for the trip">
+            <input className="input" name="purpose" defaultValue={reservation.purpose} />
+          </Field>
+        </div>
       </section>
 
       <section className="space-y-4">
         <h3 className="text-sm font-semibold text-ink">Pricing</h3>
-        <div className="grid gap-4 sm:grid-cols-2">
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <Field label="Hourly rate">
             <input
               className="input"
@@ -725,7 +727,7 @@ function EditForm({
         )}
       </section>
 
-      <section className="space-y-4">
+      <section className="grid gap-4 sm:grid-cols-2">
         <Field label="Office notes" hint="Only the office sees this.">
           <textarea
             className="input min-h-20 resize-y"

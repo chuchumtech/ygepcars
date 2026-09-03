@@ -14,7 +14,7 @@ export default async function PendingPage() {
   const locked = viewer.profile?.status === "locked";
 
   return (
-    <div className="card-pad">
+    <div className="card-pad mx-auto max-w-md">
       <h1 className="text-xl font-bold text-ink">
         {locked ? "Your account is on hold" : "Thanks for registering"}
       </h1>

@@ -200,6 +200,7 @@ function VehicleDialog({
     <Modal
       open={open}
       onClose={onClose}
+      width="lg"
       title={vehicle ? `Edit ${vehicle.name}` : "Add a car"}
       subtitle="Rates here become the default quote students see."
       footer={

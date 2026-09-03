@@ -79,6 +79,20 @@ npm install
 npm run dev
 ```
 
+## Student records
+
+Sign-up collects first name, last name, email, cell phone, how they intend to
+pay (Zelle or cash) and a password. `full_name` still exists and is still what
+every screen and join reads, but it is now derived: a database trigger rebuilds
+it from the two parts, so nothing had to be rewritten and the two can never
+drift apart.
+
+The office can change all of it from a student's record, including the sign-in
+email -- which updates both the profile and the auth account together, so they
+cannot get out of step -- and can set a new password directly. There is no email
+round trip: the office reads the new password off the screen and tells the
+student, which is how they already hand out accounts.
+
 ### 4. Make yourself an admin
 
 Register through the site, then in the Supabase SQL editor:

@@ -34,7 +34,7 @@ export default async function SiteLayout({ children }: { children: React.ReactNo
         </div>
       </header>
 
-      <main className="flex-1">{children}</main>
+      <main className="mx-auto w-full max-w-5xl flex-1 px-4">{children}</main>
 
       <footer className="app-footer border-t border-line/70">
         <div className="mx-auto max-w-5xl px-4 py-5 text-center text-xs text-ink-soft">

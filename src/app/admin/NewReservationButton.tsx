@@ -40,6 +40,7 @@ export function NewReservationButton({
       <Modal
         open={open}
         onClose={() => setOpen(false)}
+        width="lg"
         title="Add a reservation"
         subtitle="For a student who asked in person or over the phone."
         footer={

@@ -21,14 +21,20 @@ export async function signUpAction(
   _prev: AuthFormState,
   formData: FormData,
 ): Promise<AuthFormState> {
-  const fullName = readString(formData, "full_name");
+  const firstName = readString(formData, "first_name");
+  const lastName = readString(formData, "last_name");
   const email = readString(formData, "email").toLowerCase();
   const phone = readString(formData, "phone");
+  const paymentMethod = readString(formData, "payment_method");
   const password = String(formData.get("password") ?? "");
   const confirm = String(formData.get("confirm_password") ?? "");
+  const fullName = `${firstName} ${lastName}`.trim();
 
-  if (!fullName || !email || !phone || !password) {
+  if (!firstName || !lastName || !email || !phone || !password) {
     return { error: "Please fill in every field." };
+  }
+  if (!["zelle", "cash"].includes(paymentMethod)) {
+    return { error: "Choose how you plan to pay — Zelle or cash." };
   }
   if (password.length < 8) {
     return { error: "Choose a password of at least 8 characters." };
@@ -41,7 +47,7 @@ export async function signUpAction(
   const { data, error } = await supabase.auth.signUp({
     email,
     password,
-    options: { data: { full_name: fullName, phone } },
+    options: { data: { full_name: fullName, first_name: firstName, last_name: lastName, phone } },
   });
 
   if (error) {
@@ -57,9 +63,12 @@ export async function signUpAction(
   const { error: profileError } = await admin.from("cars_profiles").upsert(
     {
       id: data.user.id,
+      first_name: firstName,
+      last_name: lastName,
       full_name: fullName,
       email,
       phone,
+      payment_method: paymentMethod,
       role: "student",
       status: "pending",
     },
@@ -106,6 +115,8 @@ export async function signInAction(
   if (!profile) {
     await admin.from("cars_profiles").insert({
       id: data.user.id,
+      first_name: (data.user.user_metadata?.first_name as string) ?? "",
+      last_name: (data.user.user_metadata?.last_name as string) ?? "",
       full_name: (data.user.user_metadata?.full_name as string) ?? "",
       email: data.user.email ?? email,
       phone: (data.user.user_metadata?.phone as string) ?? "",

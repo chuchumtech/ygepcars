@@ -25,12 +25,14 @@ export default async function BookPage({
 
   if ("error" in parsed) {
     return (
-      <Alert tone="warn">
-        {parsed.error}{" "}
-        <Link href="/" className="link">
-          Start a new search
-        </Link>
-      </Alert>
+      <div className="py-8">
+        <Alert tone="warn">
+          {parsed.error}{" "}
+          <Link href="/" className="link">
+            Start a new search
+          </Link>
+        </Alert>
+      </div>
     );
   }
 
@@ -61,7 +63,7 @@ export default async function BookPage({
 
   if (state && !state.is_available) {
     return (
-      <div className="space-y-4">
+      <div className="space-y-4 py-8">
         <Alert tone="error" title="That car is no longer free for those times">
           Somebody else got there first.
         </Alert>
@@ -78,7 +80,7 @@ export default async function BookPage({
   const ruleProblems = checkBookingRules(win.startsAt, win.endsAt, rules, new Date());
 
   return (
-    <div className="mx-auto max-w-4xl">
+    <div className="py-8">
       <div className="mb-6">
         <Link href="/" className="text-sm text-ink-soft hover:text-ink">
           &larr; Back to search

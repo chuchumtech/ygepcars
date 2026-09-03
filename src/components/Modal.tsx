@@ -32,11 +32,14 @@ export function Modal({
     if (!open && dialog.open) dialog.close();
   }, [open]);
 
+  // Roomier than the old scale across the board: these dialogs carry real
+  // forms, and cramming them into a narrow column meant fields stacked that
+  // had no reason to.
   const maxWidth = {
-    sm: "max-w-sm",
-    md: "max-w-lg",
-    lg: "max-w-2xl",
-    xl: "max-w-4xl",
+    sm: "max-w-lg",
+    md: "max-w-2xl",
+    lg: "max-w-4xl",
+    xl: "max-w-6xl",
   }[width];
 
   return (
@@ -47,11 +50,11 @@ export function Modal({
         // Clicking the backdrop -- the dialog element itself -- dismisses.
         if (event.target === ref.current) onClose();
       }}
-      className={`w-[calc(100vw-2rem)] ${maxWidth} rounded-2xl border border-line/70 bg-white p-0 shadow-2xl backdrop:bg-ink/40 backdrop:backdrop-blur-[2px]`}
+      className={`w-[calc(100vw-1.5rem)] ${maxWidth} rounded-2xl border border-line/70 bg-surface p-0 shadow-lift backdrop:bg-ink/40 backdrop:backdrop-blur-[2px]`}
     >
       {open ? (
-        <div className="flex max-h-[85vh] flex-col">
-          <div className="flex items-start justify-between gap-4 border-b border-line/70 px-5 py-4">
+        <div className="flex max-h-[88dvh] flex-col">
+          <div className="flex items-start justify-between gap-4 border-b border-line/70 px-6 py-4">
             <div className="min-w-0">
               <h2 className="truncate text-lg font-bold text-ink">{title}</h2>
               {subtitle ? (
@@ -75,10 +78,10 @@ export function Modal({
             </button>
           </div>
 
-          <div className="min-h-0 flex-1 overflow-y-auto px-5 py-4">{children}</div>
+          <div className="min-h-0 flex-1 overflow-y-auto px-6 py-5">{children}</div>
 
           {footer ? (
-            <div className="flex flex-wrap justify-end gap-2 border-t border-line/70 bg-parchment/50 px-5 py-3">
+            <div className="flex flex-wrap justify-end gap-2 border-t border-line/70 bg-parchment px-6 py-4">
               {footer}
             </div>
           ) : null}

@@ -9,7 +9,7 @@ export default async function AccountPage() {
   const viewer = await requireActiveStudent();
 
   return (
-    <div className="mx-auto max-w-2xl">
+    <div className="mx-auto max-w-3xl py-10">
       <PageHeader
         title="My details"
         description="Keep this current so the office can reach you about a reservation."
