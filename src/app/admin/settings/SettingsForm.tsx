@@ -23,6 +23,51 @@ export function SettingsForm({ values }: { values: Record<string, unknown> }) {
       {state.error ? <Alert tone="error">{state.error}</Alert> : null}
       {state.success ? <Alert tone="success">{state.success}</Alert> : null}
 
+      <section className="rounded-lg border border-gold-200 bg-gold-50/60 p-4">
+        <h2 className="text-sm font-bold text-slate-600">Booking rules</h2>
+        <p className="mt-0.5 text-xs text-muted">
+          These apply to students booking themselves. The office is not bound by
+          them when adding a reservation by hand.
+        </p>
+
+        <div className="mt-4 grid gap-4 sm:grid-cols-3">
+          <Field label="Minimum rental" hint="Hours. Shortest a student can book.">
+            <input
+              className="input"
+              name="min_rental_hours"
+              inputMode="numeric"
+              defaultValue={num(values.min_rental_hours, 4)}
+            />
+          </Field>
+
+          <Field label="Notice required" hint="Hours ahead of pickup.">
+            <input
+              className="input"
+              name="min_advance_hours"
+              inputMode="numeric"
+              defaultValue={num(values.min_advance_hours, 2)}
+            />
+          </Field>
+
+          <Field label="Car held unpaid for" hint="Hours from the request.">
+            <input
+              className="input"
+              name="payment_hold_hours"
+              inputMode="numeric"
+              defaultValue={num(values.payment_hold_hours, 12)}
+            />
+          </Field>
+        </div>
+
+        <p className="mt-3 text-xs text-muted">
+          After the hold window runs out on an unpaid reservation, the car goes
+          back into the pool for anyone to book, but the reservation stays
+          pending. If the student pays later and nobody else has taken the car,
+          it is still theirs. Recording a payment against a reservation marks it
+          paid automatically.
+        </p>
+      </section>
+
       <Field label="Organisation name">
         <input
           className="input"

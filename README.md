@@ -132,6 +132,46 @@ Sending never blocks a booking. If Resend is down or misconfigured the student's
 request still goes through and the failure is recorded in `cars_email_log`,
 visible in the portal.
 
+## Booking rules
+
+Three rules the office sets in **Settings**, shipped with the values the yeshiva
+asked for and changeable without a deploy:
+
+| Rule | Default | Setting |
+| --- | --- | --- |
+| Minimum rental length | 4 hours | `min_rental_hours` |
+| Notice required before pickup | 2 hours | `min_advance_hours` |
+| How long an unpaid reservation holds the car | 12 hours | `payment_hold_hours` |
+
+They are stated on the home page and beside the booking form in the same words
+the server validates with, checked in the request handler so a student gets a
+sentence they can act on, and enforced again by a database trigger as a
+backstop. The office is deliberately exempt — they take bookings by phone and
+need to override.
+
+**A reason for the trip is required.** It is what the office decides on, so it
+is validated on the server as well as the form, and shown at the top of the
+reservation dialog rather than buried in the details.
+
+### The unpaid hold, in detail
+
+This one is worth being precise about, because two things expire at different
+times:
+
+1. A student requests a car. The reservation is **pending** and the car is
+   **held for them** — nobody else can book it.
+2. If payment has not been recorded within the hold window, **the car goes back
+   into the pool** and anyone can book it.
+3. **The reservation stays pending.** It is not cancelled and does not vanish.
+4. If the student pays at hour 16 and nobody else has taken the car, the car is
+   held for them again and the reservation carries on as normal.
+5. If somebody else did take it in the meantime, approving the original request
+   is refused by the no-double-booking constraint, and the office sees why.
+
+Recording a payment against a reservation marks it paid automatically; removing
+that payment marks it unpaid again. The office can also toggle paid by hand from
+the reservation dialog.
+
 ## Holds and releases
 
 Beyond approving and declining, the office can **put a car on hold**: it blocks

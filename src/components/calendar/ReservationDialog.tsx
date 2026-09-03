@@ -183,6 +183,21 @@ function ReadView({
         </Alert>
       ) : null}
 
+      {reservation.status === "pending" ? (
+        <Alert
+          tone={reservation.payment_received_at ? "success" : "warn"}
+          title={
+            reservation.payment_received_at
+              ? "Paid — the car is held"
+              : "Unpaid — the car is only held for a while"
+          }
+        >
+          {reservation.payment_received_at
+            ? `Payment recorded ${formatDateTime(reservation.payment_received_at)}, so this car stays out of the pool.`
+            : `Requested ${formatDateTime(reservation.requested_at)}. The car is blocked for this student for the hold window set in Settings; once that runs out the car returns to the pool while this request stays pending.`}
+        </Alert>
+      ) : null}
+
       {reservation.status === "released" && reservation.release_reason ? (
         <Alert tone="info" title="Released">
           {reservation.release_reason}
@@ -257,6 +272,19 @@ function ReadView({
             </SubmitButton>
           </form>
         ) : null}
+
+        <form action={decideAction}>
+          <input type="hidden" name="reservation_id" value={reservation.id} />
+          <input type="hidden" name="current_status" value={reservation.status} />
+          <input
+            type="hidden"
+            name="decision"
+            value={reservation.payment_received_at ? "mark_unpaid" : "mark_paid"}
+          />
+          <SubmitButton className="btn-secondary btn-sm" pendingLabel="...">
+            {reservation.payment_received_at ? "Mark unpaid" : "Mark as paid"}
+          </SubmitButton>
+        </form>
 
         {reservation.student ? (
           <Link
@@ -333,6 +361,18 @@ function ReadView({
           </SubmitButton>
         </form>
       ) : null}
+
+      <div className="rounded-lg border border-gold-200 bg-gold-50 px-4 py-3">
+        <p className="text-[11px] font-semibold uppercase tracking-wider text-gold-600">
+          Reason for the trip
+        </p>
+        <p className="mt-0.5 text-sm font-medium text-slate-700">
+          {reservation.purpose || "The student did not give one."}
+        </p>
+        {reservation.destination_label ? (
+          <p className="mt-1 text-sm text-muted">Heading to {reservation.destination_label}</p>
+        ) : null}
+      </div>
 
       <div className="grid gap-5 sm:grid-cols-2">
         <div>

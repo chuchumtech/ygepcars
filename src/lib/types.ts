@@ -90,6 +90,7 @@ export type Reservation = {
   admin_notes: string;
   decline_reason: string;
   hold_expires_at: string | null;
+  payment_received_at: string | null;
   released_at: string | null;
   release_reason: string;
   requested_at: string;

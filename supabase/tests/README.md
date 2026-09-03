@@ -12,6 +12,14 @@ things that matter most and are easiest to get wrong:
   who booked what; they cannot promote themselves to admin, change a rate, or
   approve their own request; the office sees everything; an anonymous visitor
   sees the fleet and the toll sheet and nothing else.
+* **`94_booking_rules.sql`** — the three rules hold at their defaults and a junk
+  setting falls back rather than erroring; a short rental, a last-minute one and
+  a reasonless one are all refused for a student and all allowed for the office;
+  and rule 2 end to end: the car is held while unpaid inside the window, returns
+  to inventory once it lapses while the reservation stays pending, is held again
+  the moment payment lands, frees again if that payment is removed, follows the
+  window when the office changes it, and does not stop somebody else being
+  approved once lapsed. A student cannot mark their own reservation paid.
 * **`93_holds_and_ordering.sql`** — a hold blocks the car and cannot be booked
   over; releasing it frees the car for somebody else immediately; a held car is
   not money owed; reordering the queue produces the expected order, clamps an
@@ -38,10 +46,12 @@ for f in supabase/tests/00_supabase_stub.sql \
          supabase/migrations/0003_cars_seed.sql \
          supabase/migrations/0004_cars_waitlist_and_email.sql \
          supabase/migrations/0005_cars_holds_and_ordering.sql \
+         supabase/migrations/0006_cars_booking_rules.sql \
          supabase/tests/90_behaviour.sql \
          supabase/tests/91_rls.sql \
          supabase/tests/92_waitlist.sql \
-         supabase/tests/93_holds_and_ordering.sql; do
+         supabase/tests/93_holds_and_ordering.sql \
+         supabase/tests/94_booking_rules.sql; do
   psql -d carscheck -v ON_ERROR_STOP=1 -q -f "$f"
 done
 ```

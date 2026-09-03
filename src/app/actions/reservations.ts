@@ -7,6 +7,7 @@ import { getViewer, requireActiveStudent } from "@/lib/auth";
 import { parseSearchWindow } from "@/lib/search-params";
 import { quoteForVehicle } from "@/lib/pricing";
 import { notifyCancellation, notifyNewRequest } from "@/lib/email/notify";
+import { checkBookingRules, loadBookingRules } from "@/lib/settings";
 import type { Destination, Vehicle } from "@/lib/types";
 
 export type ActionState = { error?: string; success?: string };
@@ -43,9 +44,11 @@ export async function requestReservationAction(
   if ("error" in parsed) return { error: parsed.error };
   const { startsAt, endsAt } = parsed.window;
 
-  if (startsAt.getTime() < Date.now() - 60_000) {
-    return { error: "That pickup time is in the past. Please pick a new time." };
-  }
+  // The office's rules, checked here so the student gets a sentence they can
+  // act on. Database triggers enforce the same limits as a backstop.
+  const rules = await loadBookingRules();
+  const problems = checkBookingRules(startsAt, endsAt, rules, new Date());
+  if (problems.length > 0) return { error: problems.join(" ") };
 
   const { data: vehicleRow } = await supabase
     .from("cars_vehicles")
@@ -70,6 +73,11 @@ export async function requestReservationAction(
   }
   if (!destination) {
     return { error: "Please choose where you are heading." };
+  }
+
+  const purpose = text(formData, "purpose");
+  if (!purpose) {
+    return { error: "Please tell the office what the trip is for — they need it to decide." };
   }
 
   const destinationNote = text(formData, "destination_note");
@@ -105,7 +113,7 @@ export async function requestReservationAction(
     status: "pending",
     destination_id: destination.id,
     destination_label: label,
-    purpose: text(formData, "purpose"),
+    purpose,
     hourly_rate_cents: vehicle.hourly_rate_cents,
     daily_cap_cents: vehicle.daily_cap_cents,
     billable_hours: quote.billableHours,
@@ -139,7 +147,7 @@ export async function requestReservationAction(
     startsAt: startsAt.toISOString(),
     endsAt: endsAt.toISOString(),
     destinationLabel: label,
-    purpose: text(formData, "purpose"),
+    purpose,
     totalCents: quote.totalCents,
     tollCents: quote.tollCents,
     studentNotes: text(formData, "student_notes"),

@@ -16,6 +16,7 @@ export function SubmitButton({
   name,
   value,
   onClick,
+  disabled = false,
 }: {
   children: ReactNode;
   pendingLabel?: string;
@@ -26,12 +27,14 @@ export function SubmitButton({
   name?: string;
   value?: string;
   onClick?: () => void;
+  /** Blocks submission for reasons of its own, on top of the pending state. */
+  disabled?: boolean;
 }) {
   const { pending } = useFormStatus();
   return (
     <button
       type="submit"
-      disabled={pending}
+      disabled={pending || disabled}
       className={className}
       formAction={formAction}
       form={form}

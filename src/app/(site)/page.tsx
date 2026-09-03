@@ -3,7 +3,9 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { getViewer } from "@/lib/auth";
 import { SearchForm } from "@/components/SearchForm";
+import { BookingRulesNote } from "@/components/BookingRulesNote";
 import { Alert } from "@/components/ui";
+import { loadBookingRules } from "@/lib/settings";
 import { formatMoney } from "@/lib/pricing";
 import type { Destination, Vehicle } from "@/lib/types";
 
@@ -12,10 +14,11 @@ export default async function HomePage({
 }: {
   searchParams: Promise<{ error?: string }>;
 }) {
-  const [params, viewer, supabase] = await Promise.all([
+  const [params, viewer, supabase, rules] = await Promise.all([
     searchParams,
     getViewer(),
     createClient(),
+    loadBookingRules(),
   ]);
 
   const [{ data: vehicles }, { data: destinations }] = await Promise.all([
@@ -74,6 +77,11 @@ export default async function HomePage({
             </Alert>
           </div>
         ) : null}
+      </section>
+
+      <section className="card-pad">
+        <h2 className="text-base font-bold text-slate-500">Before you book</h2>
+        <BookingRulesNote rules={rules} className="mt-3" />
       </section>
 
       <section>

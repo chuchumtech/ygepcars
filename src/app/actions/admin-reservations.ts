@@ -47,9 +47,17 @@ export async function decideReservationAction(
   const decision = text(formData, "decision");
 
   if (
-    !["approved", "declined", "completed", "cancelled", "pending", "hold", "released"].includes(
-      decision,
-    )
+    ![
+      "approved",
+      "declined",
+      "completed",
+      "cancelled",
+      "pending",
+      "hold",
+      "released",
+      "mark_paid",
+      "mark_unpaid",
+    ].includes(decision)
   ) {
     return { error: "Unknown decision." };
   }
@@ -59,6 +67,7 @@ export async function decideReservationAction(
     decided_at: new Date().toISOString(),
     decided_by: admin.userId,
   };
+
 
   if (decision === "declined") {
     patch.decline_reason = text(formData, "decline_reason");
@@ -76,12 +85,30 @@ export async function decideReservationAction(
     patch.released_at = null;
     patch.release_reason = "";
   }
+  if (decision === "mark_paid") {
+    patch.status = (text(formData, "current_status") || "pending") as Reservation["status"];
+    patch.payment_received_at = new Date().toISOString();
+    patch.decided_at = undefined;
+    patch.decided_by = undefined;
+  }
+  if (decision === "mark_unpaid") {
+    patch.status = (text(formData, "current_status") || "pending") as Reservation["status"];
+    patch.payment_received_at = null;
+    patch.decided_at = undefined;
+    patch.decided_by = undefined;
+  }
   if (decision === "released") {
     patch.released_at = new Date().toISOString();
     patch.release_reason = text(formData, "release_reason");
   }
 
-  const { error } = await supabase.from("cars_reservations").update(patch).eq("id", id);
+  // undefined means "leave it alone"; the payment toggles use that so they do
+  // not stamp themselves over who actually decided the reservation.
+  const cleaned = Object.fromEntries(
+    Object.entries(patch).filter(([, value]) => value !== undefined),
+  );
+
+  const { error } = await supabase.from("cars_reservations").update(cleaned).eq("id", id);
   if (error) return { error: friendlyDbError(error) };
 
   await logActivity(supabase, { userId: admin.userId, name: admin.profile.full_name }, {
@@ -91,7 +118,14 @@ export async function decideReservationAction(
   });
 
   revalidateAdmin();
-  return { success: `Reservation marked ${decision}.` };
+  return {
+    success:
+      decision === "mark_paid"
+        ? "Marked as paid — the car is held again."
+        : decision === "mark_unpaid"
+          ? "Marked as unpaid."
+          : `Reservation marked ${decision}.`,
+  };
 }
 
 /* -------------------------------------------------------------------------- */

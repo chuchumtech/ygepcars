@@ -6,7 +6,9 @@ import { createClient } from "@/lib/supabase/server";
 import { requireActiveStudent } from "@/lib/auth";
 import { parseSearchWindow } from "@/lib/search-params";
 import { Alert } from "@/components/ui";
+import { BookingRulesNote } from "@/components/BookingRulesNote";
 import { BookingForm } from "./BookingForm";
+import { checkBookingRules, loadBookingRules } from "@/lib/settings";
 import { describeDuration, formatRange, hoursBetween } from "@/lib/dates";
 import type { Destination, Vehicle } from "@/lib/types";
 
@@ -72,6 +74,8 @@ export default async function BookPage({
 
   const destinations = (destinationRows ?? []) as Destination[];
   const hours = hoursBetween(win.startsAt, win.endsAt);
+  const rules = await loadBookingRules();
+  const ruleProblems = checkBookingRules(win.startsAt, win.endsAt, rules, new Date());
 
   return (
     <div className="mx-auto max-w-4xl">
@@ -88,6 +92,23 @@ export default async function BookPage({
         </p>
       </div>
 
+      {ruleProblems.length > 0 ? (
+        <div className="mb-6">
+          <Alert tone="warn" title="That window does not fit the rules">
+            <ul className="mt-1 list-disc space-y-1 pl-5">
+              {ruleProblems.map((problem) => (
+                <li key={problem}>{problem}</li>
+              ))}
+            </ul>
+            <p className="mt-2">
+              <Link href="/" className="link">
+                Pick different times
+              </Link>
+            </p>
+          </Alert>
+        </div>
+      ) : null}
+
       <div className="grid gap-6 lg:grid-cols-[1fr_20rem]">
         <BookingForm
           vehicle={vehicle}
@@ -100,6 +121,8 @@ export default async function BookPage({
           }}
           startsAtIso={win.startsAt.toISOString()}
           endsAtIso={win.endsAt.toISOString()}
+          rules={rules}
+          blocked={ruleProblems.length > 0}
         />
 
         <aside className="space-y-4 lg:sticky lg:top-24 lg:self-start">
@@ -139,6 +162,11 @@ export default async function BookPage({
             <Link href="/account" className="link mt-2 inline-block text-xs">
               Update my details
             </Link>
+          </div>
+
+          <div className="card-pad">
+            <p className="text-sm font-semibold text-slate-500">The rules</p>
+            <BookingRulesNote rules={rules} className="mt-2 text-xs" />
           </div>
         </aside>
       </div>

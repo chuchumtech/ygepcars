@@ -145,7 +145,17 @@ export async function saveSettingsAction(
   await requireAdmin();
   const supabase = await createClient();
 
+  // Rules are clamped rather than rejected: a zero or negative window would
+  // quietly disable a rule, which is not something to allow by typo.
+  const rule = (key: string, fallback: number, max: number) => {
+    const raw = integer(formData, key, fallback);
+    return Math.min(Math.max(raw, 1), max);
+  };
+
   const updates: { key: string; value: unknown }[] = [
+    { key: "min_rental_hours", value: rule("min_rental_hours", 4, 24 * 14) },
+    { key: "min_advance_hours", value: rule("min_advance_hours", 2, 24 * 30) },
+    { key: "payment_hold_hours", value: rule("payment_hold_hours", 12, 24 * 30) },
     { key: "org_name", value: text(formData, "org_name") },
     { key: "office_email", value: text(formData, "office_email") },
     { key: "office_phone", value: text(formData, "office_phone") },

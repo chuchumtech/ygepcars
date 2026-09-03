@@ -6,6 +6,8 @@ import { requireActiveStudent } from "@/lib/auth";
 import { cancelReservationAction } from "@/app/actions/reservations";
 import { leaveWaitlistAction } from "@/app/actions/waitlist";
 import { Alert, DetailRow, EmptyState, PageHeader, StatusBadge } from "@/components/ui";
+import { PaymentHoldNotice } from "@/components/BookingRulesNote";
+import { loadBookingRules, hoursLabel, type BookingRules } from "@/lib/settings";
 import { describeDuration, formatDateTime, formatRange, hoursBetween } from "@/lib/dates";
 import { formatMoney } from "@/lib/pricing";
 import type { Reservation, Vehicle, WaitlistEntryWithRefs } from "@/lib/types";
@@ -19,10 +21,11 @@ export default async function ReservationsPage({
 }: {
   searchParams: Promise<{ requested?: string; waitlisted?: string }>;
 }) {
-  const [params, viewer, supabase] = await Promise.all([
+  const [params, viewer, supabase, rules] = await Promise.all([
     searchParams,
     requireActiveStudent(),
     createClient(),
+    loadBookingRules(),
   ]);
 
   const [{ data }, { data: waitlistRows }] = await Promise.all([
@@ -64,9 +67,13 @@ export default async function ReservationsPage({
       />
 
       {params.requested ? (
-        <Alert tone="success" title="Request sent">
-          The office has it. You will hear back once it is approved — check here for
-          the status.
+        <Alert tone="success" title="Request sent — the car is being held for you">
+          <p>
+            The office has your request and will get back to you.
+          </p>
+          <p className="mt-1.5">
+            <PaymentHoldNotice rules={rules} />
+          </p>
         </Alert>
       ) : null}
 
@@ -134,7 +141,7 @@ export default async function ReservationsPage({
         ) : (
           <div className="space-y-4">
             {upcoming.map((r) => (
-              <ReservationCard key={r.id} reservation={r} cancellable />
+              <ReservationCard key={r.id} reservation={r} rules={rules} cancellable />
             ))}
           </div>
         )}
@@ -147,7 +154,7 @@ export default async function ReservationsPage({
           </h2>
           <div className="space-y-4">
             {past.map((r) => (
-              <ReservationCard key={r.id} reservation={r} />
+              <ReservationCard key={r.id} reservation={r} rules={rules} />
             ))}
           </div>
         </section>
@@ -158,12 +165,23 @@ export default async function ReservationsPage({
 
 function ReservationCard({
   reservation: r,
+  rules,
   cancellable = false,
 }: {
   reservation: Row;
+  rules: BookingRules;
   cancellable?: boolean;
 }) {
   const hours = hoursBetween(r.starts_at, r.ends_at);
+
+  // Server Component: rendered per request, so reading the clock here is fine.
+  // eslint-disable-next-line react-hooks/purity
+  const now = Date.now();
+  const holdEndsAt =
+    new Date(r.requested_at).getTime() + rules.paymentHoldHours * 3_600_000;
+  const paid = r.payment_received_at !== null;
+  const holdLapsed = r.status === "pending" && !paid && now > holdEndsAt;
+  const holdActive = r.status === "pending" && !paid && now <= holdEndsAt;
 
   return (
     <article className="card overflow-hidden md:flex">
@@ -203,6 +221,36 @@ function ReservationCard({
             </p>
           </div>
         </div>
+
+        {holdActive ? (
+          <div className="mt-3">
+            <Alert tone="warn" title="The car is being held for you">
+              Held until {formatDateTime(new Date(holdEndsAt))} —{" "}
+              {hoursLabel(rules.paymentHoldHours)} from when you asked. If the office
+              has not been paid by then the car goes back into the pool, though your
+              request stays open.
+            </Alert>
+          </div>
+        ) : null}
+
+        {holdLapsed ? (
+          <div className="mt-3">
+            <Alert tone="warn" title="The car is no longer being held">
+              The {hoursLabel(rules.paymentHoldHours)} hold ran out, so the car is back
+              in the pool and somebody else could book it. Your request is still open —
+              pay the office and, as long as nobody has taken the car, it is still
+              yours.
+            </Alert>
+          </div>
+        ) : null}
+
+        {paid && r.status === "pending" ? (
+          <div className="mt-3">
+            <Alert tone="success" title="Payment received">
+              The car is held for you while the office finishes approving this.
+            </Alert>
+          </div>
+        ) : null}
 
         {r.status === "declined" && r.decline_reason ? (
           <div className="mt-3">

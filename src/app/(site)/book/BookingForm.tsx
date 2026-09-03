@@ -8,7 +8,9 @@ import {
 } from "@/app/actions/reservations";
 import { SubmitButton } from "@/components/SubmitButton";
 import { Alert, Field } from "@/components/ui";
+import { PaymentHoldNotice } from "@/components/BookingRulesNote";
 import { formatMoney, quoteForVehicle } from "@/lib/pricing";
+import type { BookingRules } from "@/lib/booking-rules";
 import type { Destination, Vehicle } from "@/lib/types";
 
 export function BookingForm({
@@ -17,12 +19,16 @@ export function BookingForm({
   window: win,
   startsAtIso,
   endsAtIso,
+  rules,
+  blocked = false,
 }: {
   vehicle: Vehicle;
   destinations: Destination[];
   window: { startDate: string; startTime: string; endDate: string; endTime: string };
   startsAtIso: string;
   endsAtIso: string;
+  rules: BookingRules;
+  blocked?: boolean;
 }) {
   const [state, action] = useActionState<ActionState, FormData>(
     requestReservationAction,
@@ -117,11 +123,14 @@ export function BookingForm({
       <section className="card-pad space-y-4">
         <h2 className="text-base font-bold text-slate-500">A few details</h2>
 
-        <Field label="Reason for the trip">
+        <Field
+          label="Reason for the trip"
+          hint="Required. The office decides on requests based on this, so be specific."
+        >
           <input
             className="input"
             name="purpose"
-            placeholder="e.g. Shabbos at home, wedding, doctor"
+            placeholder="e.g. Shabbos at home in Lakewood, cousin's wedding, dentist"
             maxLength={160}
             required
           />
@@ -170,10 +179,20 @@ export function BookingForm({
           This is an estimate, not a bill. Nothing is charged online — the office
           settles up with you and can adjust the tolls if the trip changes.
         </p>
+
+        <div className="mt-4">
+          <Alert tone="warn" title="How long the car is held for you">
+            <PaymentHoldNotice rules={rules} />
+          </Alert>
+        </div>
       </section>
 
       <div className="flex flex-wrap gap-3">
-        <SubmitButton className="btn-primary" pendingLabel="Sending request...">
+        <SubmitButton
+          className="btn-primary"
+          pendingLabel="Sending request..."
+          disabled={blocked}
+        >
           Request this reservation
         </SubmitButton>
         <Link href="/" className="btn-secondary">

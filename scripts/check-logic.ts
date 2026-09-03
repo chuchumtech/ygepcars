@@ -1,6 +1,7 @@
 import { quote, parseMoneyToCents, formatMoney } from "@/lib/pricing";
 import { localToInstant, instantToLocalParts, hoursBetween, describeDuration } from "@/lib/dates";
 import { splitIntoDaySegments, shiftMonths, startOfWeek, viewBounds } from "@/lib/calendar";
+import { checkBookingRules, holdEndsAt, hoursLabel, DEFAULT_RULES } from "@/lib/booking-rules";
 
 let failures = 0;
 function check(label: string, actual: unknown, expected: unknown) {
@@ -100,6 +101,39 @@ const midnight = splitIntoDaySegments(
   localToInstant("2026-09-04", "00:00"),
   "2026-08-30", "2026-09-12");
 check("midnight end stays on one day", midnight.map((s) => s.date), ["2026-09-03"]);
+
+// --- booking rules --------------------------------------------------------
+const rules = DEFAULT_RULES;
+const base = new Date("2026-09-10T12:00:00Z");
+const at = (hoursFromBase: number) => new Date(base.getTime() + hoursFromBase * 3_600_000);
+
+check("4h minimum: a 2h booking is refused",
+  checkBookingRules(at(24), at(26), rules, base).length, 1);
+check("4h minimum: exactly 4h is fine",
+  checkBookingRules(at(24), at(28), rules, base).length, 0);
+check("2h notice: 30 minutes ahead is refused",
+  checkBookingRules(at(0.5), at(8), rules, base).some((p) => p.includes("ahead")), true);
+check("2h notice: exactly 2h ahead is fine",
+  checkBookingRules(at(2), at(8), rules, base).length, 0);
+check("both rules broken are both reported",
+  checkBookingRules(at(0.5), at(1.5), rules, base).length, 2);
+check("longest rental is enforced",
+  checkBookingRules(at(24), at(24 + 24 * 20), rules, base)
+    .some((p) => p.includes("longest")), true);
+check("booking too far out is refused",
+  checkBookingRules(at(24 * 200), at(24 * 200 + 8), rules, base)
+    .some((p) => p.includes("open")), true);
+
+check("hold ends 12h after the request",
+  holdEndsAt("2026-09-10T12:00:00Z", rules).toISOString(), "2026-09-11T00:00:00.000Z");
+check("a changed hold window moves the deadline",
+  holdEndsAt("2026-09-10T12:00:00Z", { ...rules, paymentHoldHours: 24 }).toISOString(),
+  "2026-09-11T12:00:00.000Z");
+
+check("hours wording: singular", hoursLabel(1), "1 hour");
+check("hours wording: plural", hoursLabel(4), "4 hours");
+check("hours wording: a whole day", hoursLabel(24), "1 day");
+check("hours wording: several days", hoursLabel(72), "3 days");
 
 console.log(failures === 0 ? "\nAll checks passed." : `\n${failures} FAILED`);
 process.exit(failures === 0 ? 0 : 1);
