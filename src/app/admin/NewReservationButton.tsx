@@ -6,6 +6,7 @@ import type { ActionResult } from "@/app/actions/shared";
 import { Modal } from "@/components/Modal";
 import { SubmitButton } from "@/components/SubmitButton";
 import { Alert, Field } from "@/components/ui";
+import { DateField, DateRangeField } from "@/components/DateField";
 import { halfHourOptions, todayLocal } from "@/lib/dates";
 import { formatMoney } from "@/lib/pricing";
 import type { Destination, Profile, Vehicle } from "@/lib/types";
@@ -28,6 +29,8 @@ export function NewReservationButton({
   );
   const times = useMemo(() => halfHourOptions(), []);
   const today = todayLocal();
+  const [dates, setDates] = useState({ startDate: today, endDate: today });
+  const [holdUntil, setHoldUntil] = useState("");
 
   const bookable = students.filter((student) => student.status === "active");
 
@@ -93,43 +96,38 @@ export function NewReservationButton({
             </select>
           </Field>
 
+          <Field label="Dates">
+            <DateRangeField
+              id="new-reservation-dates"
+              startDate={dates.startDate}
+              endDate={dates.endDate}
+              startName="start_date"
+              endName="end_date"
+              startLabel="Picks up"
+              endLabel="Returns"
+              onChange={setDates}
+            />
+          </Field>
+
           <div className="grid gap-4 sm:grid-cols-2">
-            <Field label="Picks up">
-              <div className="flex gap-2">
-                <input
-                  type="date"
-                  className="input"
-                  name="start_date"
-                  defaultValue={today}
-                  required
-                />
-                <select className="input w-32 shrink-0" name="start_time" defaultValue="09:00">
-                  {times.map((t) => (
-                    <option key={t.value} value={t.value}>
-                      {t.label}
-                    </option>
-                  ))}
-                </select>
-              </div>
+            <Field label="Pick up time">
+              <select className="input" name="start_time" defaultValue="09:00">
+                {times.map((t) => (
+                  <option key={t.value} value={t.value}>
+                    {t.label}
+                  </option>
+                ))}
+              </select>
             </Field>
 
-            <Field label="Returns">
-              <div className="flex gap-2">
-                <input
-                  type="date"
-                  className="input"
-                  name="end_date"
-                  defaultValue={today}
-                  required
-                />
-                <select className="input w-32 shrink-0" name="end_time" defaultValue="17:00">
-                  {times.map((t) => (
-                    <option key={t.value} value={t.value}>
-                      {t.label}
-                    </option>
-                  ))}
-                </select>
-              </div>
+            <Field label="Return time">
+              <select className="input" name="end_time" defaultValue="17:00">
+                {times.map((t) => (
+                  <option key={t.value} value={t.value}>
+                    {t.label}
+                  </option>
+                ))}
+              </select>
             </Field>
           </div>
 
@@ -178,7 +176,14 @@ export function NewReservationButton({
 
           {initialStatus === "hold" ? (
             <Field label="Revisit the hold by (optional)">
-              <input className="input" type="date" name="hold_expires_at" />
+              <DateField
+                id="new-reservation-hold-until"
+                label="Revisit the hold by"
+                name="hold_expires_at"
+                value={holdUntil}
+                min={today}
+                onChange={setHoldUntil}
+              />
             </Field>
           ) : null}
         </form>

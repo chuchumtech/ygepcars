@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 import { addDaysLocal, halfHourOptions, todayLocal } from "@/lib/dates";
+import { DateRangeField } from "@/components/DateField";
 
 export type SearchValues = {
   startDate: string;
@@ -76,25 +77,29 @@ export function SearchForm({
 
   return (
     <form onSubmit={submit} className={compact ? "" : "card-pad"}>
-      <div className="grid gap-y-5 gap-x-8 sm:grid-cols-2">
-        <fieldset className="min-w-0">
-          <legend className="label">Pick up</legend>
-          <div className="flex gap-2">
-            <input
-              type="date"
-              className="input min-w-0 px-3"
-              value={values.startDate}
-              min={min}
-              max={max}
-              onChange={(e) => update({ startDate: e.target.value })}
-              required
-              aria-label="Pickup date"
-            />
+      <div className="space-y-4">
+        <div>
+          <p className="label">Dates</p>
+          <DateRangeField
+            id="trip-dates"
+            startDate={values.startDate}
+            endDate={values.endDate}
+            min={min}
+            max={max}
+            onChange={(next) => update(next)}
+          />
+        </div>
+
+        <div className="grid gap-y-4 gap-x-8 sm:grid-cols-2">
+          <div className="min-w-0">
+            <label className="label" htmlFor="pickup-time">
+              Pick up time
+            </label>
             <select
-              className="input w-[7.25rem] shrink-0 px-3"
+              id="pickup-time"
+              className="input"
               value={values.startTime}
               onChange={(e) => update({ startTime: e.target.value })}
-              aria-label="Pickup time"
             >
               {times.map((t) => (
                 <option key={t.value} value={t.value}>
@@ -103,26 +108,16 @@ export function SearchForm({
               ))}
             </select>
           </div>
-        </fieldset>
 
-        <fieldset className="min-w-0">
-          <legend className="label">Return</legend>
-          <div className="flex gap-2">
-            <input
-              type="date"
-              className="input min-w-0 px-3"
-              value={values.endDate}
-              min={values.startDate}
-              max={max}
-              onChange={(e) => update({ endDate: e.target.value })}
-              required
-              aria-label="Return date"
-            />
+          <div className="min-w-0">
+            <label className="label" htmlFor="return-time">
+              Return time
+            </label>
             <select
-              className="input w-[7.25rem] shrink-0 px-3"
+              id="return-time"
+              className="input"
               value={values.endTime}
               onChange={(e) => update({ endTime: e.target.value })}
-              aria-label="Return time"
             >
               {times.map((t) => (
                 <option key={t.value} value={t.value}>
@@ -131,8 +126,7 @@ export function SearchForm({
               ))}
             </select>
           </div>
-        </fieldset>
-
+        </div>
       </div>
 
       <button type="submit" className="btn-primary mt-5 h-12 w-full text-base">

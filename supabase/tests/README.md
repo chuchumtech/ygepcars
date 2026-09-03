@@ -46,6 +46,12 @@ things that matter most and are easiest to get wrong:
   entry; students see only their own row while still getting the true total
   through the count function; the email log is office-only.
 
+* **`98_off_shabbosim.sql`** — the office can mark a Shabbos off, relabel one
+  (the Saturday is the primary key, so marking it twice is impossible) and take
+  one off again; a student and a signed-out visitor can both read the list,
+  because the date picker needs it, but a student cannot add one, and their
+  update and delete change nothing rather than clearing the list.
+
 `00_supabase_stub.sql` stands in for the pieces of Supabase the schema leans on
 (`auth.users`, `auth.uid()`, the `anon` and `authenticated` roles) so the
 migrations can run on plain Postgres.
@@ -66,6 +72,7 @@ for f in supabase/tests/00_supabase_stub.sql \
          supabase/migrations/0007_cars_availability_performance.sql \
          supabase/migrations/0008_cars_student_details.sql \
          supabase/migrations/0009_cars_returns_and_incidents.sql \
+         supabase/migrations/0010_cars_off_shabbosim.sql \
          supabase/tests/90_behaviour.sql \
          supabase/tests/91_rls.sql \
          supabase/tests/92_waitlist.sql \
@@ -73,7 +80,8 @@ for f in supabase/tests/00_supabase_stub.sql \
          supabase/tests/94_booking_rules.sql \
          supabase/tests/95_availability_performance.sql \
          supabase/tests/96_student_details.sql \
-         supabase/tests/97_returns_and_incidents.sql; do
+         supabase/tests/97_returns_and_incidents.sql \
+         supabase/tests/98_off_shabbosim.sql; do
   psql -d carscheck -v ON_ERROR_STOP=1 -q -f "$f"
 done
 ```

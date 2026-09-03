@@ -13,6 +13,7 @@ import type { ActionResult } from "@/app/actions/shared";
 import { Modal } from "@/components/Modal";
 import { SubmitButton } from "@/components/SubmitButton";
 import { Alert, DetailRow, Field, StatusBadge } from "@/components/ui";
+import { DateField, DateRangeField } from "@/components/DateField";
 import {
   describeDuration,
   formatDateTime,
@@ -174,6 +175,7 @@ function ReadView({
   const [holding, setHolding] = useState(false);
   const [releasing, setReleasing] = useState(false);
   const [checkingIn, setCheckingIn] = useState(false);
+  const [holdUntil, setHoldUntil] = useState("");
   const [checkInState, checkInAction] = useActionState<ActionResult, FormData>(
     checkInReservationAction,
     {},
@@ -389,7 +391,13 @@ function ReadView({
             label="Revisit by (optional)"
             hint="Just a reminder for you — a lapsed hold keeps the car blocked until you act on it."
           >
-            <input className="input" type="date" name="hold_expires_at" />
+            <DateField
+              id={`hold-until-${reservation.id}`}
+              label="Revisit by"
+              name="hold_expires_at"
+              value={holdUntil}
+              onChange={setHoldUntil}
+            />
           </Field>
           <SubmitButton className="btn-primary btn-sm" pendingLabel="Holding...">
             Hold this car
@@ -658,54 +666,47 @@ function EditForm({
           </select>
         </Field>
 
-        <Field label="Picks up">
-          <div className="flex gap-2">
-            <input
-              type="date"
-              className="input"
-              name="start_date"
-              value={form.startDate}
-              onChange={(e) => set({ startDate: e.target.value })}
-              required
-            />
-            <select
-              className="input w-32 shrink-0"
-              name="start_time"
-              value={form.startTime}
-              onChange={(e) => set({ startTime: e.target.value })}
-            >
-              {times.map((t) => (
-                <option key={t.value} value={t.value}>
-                  {t.label}
-                </option>
-              ))}
-            </select>
-          </div>
+        <Field label="Dates">
+          <DateRangeField
+            id={`edit-dates-${reservation.id}`}
+            startDate={form.startDate}
+            endDate={form.endDate}
+            startName="start_date"
+            endName="end_date"
+            startLabel="Picks up"
+            endLabel="Returns"
+            onChange={(next) => set(next)}
+          />
         </Field>
 
-        <Field label="Returns">
-          <div className="flex gap-2">
-            <input
-              type="date"
-              className="input"
-              name="end_date"
-              value={form.endDate}
-              onChange={(e) => set({ endDate: e.target.value })}
-              required
-            />
-            <select
-              className="input w-32 shrink-0"
-              name="end_time"
-              value={form.endTime}
-              onChange={(e) => set({ endTime: e.target.value })}
-            >
-              {times.map((t) => (
-                <option key={t.value} value={t.value}>
-                  {t.label}
-                </option>
-              ))}
-            </select>
-          </div>
+        <Field label="Pick up time">
+          <select
+            className="input"
+            name="start_time"
+            value={form.startTime}
+            onChange={(e) => set({ startTime: e.target.value })}
+          >
+            {times.map((t) => (
+              <option key={t.value} value={t.value}>
+                {t.label}
+              </option>
+            ))}
+          </select>
+        </Field>
+
+        <Field label="Return time">
+          <select
+            className="input"
+            name="end_time"
+            value={form.endTime}
+            onChange={(e) => set({ endTime: e.target.value })}
+          >
+            {times.map((t) => (
+              <option key={t.value} value={t.value}>
+                {t.label}
+              </option>
+            ))}
+          </select>
         </Field>
       </section>
 

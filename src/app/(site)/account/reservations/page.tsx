@@ -170,7 +170,12 @@ export default async function ReservationsPage({
           </h2>
           <div className="space-y-4">
             {past.map((r) => (
-              <ReservationCard key={r.id} reservation={r} rules={rules} destinations={destinations} />
+              <ReservationCard
+                key={r.id}
+                reservation={r}
+                rules={rules}
+                destinations={destinations}
+              />
             ))}
           </div>
         </section>
@@ -303,7 +308,10 @@ function ReservationCard({
         {cancellable ? (
           <div className="mt-4 flex flex-wrap gap-2">
             {r.status === "pending" ? (
-              <EditReservationButton reservation={r} destinations={destinations} />
+              <EditReservationButton
+                reservation={r}
+                destinations={destinations}
+              />
             ) : null}
             <form action={cancelReservationAction}>
               <input type="hidden" name="reservation_id" value={r.id} />

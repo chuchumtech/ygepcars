@@ -11,6 +11,7 @@ import type { ActionResult } from "@/app/actions/shared";
 import { Modal } from "@/components/Modal";
 import { SubmitButton } from "@/components/SubmitButton";
 import { Alert, Field } from "@/components/ui";
+import { DateRangeField } from "@/components/DateField";
 import { formatDateTime, halfHourOptions, todayLocal } from "@/lib/dates";
 import { formatMoney } from "@/lib/pricing";
 import { carColor } from "@/lib/calendar";
@@ -344,6 +345,7 @@ function BlackoutDialog({
   const [state, action] = useActionState<ActionResult, FormData>(createBlackoutAction, {});
   const times = useMemo(() => halfHourOptions(), []);
   const today = todayLocal();
+  const [blackout, setBlackout] = useState({ startDate: today, endDate: today });
 
   return (
     <Modal
@@ -380,31 +382,40 @@ function BlackoutDialog({
           </select>
         </Field>
 
-        <Field label="From">
-          <div className="flex gap-2">
-            <input type="date" className="input" name="start_date" defaultValue={today} required />
-            <select className="input w-32 shrink-0" name="start_time" defaultValue="08:00">
-              {times.map((t) => (
-                <option key={t.value} value={t.value}>
-                  {t.label}
-                </option>
-              ))}
-            </select>
-          </div>
+        <Field label="Dates">
+          <DateRangeField
+            id="blackout-dates"
+            startDate={blackout.startDate}
+            endDate={blackout.endDate}
+            startName="start_date"
+            endName="end_date"
+            startLabel="From"
+            endLabel="Until"
+            onChange={setBlackout}
+          />
         </Field>
 
-        <Field label="Until">
-          <div className="flex gap-2">
-            <input type="date" className="input" name="end_date" defaultValue={today} required />
-            <select className="input w-32 shrink-0" name="end_time" defaultValue="17:00">
+        <div className="grid gap-4 sm:grid-cols-2">
+          <Field label="From time">
+            <select className="input" name="start_time" defaultValue="08:00">
               {times.map((t) => (
                 <option key={t.value} value={t.value}>
                   {t.label}
                 </option>
               ))}
             </select>
-          </div>
-        </Field>
+          </Field>
+
+          <Field label="Until time">
+            <select className="input" name="end_time" defaultValue="17:00">
+              {times.map((t) => (
+                <option key={t.value} value={t.value}>
+                  {t.label}
+                </option>
+              ))}
+            </select>
+          </Field>
+        </div>
 
         <Field label="Reason">
           <input className="input" name="reason" placeholder="Oil change, inspection, staff use" />

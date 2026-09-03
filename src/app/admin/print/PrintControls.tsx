@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { shiftDays } from "@/lib/calendar";
 import { todayLocal } from "@/lib/dates";
+import { DateRangeField } from "@/components/DateField";
 
 const PRESETS = [
   { label: "Today", from: 0, to: 0 },
@@ -33,36 +34,17 @@ export function PrintControls({
   return (
     <div className="no-print mb-6 space-y-3">
       <div className="flex flex-wrap items-end gap-3">
-        <div>
-          <label className="label" htmlFor="print-from">
-            From
-          </label>
-          <input
-            id="print-from"
-            type="date"
-            className="input"
-            value={range.from}
-            onChange={(e) =>
-              apply({
-                ...range,
-                from: e.target.value,
-                to: range.to < e.target.value ? e.target.value : range.to,
-              })
+        <div className="min-w-[22rem] flex-1">
+          <p className="label">Dates</p>
+          <DateRangeField
+            id="print-dates"
+            startDate={range.from}
+            endDate={range.to}
+            startLabel="From"
+            endLabel="To"
+            onChange={(next) =>
+              apply({ ...range, from: next.startDate, to: next.endDate })
             }
-          />
-        </div>
-
-        <div>
-          <label className="label" htmlFor="print-to">
-            To
-          </label>
-          <input
-            id="print-to"
-            type="date"
-            className="input"
-            value={range.to}
-            min={range.from}
-            onChange={(e) => apply({ ...range, to: e.target.value })}
           />
         </div>
 

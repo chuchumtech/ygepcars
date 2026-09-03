@@ -16,7 +16,10 @@ export default async function HomePage({
 }: {
   searchParams: Promise<{ error?: string }>;
 }) {
-  const [params, viewer] = await Promise.all([searchParams, getViewer()]);
+  const [params, viewer] = await Promise.all([
+    searchParams,
+    getViewer(),
+  ]);
 
   return (
     <div className="mx-auto flex min-h-[calc(100dvh-9rem)] w-full max-w-3xl flex-col justify-center px-4 py-12">

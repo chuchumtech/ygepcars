@@ -79,10 +79,18 @@ set role authenticated;
 \echo 'A student sees only incidents charged to them (expect 0 for Bini):';
 select count(*) from cars_incidents;
 
-\echo 'and cannot write their own return or fees:';
-update cars_reservations
-   set fuel_in = 0, late_fee_cents = 0, returned_at = now(), status = 'completed'
- where user_id = auth.uid();
+\echo 'and cannot write their own return, fuel reading or fees:';
+do $$ begin
+  begin
+    update cars_reservations
+       set fuel_in = 0, late_fee_cents = 0, returned_at = now(), status = 'completed'
+     where user_id = auth.uid();
+    raise exception 'STUDENT CHECKED THEMSELVES BACK IN';
+  exception when raise_exception then
+    if sqlerrm = 'STUDENT CHECKED THEMSELVES BACK IN' then raise; end if;
+    raise notice 'PASS: student check-in rejected (%)', sqlerrm;
+  end;
+end $$;
 select fuel_in, late_fee_cents, returned_at is null as not_returned, status
   from cars_reservations where user_id = auth.uid();
 reset role;

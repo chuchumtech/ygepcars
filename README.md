@@ -290,6 +290,34 @@ Timestamps are stored as `timestamptz`; `src/lib/dates.ts` is the only place
 wall-clock time and instants convert, and it handles the daylight-saving
 changeovers.
 
+## The date picker
+
+Dates are picked on one calendar, not two: choose the pickup day, choose the
+return day, and everything in between highlights as you go. The trigger shows
+both ends and how many nights they cover. It is used wherever a start and an
+end are asked for -- searching, editing a request, the office's own booking
+form, maintenance blackouts and the print range -- so the same calendar behaves
+the same way everywhere.
+
+Every day carries its Hebrew date, every Shabbos its parsha, and yom tov is
+tinted with its name. The Hebrew calendar comes from `@hebcal/core` on the
+Diaspora schedule, and `src/lib/hebrew.ts` loads it lazily -- the tables are a
+couple of hundred kilobytes, so nothing is fetched until somebody actually
+opens a picker, and the grid renders complete without them in the meantime.
+
+### Off Shabbosim
+
+The office marks off Shabbosim at `/admin/shabbosim`, working from a list of
+upcoming Saturdays with their parshiyos already worked out. One click marks one
+off, with a label -- bein hazmanim, yeshiva closed, or anything typed in. They
+show up by name on every picker, for students too.
+
+Marking a Shabbos off blocks nothing. Those are usually the weekends students
+most want a car, so the office still wants the requests -- just with their eyes
+open. Each layout loads the list once and hands it down through
+`OffShabbosimProvider`, so every calendar on the page has it without a screen
+threading it through.
+
 ## Checks
 
 ```bash
@@ -313,7 +341,7 @@ src/app/admin/       office portal
 src/app/actions/     server actions, one file per area
 src/components/      shared UI
 src/components/calendar/  the calendar: month, week, day, agenda, detail dialog
-src/lib/             pricing, dates, calendar maths, Supabase clients, auth
+src/lib/             pricing, dates, calendar maths, Hebrew dates, Supabase clients, auth
 src/lib/email/       Resend client, templates, notification dispatch
 supabase/migrations/ schema
 supabase/tests/      schema tests

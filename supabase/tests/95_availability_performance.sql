@@ -6,6 +6,10 @@
 -- row, and no range index covering pending reservations.
 --
 -- Run this on a scratch database. It inserts thousands of rows.
+--
+-- Start from nobody signed in: the booking rules only apply to students, so an
+-- earlier file's session user would make these backdated rows illegal.
+delete from public._test_current_user;
 
 insert into auth.users (id, email) values ('bbbbbbbb-0000-0000-0000-000000000001','bench@e.com')
   on conflict do nothing;

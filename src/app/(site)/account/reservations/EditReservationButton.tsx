@@ -9,6 +9,7 @@ import { Modal } from "@/components/Modal";
 import { SubmitButton } from "@/components/SubmitButton";
 import { Alert, Field } from "@/components/ui";
 import { halfHourOptions, instantToLocalParts } from "@/lib/dates";
+import { DateRangeField } from "@/components/DateField";
 import { formatMoney } from "@/lib/pricing";
 import type { Destination, Reservation } from "@/lib/types";
 
@@ -33,6 +34,8 @@ export function EditReservationButton({
 
   const start = instantToLocalParts(reservation.starts_at);
   const end = instantToLocalParts(reservation.ends_at);
+  const [startDate, setStartDate] = useState(start.date);
+  const [endDate, setEndDate] = useState(end.date);
 
   return (
     <>
@@ -63,51 +66,39 @@ export function EditReservationButton({
           {state.error ? <Alert tone="error">{state.error}</Alert> : null}
           {state.success ? <Alert tone="success">{state.success}</Alert> : null}
 
+          <Field label="Dates">
+            <DateRangeField
+              id={`edit-dates-${reservation.id}`}
+              startDate={startDate}
+              endDate={endDate}
+              startName="start_date"
+              endName="end_date"
+              onChange={(next) => {
+                setStartDate(next.startDate);
+                setEndDate(next.endDate);
+              }}
+            />
+          </Field>
+
           <div className="grid gap-4 sm:grid-cols-2">
-            <Field label="Pick up">
-              <div className="flex gap-2">
-                <input
-                  type="date"
-                  className="input min-w-0 px-3"
-                  name="start_date"
-                  defaultValue={start.date}
-                  required
-                />
-                <select
-                  className="input w-[7.25rem] shrink-0 px-3"
-                  name="start_time"
-                  defaultValue={start.time}
-                >
-                  {times.map((t) => (
-                    <option key={t.value} value={t.value}>
-                      {t.label}
-                    </option>
-                  ))}
-                </select>
-              </div>
+            <Field label="Pick up time">
+              <select className="input" name="start_time" defaultValue={start.time}>
+                {times.map((t) => (
+                  <option key={t.value} value={t.value}>
+                    {t.label}
+                  </option>
+                ))}
+              </select>
             </Field>
 
-            <Field label="Return">
-              <div className="flex gap-2">
-                <input
-                  type="date"
-                  className="input min-w-0 px-3"
-                  name="end_date"
-                  defaultValue={end.date}
-                  required
-                />
-                <select
-                  className="input w-[7.25rem] shrink-0 px-3"
-                  name="end_time"
-                  defaultValue={end.time}
-                >
-                  {times.map((t) => (
-                    <option key={t.value} value={t.value}>
-                      {t.label}
-                    </option>
-                  ))}
-                </select>
-              </div>
+            <Field label="Return time">
+              <select className="input" name="end_time" defaultValue={end.time}>
+                {times.map((t) => (
+                  <option key={t.value} value={t.value}>
+                    {t.label}
+                  </option>
+                ))}
+              </select>
             </Field>
           </div>
 
